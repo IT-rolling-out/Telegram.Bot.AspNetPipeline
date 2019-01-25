@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRO.Telegram.Bot.LikeMvc.Core", "src\Telegram\IRO.Telegram.Bot.LikeMvc.Core\IRO.Telegram.Bot.LikeMvc.Core.csproj", "{B786F91B-049F-4F12-A945-FDAE97345A40}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B786F91B-049F-4F12-A945-FDAE97345A40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B786F91B-049F-4F12-A945-FDAE97345A40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B786F91B-049F-4F12-A945-FDAE97345A40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B786F91B-049F-4F12-A945-FDAE97345A40}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C232FA4E-FED2-40B5-B4A3-1458678B1AED}
+	EndGlobalSection
+EndGlobal

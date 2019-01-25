@@ -1,0 +1,42 @@
+<!-- Imported before all csproj items. Here better to define variables or default properties. -->
+<Project>
+  <PropertyGroup>
+    <IsTest>false</IsTest>
+    <IsNuPackage>false</IsNuPackage>
+  </PropertyGroup>
+  <PropertyGroup Condition = "($(MSBuildProjectName.StartsWith('IRO.Tests')) Or $(MSBuildProjectName.StartsWith('IRO.UnitTests')))">
+    <IsTest>true</IsTest>
+  </PropertyGroup>
+  <PropertyGroup  Condition = "$(MSBuildProjectName.StartsWith('IRO.')) And !$(IsTest)" >
+    <IsNuPackage>true</IsNuPackage>
+  </PropertyGroup>
+
+
+  <!-- Use default settings: comments generation, build packege, etc. -->
+  <PropertyGroup Condition="$(IsNuPackage)">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PackageProjectUrl>https://github.com/IT-rolling-out/IRO.Telegram</PackageProjectUrl>
+  </PropertyGroup>
+
+  <!-- Category versions list. Use it in target projects and to set nuget dependencies. -->
+  <PropertyGroup>
+    <!-- Use current same version for all or define special for category-->
+    <VersionPostfix>-alpha</VersionPostfix>	
+	
+    <!-- Versions for remote nuget libs management. ///-->
+	<RemoteVersionPostfix></RemoteVersionPostfix>
+    <DefaultAsmVersion>1.0.7$(RemoteVersionPostfix)</DefaultAsmVersion>
+	
+    <AsmVersion_Cache>1.0.6$(RemoteVersionPostfix)</AsmVersion_Cache>
+    <AsmVersion_CmdLine>2.0.6$(RemoteVersionPostfix)</AsmVersion_CmdLine>
+    <AsmVersion_Common>1.0.8$(RemoteVersionPostfix)</AsmVersion_Common>
+    <AsmVersion_FileIO>1.0.7$(RemoteVersionPostfix)</AsmVersion_FileIO>
+    <AsmVersion_Mvc>$(DefaultAsmVersion)</AsmVersion_Mvc>
+    <AsmVersion_Reflection>$(DefaultAsmVersion)</AsmVersion_Reflection>
+    <AsmVersion_Storage>2.2.5$(RemoteVersionPostfix)</AsmVersion_Storage>
+	<!--/// Versions for remote nuget libs management.-->
+	
+	<AsmVersion_Telegram>1.0.0$(VersionPostfix)</AsmVersion_Telegram>
+  </PropertyGroup>
+</Project>
