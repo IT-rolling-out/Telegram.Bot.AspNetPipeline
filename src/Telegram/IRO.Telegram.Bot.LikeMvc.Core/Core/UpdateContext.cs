@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using IRO.Telegram.Bot.ProcessingPipeline.Core.BotExt;
 using Telegram.Bot.Types;
 using Tg = Telegram.Bot;
 
@@ -14,6 +15,12 @@ namespace IRO.Telegram.Bot.ProcessingPipeline.Core
         public Update Update { get; }
 
         public BotClientContext BotContext { get; }
+
+        /// <summary>
+        /// BotExtensions based on UpdateContext and cant work without it.
+        /// Thats why it here, not in BotContext.
+        /// </summary>
+        public BotExtensions BotExtensions { get; }
 
         /// <summary>
         /// Scoped services for current update.
@@ -51,12 +58,19 @@ namespace IRO.Telegram.Bot.ProcessingPipeline.Core
         /// </summary>
         public CancellationToken UpdateProcessingAborted { get; }
 
-        public UpdateContext(Update update, BotClientContext botContext, IServiceProvider services, CancellationToken updateProcessingAborted)
+        public UpdateContext(
+            Update update, 
+            BotClientContext botContext, 
+            IServiceProvider services, 
+            CancellationToken updateProcessingAborted,
+            IBotStatelessExtensions botStatelessExtensions
+            )
         {
             Update = update;
             BotContext = botContext;
             Services = services;
             UpdateProcessingAborted = updateProcessingAborted;
+            BotExtensions = new BotExtensions(botStatelessExtensions, this);
         }
     }
 }

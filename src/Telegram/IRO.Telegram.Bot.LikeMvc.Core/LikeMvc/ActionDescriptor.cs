@@ -2,9 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
-using IRO.Telegram.Bot.ProcessingPipeline.LikeMvc;
 
-namespace IRO.Telegram.Bot.ProcessingPipeline.Core
+namespace IRO.Telegram.Bot.ProcessingPipeline.LikeMvc
 {
     public class ActionDescriptor
     {
@@ -20,8 +19,6 @@ namespace IRO.Telegram.Bot.ProcessingPipeline.Core
         public Type ControllerType{ get; }
        
         public RouteData RouteData { get; }
-
-        
 
         #region Properties bag.
         IDictionary<object, object> _properties;

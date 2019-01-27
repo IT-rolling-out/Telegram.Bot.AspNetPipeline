@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using IRO.Telegram.Bot.ProcessingPipeline.Core;
+using IRO.Telegram.Bot.ProcessingPipeline.LikeMvc;
 
 namespace IRO.Tests.Telegram.Controllers
 {

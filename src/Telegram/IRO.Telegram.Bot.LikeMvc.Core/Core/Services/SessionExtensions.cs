@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace IRO.Telegram.Bot.ProcessingPipeline.Services
+namespace IRO.Telegram.Bot.ProcessingPipeline.Core.Services
 {
     public static class SessionExtensions
     {

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using IRO.Telegram.Bot.ProcessingPipeline.Core;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace IRO.Telegram.Bot.ProcessingPipeline.Core
+namespace IRO.Telegram.Bot.ProcessingPipeline.LikeMvc
 {
     public class BotController
     {
