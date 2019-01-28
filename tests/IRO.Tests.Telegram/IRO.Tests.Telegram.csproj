@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Telegram\IRO.Telegram.Bot.LikeMvc.Core\IRO.Telegram.Bot.ProcessingPipeline.csproj" />
+    <ProjectReference Include="..\..\src\Telegram\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\Telegram\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
   </ItemGroup>
 
 </Project>

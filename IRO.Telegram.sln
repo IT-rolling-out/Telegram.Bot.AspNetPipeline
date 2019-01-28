@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Telegram.Bot.ProcessingPipeline", "src\Telegram\IRO.Telegram.Bot.LikeMvc.Core\IRO.Telegram.Bot.ProcessingPipeline.csproj", "{B786F91B-049F-4F12-A945-FDAE97345A40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline", "src\Telegram\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj", "{B786F91B-049F-4F12-A945-FDAE97345A40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A9CAF669-789B-4705-ADDD-2D700148C187}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRO.Tests.Telegram", "tests\IRO.Tests.Telegram\IRO.Tests.Telegram.csproj", "{996FAD68-5D0F-41CB-AB5B-A61A84227E18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Tests.Telegram", "tests\IRO.Tests.Telegram\IRO.Tests.Telegram.csproj", "{996FAD68-5D0F-41CB-AB5B-A61A84227E18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram.Bot.AspNetPipeline.Mvc", "src\Telegram\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj", "{E51650C1-5867-4FFF-9A1F-47261ADC0431}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +25,10 @@ Global
 		{996FAD68-5D0F-41CB-AB5B-A61A84227E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{996FAD68-5D0F-41CB-AB5B-A61A84227E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{996FAD68-5D0F-41CB-AB5B-A61A84227E18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E51650C1-5867-4FFF-9A1F-47261ADC0431}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E51650C1-5867-4FFF-9A1F-47261ADC0431}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E51650C1-5867-4FFF-9A1F-47261ADC0431}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E51650C1-5867-4FFF-9A1F-47261ADC0431}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
