@@ -23,13 +23,25 @@ namespace IRO.Tests.Telegram
         {
             ITelegramBotClient bot = null;
             //Use asp.net collection, or empty. Use ioc which you want.
-            IServiceCollection services = new ServiceCollection();
+            IServiceCollection serviceCollection = new ServiceCollection();
 
-            var botHandler = new BotHandler(bot, services);
+            var botHandler = new BotHandler(bot, serviceCollection);
+
+            botHandler.ConfigureServices((services) =>
+            {
+                services.AddScoped<ISomeScopedService, SomeScopedService>();
+                services.AddMvc((mvcServicesRegistrator) =>
+                {
+                    //Custom controllers registration.
+                    mvcServicesRegistrator.ConfigureControllers((controllersList) =>
+                    {
+                        controllersList.Add(typeof(BotFatherSampleController));
+                    }, findWithReflection: false);
+                });
+            });
+
             botHandler.ConfigureBuilder((builder) =>
             {
-                builder.Services.AddScoped<ISomeScopedService, SomeScopedService>();
-
                 builder.UseMvc((mvcBuilder) =>
                 {
                     //Mvc route example. Can configure just like default controller.
@@ -43,12 +55,8 @@ namespace IRO.Tests.Telegram
 
                         }, template: "/hi", order: 1);
 
-                    //Custom controllers registration.
-                    mvcBuilder.ConfigureControllers((controllersList) =>
-                    {
-                        controllersList.Add(typeof(BotFatherSampleController));
-                    }, findWithReflection: false);
-
+                    
+                    //NOTE. Services from UseMvc not registered in IOC, when all services from AddMvc is registered.
                     //mvcBuilder.ControllerActionPreparer=...
                     //mvcBuilder.Routers=...
                     //mvcBuilder.ControllersFactory=...
@@ -64,6 +72,7 @@ namespace IRO.Tests.Telegram
                                 "Enter /help ."
                                 );
                     }
+                    await next();
                 });
             });
         }
@@ -76,6 +85,11 @@ namespace IRO.Tests.Telegram
             botHandler.ConfigureBuilder((builder) =>
             {
                 builder.UseMvc(); 
+            });
+
+            botHandler.ConfigureServices((services) =>
+            {
+                services.AddMvc();
             });
         }
     }

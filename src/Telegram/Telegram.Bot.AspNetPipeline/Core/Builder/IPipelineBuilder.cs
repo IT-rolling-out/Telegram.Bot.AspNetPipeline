@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Telegram.Bot.AspNetPipeline.Core.Builder
 {
@@ -7,10 +8,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
     /// </summary>
     public interface IPipelineBuilder
     {
-        /// <summary>
-        /// Use it to configure your services.
-        /// </summary>
-        IServiceCollection Services { get; }
+        IServiceProvider ServiceProvider { get; }
 
         void Use(UpdateProcessingDelegate middlewareDelegate);
 

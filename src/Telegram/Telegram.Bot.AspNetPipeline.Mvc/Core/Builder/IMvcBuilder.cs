@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Core.Routing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Builder
 {
-    public interface IBotMvcBuilder
+    public interface IMvcBuilder
     {
         IList<IRouter> Routers { get; }
 
@@ -21,14 +21,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Builder
         /// Default factory use ioc to resolve controllers.
         /// </summary>
         IControllersFactory ControllersFactory { get; set; }
-
-        /// <summary>
-        /// Use it to add your controllers.
-        /// </summary>
-        void ConfigureControllers(
-            Action<IList<Type>> editControllersListDelegate,
-            bool findWithReflection = true
-            );
 
         /// <summary>
         /// Just like you do with controller methods, but for delegates.

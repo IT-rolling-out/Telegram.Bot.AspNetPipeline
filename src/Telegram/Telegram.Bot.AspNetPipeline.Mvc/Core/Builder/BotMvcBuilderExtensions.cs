@@ -6,7 +6,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Builder
     public static class BotMvcBuilderExtensions
     {
         public static void MapRouteAction(
-            this IBotMvcBuilder @this,
+            this IMvcBuilder @this,
             RouteActionDelegate routeAction,
             string template = null,
             int order = 0,

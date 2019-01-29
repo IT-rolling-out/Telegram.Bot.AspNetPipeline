@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Controllers
 {
-    public class BotController
+    public abstract class BotController
     {
         public ControllerActionContext ControllerContext { get; private set; }
 
