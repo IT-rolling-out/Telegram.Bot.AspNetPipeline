@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Core.BotExt;
+using Telegram.Bot.AspNetPipeline.Core.ImprovedBot;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Controllers
@@ -22,7 +22,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Controllers
 
         public ITelegramBotClient Bot => UpdateContext.BotContext.Bot;
 
-        public BotExtensions BotExtension => UpdateContext.BotExtensions;
+        public BotExt BotExtension => UpdateContext.BotExt;
 
         public IMvcFeatures Features => ControllerContext.Features ;
 

@@ -16,7 +16,7 @@ namespace IRO.Tests.Telegram
     {
         static void Main(string[] args)
         {
-            
+            TelegramBotClient bot=null;
         }
 
         public static void CustomInit()

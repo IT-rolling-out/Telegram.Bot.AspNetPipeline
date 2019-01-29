@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Telegram.Bot.AspNetPipeline.Core.BotExt;
+using Telegram.Bot.AspNetPipeline.Core.ImprovedBot;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -11,6 +11,11 @@ namespace Telegram.Bot.AspNetPipeline.Core
     /// </summary>
     public class UpdateContext
     {
+        /// <summary>
+        /// Unique id, used in GetHashCode too.
+        /// </summary>
+        public Guid Id { get; } = Guid.NewGuid();
+
         public Update Update { get; }
 
         public BotClientContext BotContext { get; }
@@ -19,7 +24,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// BotExtensions based on UpdateContext and cant work without it.
         /// Thats why it here, not in BotContext.
         /// </summary>
-        public BotExtensions BotExtensions { get; }
+        public BotExt BotExt { get; }
 
         /// <summary>
         /// Scoped services for current update.
@@ -40,7 +45,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// Stores arbitrary metadata properties associated with current update request.
         /// </summary>
-        public IDictionary<object, object> Properties 
+        public IDictionary<object, object> Properties
         {
             get
             {
@@ -59,34 +64,54 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// </summary>
         public CancellationToken UpdateProcessingAborted { get; }
 
-        /// <summary>
-        /// If you set it to true (call Processed method) next middlewares will know that Update was processed.
-        /// They can ignore it or finish their work.
-        /// Mvc middleware will set it automatically for all controller actions and read-callbacks.
-        /// </summary>
-        public bool IsProcessed { get; private set; } = false;
+        
 
         public UpdateContext(
-            Update update, 
-            BotClientContext botContext, 
-            IServiceProvider services, 
+            Update update,
+            BotClientContext botContext,
+            IServiceProvider services,
             CancellationToken updateProcessingAborted,
-            IBotStatelessExtensions botStatelessExtensions
+            IBotExtSingleton botStatelessExtensions
             )
         {
             Update = update;
             BotContext = botContext;
             Services = services;
             UpdateProcessingAborted = updateProcessingAborted;
-            BotExtensions = new BotExtensions(botStatelessExtensions, this);
+            BotExtensions = new BotExt(botStatelessExtensions, this);
         }
+
+        #region Processing status.
+        /// <summary>
+        /// If you set it to true (call Processed method) next middlewares will know that Update was processed.
+        /// They can ignore it or finish their work.
+        /// Mvc middleware will set it automatically for all controller actions and read-callbacks.
+        /// </summary>
+        public bool IsProcessed { get; private set; }
 
         public void Processed()
         {
-            if (IsProcessed)
-            {
-                IsProcessed = true;
-            }
+            IsProcessed = true;
+
+        }
+
+        public bool ForceExitRequested { get; private set; }
+
+        /// <summary>
+        /// Set IsProcessed and ForceExitRequested to true.
+        /// Next middleware action will not be executed.
+        /// </summary>
+        public void ForceExit()
+        {
+            Processed();
+            ForceExitRequested = true;
+        }
+
+        #endregion
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode() + 279;
         }
     }
 }

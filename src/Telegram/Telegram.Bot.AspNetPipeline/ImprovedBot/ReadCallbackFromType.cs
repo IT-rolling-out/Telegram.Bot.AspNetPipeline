@@ -1,4 +1,4 @@
-﻿namespace Telegram.Bot.AspNetPipeline.Core.BotExt
+﻿namespace Telegram.Bot.AspNetPipeline.Core.ImprovedBot
 {
     /// <summary>
     /// Used in bot exctensions to set which members messages must be processed.

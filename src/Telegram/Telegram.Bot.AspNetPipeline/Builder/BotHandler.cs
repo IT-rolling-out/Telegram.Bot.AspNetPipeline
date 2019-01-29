@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ConcurrentCollections;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Args;
+using Telegram.Bot.AspNetPipeline.Core.Services;
 using Telegram.Bot.AspNetPipeline.Implementations;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core.Builder
 {
+
     public class BotHandler : IDisposable
     {
         #region Setup properties
@@ -23,26 +27,39 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
 
         UpdateProcessingDelegate _updateProcessingDelegate;
 
-        IList<UpdateContext> _pendingUpdateContexts = new List<UpdateContext>();
+        /// <summary>
+        /// UpdateContext from pending tasks.
+        /// </summary>
+        ConcurrentHashSet<UpdateContext> _pendingUpdateContexts = new ConcurrentHashSet<UpdateContext>();
 
         public IServiceProvider Services { get; private set; }
 
         public BotClientContext BotContext { get; }
+
+        public IPendingExceededChecker PendingExceededChecker { get; }
 
         /// <summary>
         /// Aka thread manager.
         /// </summary>
         public IExecutionManager ExecutionManager { get; }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="pendingExceededChecker">Limit for command execution.
+        /// Default is <see cref="CreationTimePendingExceededChecker"/> with 30 minutes.
+        /// </param>
         public BotHandler(
             ITelegramBotClient bot,
             IServiceCollection servicesCollection = null,
-            IExecutionManager executionManager = null
+            IExecutionManager executionManager = null,
+            IPendingExceededChecker pendingExceededChecker = null
             )
         {
             ExecutionManager = executionManager ?? new ThreadPoolExecutionManager();
             BotContext = new BotClientContext(bot);
             _serviceCollection = servicesCollection ?? new ServiceCollection();
+            PendingExceededChecker = pendingExceededChecker
+               ?? new CreationTimePendingExceededChecker(TimeSpan.FromMinutes(30));
         }
 
         /// <summary>
@@ -143,7 +160,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
         {
             Func<Task> processingFunc = async () =>
             {
-                UpdateContext updateContext = null;
+                UpdateContext pendingUpdateContext = null;
                 try
                 {
                     using (var servicesScope = Services.CreateScope())
@@ -151,7 +168,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
                         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
                         //Create context.
-                        updateContext = new UpdateContext(
+                        UpdateContext updateContext = new UpdateContext(
                             update,
                             BotContext,
                             servicesScope.ServiceProvider,
@@ -161,13 +178,17 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
 
                         //Create hidden context.
                         var hiddenUpdateContext = new HiddenUpdateContext(
-                            cancellationTokenSource, 
+                            cancellationTokenSource,
                             DateTime.Now
-                            );
+                        );
                         updateContext.Properties[HiddenUpdateContext.DictKeyName] = hiddenUpdateContext;
 
                         //Add to pending list.
-                        _pendingUpdateContexts.Add(updateContext);
+                        _pendingUpdateContexts.Add(
+                            updateContext
+                        );
+
+                        pendingUpdateContext = updateContext;
 
                         //Execute.
                         await _updateProcessingDelegate.Invoke(updateContext, async () => { });
@@ -176,14 +197,27 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
                 finally
                 {
                     //Remove from pending list.
-                    if (updateContext != null)
+                    if (pendingUpdateContext != null)
                     {
-                        _pendingUpdateContexts.Remove(updateContext);
+                        _pendingUpdateContexts.TryRemove(pendingUpdateContext);
                     }
                 }
             };
-                
+
             ExecutionManager.ProcessUpdate(processingFunc);
         }
+
+        void AbortPendingExceeded()
+        {
+            foreach (var ctx in _pendingUpdateContexts)
+            {
+                //If pending time limit exceeded.
+                if (PendingExceededChecker.IsPendingExceeded(ctx))
+                {
+                    _pendingUpdateContexts.TryRemove(ctx);
+                }
+            }
+        }
+
     }
 }
