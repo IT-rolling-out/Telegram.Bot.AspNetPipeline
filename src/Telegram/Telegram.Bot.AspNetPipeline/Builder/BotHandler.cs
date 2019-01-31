@@ -30,7 +30,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
         /// <summary>
         /// UpdateContext from pending tasks.
         /// </summary>
-        ConcurrentHashSet<UpdateContext> _pendingUpdateContexts = new ConcurrentHashSet<UpdateContext>();
+        readonly ConcurrentHashSet<UpdateContext> _pendingUpdateContexts = new ConcurrentHashSet<UpdateContext>();
 
         public IServiceProvider Services { get; private set; }
 
@@ -115,10 +115,24 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
             _isSetup = true;
         }
 
+        #region Dispose region.
+        public bool IsDisposed { get; private set; }
+
         public void Dispose()
         {
+            if (IsDisposed)
+                return;
             UnsubscribeBotEvents();
+            foreach (var item in _pendingUpdateContexts)
+            {
+                item.Dispose();
+            }
+            _pendingUpdateContexts.Clear();
+            _updateProcessingDelegate = null;
+            IsDisposed = true;
+            GC.Collect();
         }
+        #endregion
 
         /// <summary>
         /// Here only musthave middleware services.
@@ -152,6 +166,10 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
 
         void OnUpdateEventHandler(object sender, UpdateEventArgs updateEventArgs)
         {
+            //Launc pending updates checker.
+            AbortPendingExceeded();
+
+            //Processing current update.
             ProcessUpdate(updateEventArgs.Update);
         }
         #endregion
@@ -199,6 +217,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
                     //Remove from pending list.
                     if (pendingUpdateContext != null)
                     {
+                        pendingUpdateContext.Dispose();
                         _pendingUpdateContexts.TryRemove(pendingUpdateContext);
                     }
                 }
@@ -207,17 +226,46 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
             ExecutionManager.ProcessUpdate(processingFunc);
         }
 
+        #region Check pending.
+        TimeSpan _checkPendingDelay = TimeSpan.FromMinutes(1);
+
+        readonly object _checkPendingLocker = new object();
+
+        DateTime _lastPendingCheck = DateTime.Now;
+
         void AbortPendingExceeded()
         {
-            foreach (var ctx in _pendingUpdateContexts)
+            if (DateTime.Now - _lastPendingCheck < _checkPendingDelay)
+                return;
+
+            Task.Run(() =>
             {
-                //If pending time limit exceeded.
-                if (PendingExceededChecker.IsPendingExceeded(ctx))
+                lock (_checkPendingLocker)
                 {
-                    _pendingUpdateContexts.TryRemove(ctx);
+                    if (DateTime.Now - _lastPendingCheck < _checkPendingDelay)
+                        return;
+
+
+                    foreach (var ctx in _pendingUpdateContexts)
+                    {
+                        //If pending time limit exceeded.
+                        if (PendingExceededChecker.IsPendingExceeded(ctx) || ctx.IsDisposed)
+                        {
+                            _pendingUpdateContexts.TryRemove(ctx);
+                            //All dispose operations in separate execution context (probably separate thread).
+                            ExecutionManager.ProcessUpdate(async () =>
+                            {
+                                ctx.Dispose();
+                                
+                            });
+                        }
+                    }
+
+                    _lastPendingCheck = DateTime.Now;
                 }
-            }
+            });
         }
+        #endregion
 
     }
 }

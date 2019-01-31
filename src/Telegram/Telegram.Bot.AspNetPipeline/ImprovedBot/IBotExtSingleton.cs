@@ -20,24 +20,12 @@ namespace Telegram.Bot.AspNetPipeline.Core.ImprovedBot
         /// <summary>
         /// </summary>
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
-        /// <param name="isUpdateFits">User delegate to check if Update from current context is fits.
+        /// <param name="messageValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
         Task<Message> ReadMessageAsync(
             UpdateContext updateContext,
-            Func<Update, bool> isUpdateFits
+            Func<Update, bool> messageValidator
             );
 
-        /// <summary>
-        /// In 99% is enough to use ReadMessageAsync.
-        /// </summary>
-        /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
-        /// <param name="isUpdateFits">User delegate to check if Update from current context is fits.
-        /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        /// <param name="updateTypes">All by default.</param>
-        Task<Update> ReadUpdateAsync(
-            UpdateContext updateContext,
-            IEnumerable<UpdateType> updateTypes = null, 
-            Func<Update, bool> isUpdateFits = null
-            );
     }
 }

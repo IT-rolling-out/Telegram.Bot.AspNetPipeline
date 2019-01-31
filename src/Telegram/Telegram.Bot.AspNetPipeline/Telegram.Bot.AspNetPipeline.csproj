@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="ConcurrentHashSet" Version="1.0.2" />
     <PackageReference Include="IRO.Common" Version="1.0.8" />
+    <PackageReference Include="IRO.Storage" Version="2.2.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Telegram.Bot" Version="14.10.0" />
   </ItemGroup>

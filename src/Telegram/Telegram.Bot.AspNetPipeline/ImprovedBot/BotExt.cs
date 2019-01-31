@@ -28,22 +28,11 @@ namespace Telegram.Bot.AspNetPipeline.Core.ImprovedBot
 
         /// <summary>
         /// </summary>
-       /// <param name="isUpdateFits">User delegate to check if Update from current context is fits.
+       /// <param name="messageValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public Task<Message> ReadMessageAsync(Func<Update, bool> isUpdateFits)
+        public Task<Message> ReadMessageAsync(Func<Update, bool> messageValidator)
         {
-            return BotExtSingleton.ReadMessageAsync(_updateContext, isUpdateFits);
-        }
-
-        /// <summary>
-        /// In 99% is enough to use ReadMessageAsync.
-        /// </summary>
-        /// <param name="isUpdateFits">User delegate to check if Update from current context is fits.
-        /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        /// <param name="updateTypes">All by default.</param>
-        public Task<Update> ReadUpdateAsync(IEnumerable<UpdateType> updateTypes=null, Func<Update, bool> isUpdateFits = null)
-        {
-            return BotExtSingleton.ReadUpdateAsync(_updateContext, updateTypes, isUpdateFits);
+            return BotExtSingleton.ReadMessageAsync(_updateContext, messageValidator);
         }
     }
 }

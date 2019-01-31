@@ -6,12 +6,12 @@
     public enum ReadCallbackFromType
     {
         /// <summary>
-        /// Any UpdateContext.Message.From messages can be returned from callback.
+        /// Only updates where Message.From is current user.
         /// </summary>
         CurrentUser=0,
 
         /// <summary>
-        /// Only UpdateContext.Message.From replies can be returned from callback.
+        /// Only updates where Message.From is current user and message is reply to current bot.
         /// </summary>
         CurrentUserReply,
 

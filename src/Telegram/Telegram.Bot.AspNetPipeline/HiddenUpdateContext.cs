@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Telegram.Bot.AspNetPipeline.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Implementations
 {
@@ -26,6 +27,11 @@ namespace Telegram.Bot.AspNetPipeline.Implementations
         {
             UpdateProcessingAbortedSource = updateProcessingAbortedSource;
             CreatedAt = createdAt;
+        }
+
+        public static HiddenUpdateContext Resolve(UpdateContext updateContext)
+        {
+            return (HiddenUpdateContext)updateContext.Properties[HiddenUpdateContext.DictKeyName];
         }
     }
 }

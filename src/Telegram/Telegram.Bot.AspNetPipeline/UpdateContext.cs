@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Telegram.Bot.AspNetPipeline.Core.ImprovedBot;
+using Telegram.Bot.AspNetPipeline.Implementations;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -9,7 +10,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
     /// <summary>
     /// Just like http context in asp.net mvc.
     /// </summary>
-    public class UpdateContext
+    public class UpdateContext: IDisposable
     {
         /// <summary>
         /// Unique id, used in GetHashCode too.
@@ -71,14 +72,14 @@ namespace Telegram.Bot.AspNetPipeline.Core
             BotClientContext botContext,
             IServiceProvider services,
             CancellationToken updateProcessingAborted,
-            IBotExtSingleton botStatelessExtensions
+            IBotExtSingleton botExtSingleton
             )
         {
             Update = update;
             BotContext = botContext;
             Services = services;
             UpdateProcessingAborted = updateProcessingAborted;
-            BotExtensions = new BotExt(botStatelessExtensions, this);
+            BotExt =new BotExt(botExtSingleton, this);
         }
 
         #region Processing status.
@@ -113,5 +114,26 @@ namespace Telegram.Bot.AspNetPipeline.Core
         {
             return Id.GetHashCode() + 279;
         }
+
+        #region Dispose region
+        public bool IsDisposed { get; private set; }
+
+        public event Func<UpdateContext> Disposed;
+
+        public void Dispose()
+        {
+            if (IsDisposed)
+                return;
+            try
+            {
+                var hiddenContext=(HiddenUpdateContext)Properties[HiddenUpdateContext.DictKeyName] ;
+                hiddenContext.UpdateProcessingAbortedSource.Cancel();
+            }
+            catch { }
+            Properties.Clear();
+            IsDisposed = true;
+            Disposed?.Invoke();
+        }
+        #endregion
     }
 }
