@@ -40,3 +40,4 @@ output/
 **/wwwroot
 publish_to_nugetorg.cmd
 scripts/localData/*
+test_token.txt
