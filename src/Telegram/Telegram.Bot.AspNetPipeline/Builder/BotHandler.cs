@@ -1,21 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Args;
-using Telegram.Bot.AspNetPipeline.Core.Services;
-using Telegram.Bot.AspNetPipeline.Implementations;
+using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
+using Telegram.Bot.AspNetPipeline.Services;
+using Telegram.Bot.AspNetPipeline.Services.Implementations;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.AspNetPipeline.Core.Builder
+namespace Telegram.Bot.AspNetPipeline.Builder
 {
 
     public class BotHandler : IDisposable
     {
-        #region Setup properties
+        #region Setup and run data
+        readonly object _setupLocker = new object();
+
+        readonly object _runLocker = new object();
+
         bool _isSetup;
 
         Action<IPipelineBuilder> _pipelineBuilderAction;
@@ -34,32 +38,38 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
 
         public IServiceProvider Services { get; private set; }
 
-        public BotClientContext BotContext { get; }
+        public BotClientContext BotContext { get; private set; }
 
-        public IPendingExceededChecker PendingExceededChecker { get; }
+        public bool IsRunning { get; private set; }
+
+        #region Resolved services.
+        /// <summary>
+        /// Check if service pending.
+        /// Default service is <see cref="CreationTimePendingExceededChecker"/> with 30 minutes delay.
+        /// Can set your handler in ConfigureServices().
+        /// </summary>
+        public IPendingExceededChecker PendingExceededChecker { get; private set; }
 
         /// <summary>
         /// Aka thread manager.
+        /// Can set your handler in ConfigureServices().
         /// </summary>
-        public IExecutionManager ExecutionManager { get; }
+        public IExecutionManager ExecutionManager { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// </summary>
-        /// <param name="pendingExceededChecker">Limit for command execution.
-        /// Default is <see cref="CreationTimePendingExceededChecker"/> with 30 minutes.
         /// </param>
         public BotHandler(
             ITelegramBotClient bot,
-            IServiceCollection servicesCollection = null,
-            IExecutionManager executionManager = null,
-            IPendingExceededChecker pendingExceededChecker = null
+            IServiceCollection servicesCollection = null
             )
         {
-            ExecutionManager = executionManager ?? new ThreadPoolExecutionManager();
+            if (bot == null)
+                throw new ArgumentNullException(nameof(bot));
             BotContext = new BotClientContext(bot);
             _serviceCollection = servicesCollection ?? new ServiceCollection();
-            PendingExceededChecker = pendingExceededChecker
-               ?? new CreationTimePendingExceededChecker(TimeSpan.FromMinutes(30));
         }
 
         /// <summary>
@@ -71,7 +81,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
             if (servicesConfigureAction == null)
                 throw new ArgumentNullException(nameof(servicesConfigureAction));
             if (_servicesConfigureAction != null)
-                throw new Exception("Services configure action was setted before");
+                throw new Exception("Services configure action was set before");
             _servicesConfigureAction = servicesConfigureAction;
         }
 
@@ -80,39 +90,90 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
             if (pipelineBuilderAction == null)
                 throw new ArgumentNullException(nameof(pipelineBuilderAction));
             if (_pipelineBuilderAction != null)
-                throw new Exception("Pipeline builder action was setted before");
+                throw new Exception("Pipeline builder action was set before");
             _pipelineBuilderAction = pipelineBuilderAction;
         }
 
-        public void Setup()
+        public void Start()
         {
-            if (_isSetup)
+            if (IsDisposed)
+                throw new ObjectDisposedException("BotHandler");
+
+            lock (_runLocker)
             {
-                throw new Exception("You can setup BotHandler twice.");
+                if (IsRunning)
+                    return;
+                Setup();
+                BotContext.Bot.StartReceiving();
+                SubscribeBotEvents();
+                IsRunning = true;
             }
 
-            //Register services.
-            RegisterMandatoryServices(_serviceCollection);
-            _servicesConfigureAction?.Invoke(_serviceCollection);
-            _servicesConfigureAction = null;
-            Services = _serviceCollection.BuildServiceProvider();
-            _serviceCollection = null;
+        }
 
-            //Not implemented.
-            IPipelineBuilder pipelineBuilder = new PipelineBuilder(Services);
+        public void Stop()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException("BotHandler");
 
-            //Register middleware.
-            RegisterMandatoryMiddleware(pipelineBuilder);
-            _pipelineBuilderAction?.Invoke(pipelineBuilder);
-            _pipelineBuilderAction = null;
+            lock (_runLocker)
+            {
+                if (!IsRunning)
+                    return;
+                UnsubscribeBotEvents();
+                foreach (var item in _pendingUpdateContexts)
+                {
+                    item.Dispose();
+                }
+                _pendingUpdateContexts.Clear();
+                IsRunning = false;
+            }
 
-            //Build pipeline.
-            _updateProcessingDelegate = pipelineBuilder.Build();
+        }
 
-            //Setup event handlers.
-            SubscribeBotEvents();
+        /// <summary>
+        /// Execute initialization callbacks and build pipeline.
+        /// <para></para>
+        /// Called automatically in Start().
+        /// </summary>
+        public void Setup()
+        {
+            lock (_setupLocker)
+            {
+                try
+                {
+                    if (_isSetup)
+                    {
+                        return;
+                    }
 
-            _isSetup = true;
+                    //Register services.
+                    RegisterMandatoryServices(_serviceCollection);
+                    _servicesConfigureAction?.Invoke(_serviceCollection);
+                    _servicesConfigureAction = null;
+                    Services = _serviceCollection.BuildServiceProvider();
+                    _serviceCollection = null;
+
+                    //Resolve services needed for BotHandler.
+                    ResolveBotHandlerServices();
+
+                    //Not implemented.
+                    IPipelineBuilder pipelineBuilder = new PipelineBuilder(Services);
+
+                    //Register middleware.
+                    RegisterMandatoryMiddleware(pipelineBuilder);
+                    _pipelineBuilderAction?.Invoke(pipelineBuilder);
+                    _pipelineBuilderAction = null;
+
+                    //Build pipeline.
+                    _updateProcessingDelegate = pipelineBuilder.Build();
+                    _isSetup = true;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("BotHandler setup exception.", ex);
+                }
+            }
         }
 
         #region Dispose region.
@@ -122,25 +183,28 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
         {
             if (IsDisposed)
                 return;
-            UnsubscribeBotEvents();
-            foreach (var item in _pendingUpdateContexts)
-            {
-                item.Dispose();
-            }
-            _pendingUpdateContexts.Clear();
+            Stop();
+            Services = null;
+            BotContext = null;
             _updateProcessingDelegate = null;
             IsDisposed = true;
             GC.Collect();
         }
         #endregion
 
+        #region Mandatory middleware and services
         /// <summary>
         /// Here only musthave middleware services.
         /// </summary>
         /// <param name="serviceCollection"></param>
         void RegisterMandatoryServices(IServiceCollection serviceCollection)
         {
-            throw new NotImplementedException();
+            serviceCollection.AddSingleton<IPendingExceededChecker>(
+                (serviceProvider) => new CreationTimePendingExceededChecker(TimeSpan.FromMinutes(30))
+                );
+            serviceCollection.AddSingleton<IExecutionManager, ThreadPoolExecutionManager>();
+
+            serviceCollection.AddBotExt();
         }
 
         /// <summary>
@@ -150,8 +214,15 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
         /// <param name="pipelineBuilder"></param>
         void RegisterMandatoryMiddleware(IPipelineBuilder pipelineBuilder)
         {
-            throw new NotImplementedException();
+            pipelineBuilder.UseBotExt();
         }
+
+        void ResolveBotHandlerServices()
+        {
+            PendingExceededChecker = Services.GetService<IPendingExceededChecker>();
+            ExecutionManager = Services.GetService<IExecutionManager>();
+        }
+        #endregion
 
         #region Bot events region
         void SubscribeBotEvents()
@@ -190,8 +261,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
                             update,
                             BotContext,
                             servicesScope.ServiceProvider,
-                            cancellationTokenSource.Token,
-                            null
+                            cancellationTokenSource.Token
                         );
 
                         //Create hidden context.
@@ -256,7 +326,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Builder
                             ExecutionManager.ProcessUpdate(async () =>
                             {
                                 ctx.Dispose();
-                                
+
                             });
                         }
                     }

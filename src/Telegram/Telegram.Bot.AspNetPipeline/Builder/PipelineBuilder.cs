@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Core.Builder;
 
-namespace Telegram.Bot.AspNetPipeline.Implementations
+namespace Telegram.Bot.AspNetPipeline.Builder
 {
-    public class PipelineBuilder:IPipelineBuilder
+    public class PipelineBuilder : IPipelineBuilder
     {
-        Stack<UpdateProcessingDelegate> _updateProcessingDelegates=new Stack<UpdateProcessingDelegate>();
+        Stack<UpdateProcessingDelegate> _updateProcessingDelegates = new Stack<UpdateProcessingDelegate>();
 
         public IServiceProvider ServiceProvider { get; }
 
@@ -33,31 +30,40 @@ namespace Telegram.Bot.AspNetPipeline.Implementations
             //For each new iteration and each middleware from stack processingDelegate_OfIteration will contain delegate to execute
             //all next middleware.
             //"next" delegate for current iteration. Started with empty delegate for last middleware.
-            UpdateProcessingDelegate processingDelegate_OfIteration =async (UpdateContext ctx, Func<Task> nextFunc) => { };
+            UpdateProcessingDelegate processingDelegate_OfIteration = async (UpdateContext ctx, Func<Task> nextFunc) => { };
             while (_updateProcessingDelegates.Count > 0)
             {
                 var prevProcessingDelegate = processingDelegate_OfIteration;
                 var currentProcessingDelegate = _updateProcessingDelegates.Pop();
 
-                processingDelegate_OfIteration= async (UpdateContext ctx, Func<Task> mostNext) =>
-                {
-                    Func<Task> next = async () =>
-                    {
-                        await prevProcessingDelegate.Invoke(ctx, mostNext);
-                    };
+                processingDelegate_OfIteration = async (UpdateContext ctx, Func<Task> mostNext) =>
+                 {
+                     Func<Task> next = async () =>
+                     {
+                         await prevProcessingDelegate.Invoke(ctx, mostNext);
+                     };
 
-                    //Force exit.
-                    if (ctx.ForceExitRequested)
-                    {
-                        return;
-                    }
+                     //Force exit.
+                     if (ctx.ForceExitRequested)
+                     {
+                         return;
+                     }
 
-                    //Execute current.
-                    await currentProcessingDelegate.Invoke(ctx, next);
-                };
+                     //Execute current.
+                     await currentProcessingDelegate.Invoke(ctx, next);
+                 };
             }
 
-            return processingDelegate_OfIteration;
+            //Just add some checks.
+            UpdateProcessingDelegate res = async (UpdateContext ctx, Func<Task> next) =>
+            {
+                if (ctx == null)
+                    throw new ArgumentNullException(nameof(ctx), "Null context passed to UpdateProcessingDelegate.");
+                if (next == null)
+                    throw new ArgumentNullException(nameof(next), "Null 'next' passed to UpdateProcessingDelegate.");
+                await processingDelegate_OfIteration.Invoke(ctx, next);
+            };
+            return res;
         }
     }
 }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Mvc;
-using Telegram.Bot.AspNetPipeline.Mvc.Core.Controllers;
-using Telegram.Bot.AspNetPipeline.Mvc.Core.Metadata;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -16,10 +16,10 @@ namespace IRO.Tests.Telegram.Controllers
         public async Task NewBot()
         {
             await Bot.SendTextMessageAsync(Chat.Id, "Enter bot name: ");
-            Message msg = await BotExtension.ReadMessageAsync();
+            Message msg = await BotExt.ReadMessageAsync();
             var name = msg.Text;
             await Bot.SendTextMessageAsync(Chat.Id, "Enter bot nikname: ");
-            msg = await BotExtension.ReadMessageAsync();
+            msg = await BotExt.ReadMessageAsync();
             var nick = msg.Text;
 
             //Creating bot started...

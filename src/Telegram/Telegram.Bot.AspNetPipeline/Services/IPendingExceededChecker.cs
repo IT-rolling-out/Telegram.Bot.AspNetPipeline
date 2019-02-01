@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Core.Services
+namespace Telegram.Bot.AspNetPipeline.Services
 {
     public interface IPendingExceededChecker
     {

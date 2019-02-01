@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Telegram.Bot.AspNetPipeline.Core.Services
+namespace Telegram.Bot.AspNetPipeline.Services
 {
     /// <summary>
     /// Manage how delegate will be executed: in thread, in queue, synchronous or else.

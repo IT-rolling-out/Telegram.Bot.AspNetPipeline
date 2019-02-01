@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Core.Builder
+namespace Telegram.Bot.AspNetPipeline.Builder
 {
     /// <summary>
     /// Like IApplicationBuilder in asp.net .

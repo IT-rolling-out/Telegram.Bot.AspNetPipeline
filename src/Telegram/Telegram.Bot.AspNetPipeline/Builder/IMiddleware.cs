@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Core.Builder
+namespace Telegram.Bot.AspNetPipeline.Builder
 {
     public interface IMiddleware
     {

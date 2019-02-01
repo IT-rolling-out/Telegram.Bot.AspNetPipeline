@@ -5,8 +5,8 @@ using IRO.Tests.Telegram.Controllers;
 using IRO.Tests.Telegram.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
-using Telegram.Bot.AspNetPipeline.Core.Builder;
-using Telegram.Bot.AspNetPipeline.Mvc.Core.Builder;
+using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Mvc.Builder;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 

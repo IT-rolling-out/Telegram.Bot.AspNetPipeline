@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Telegram.Bot.AspNetPipeline.Core.Builder
+namespace Telegram.Bot.AspNetPipeline.Builder
 {
     public static class PipelineBuilderExtensions 
     {
