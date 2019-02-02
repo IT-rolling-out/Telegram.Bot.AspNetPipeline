@@ -19,13 +19,13 @@ namespace IRO.UnitTests.Telegram
     {
         IPipelineBuilder _pipelineBuilder;
         UpdateContext _ctx;
-        ThreadPoolExecutionManager _executionManager=new ThreadPoolExecutionManager();
+
 
         [SetUp]
         public void Setup()
         {
             var servicesCollection = new ServiceCollection();
-            var servicesProvider =servicesCollection.BuildServiceProvider();
+            var servicesProvider = servicesCollection.BuildServiceProvider();
             _pipelineBuilder = new PipelineBuilder(
                 servicesProvider
                 );
@@ -43,14 +43,15 @@ namespace IRO.UnitTests.Telegram
         [Test]
         public async Task NoPending()
         {
-            var locker=new object();
+            var executionManager = new ThreadPoolExecutionManager();
+            object locker = new object();
             List<Task> tasks = new List<Task>();
-            int count = 200;
+            int count = 50;
             int finishedTasks = 0;
             //Launch many threads.
             for (int i = 0; i < count; i++)
             {
-                var t = _executionManager.ProcessUpdate(async () =>
+                var t = executionManager.ProcessUpdate(async () =>
                 {
                     Thread.Sleep(1000);
                     lock (locker)
@@ -60,14 +61,100 @@ namespace IRO.UnitTests.Telegram
                 });
                 tasks.Add(t);
             }
+
             //Await all.
-            foreach(var t in tasks)
-            {
-                await t;
-            }
-            
-            Assert.Zero(_executionManager.PendingTasksCount);
+            await executionManager.AwaitAllPending();
+
+            Assert.Zero(executionManager.PendingTasksCount);
             Assert.AreEqual(count, finishedTasks);
+        }
+
+        [Test]
+        public async Task AllPending_ThreadLock()
+        {
+            var executionManager = new ThreadPoolExecutionManager();
+            var locker = new object();
+            List<Task> tasks = new List<Task>();
+            int count = 200;
+            int finishedTasks = 0;
+            Semaphore are = new Semaphore(0, int.MaxValue);
+
+            //Launch many threads.
+            for (int i = 0; i < count; i++)
+            {
+                var t = executionManager.ProcessUpdate(async () =>
+                {
+                    are.WaitOne();
+                    finishedTasks++;
+                });
+                tasks.Add(t);
+            }
+
+            var pendingTasksCount = executionManager.PendingTasksCount;
+            var finishedTasksRes = finishedTasks;
+
+            //Await all.
+            await executionManager.AwaitAllPending(TimeSpan.FromMilliseconds(100));
+
+            //Release threads.
+            for (int i = 0; i < count; i++)
+            {
+                are.Release();
+            }
+            await executionManager.AwaitAllPending();
+
+            Assert.AreEqual(count, pendingTasksCount);
+            Assert.Zero(finishedTasksRes);
+        }
+
+
+        [Test]
+        public async Task AllPending_TaskAwait()
+        {
+            var executionManager = new ThreadPoolExecutionManager();
+            var locker = new object();
+            List<Task> tasks = new List<Task>();
+            int count = 200;
+            int finishedTasks = 0;
+            List<TaskCompletionSource<object>> tasksSources = new List<TaskCompletionSource<object>>();
+
+            //Launch many threads.
+            for (int i = 0; i < count; i++)
+            {
+                var t = executionManager.ProcessUpdate(async () =>
+                {
+                    var tcs = new TaskCompletionSource<object>();
+                    lock (tasksSources)
+                    {
+                        tasksSources.Add(tcs);
+                    }
+                    await tcs.Task;
+                    finishedTasks++;
+                });
+                tasks.Add(t);
+            }
+
+            var pendingTasksCount = executionManager.PendingTasksCount;
+            var finishedTasksRes = finishedTasks;
+
+            //Await all.
+            await executionManager.AwaitAllPending(TimeSpan.FromMilliseconds(100));
+
+            //Release threads.
+            lock (tasksSources)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    //If we not "release all task - threads will not been locked and application will not freeze.
+                    //Thats how Task works.
+                    tasksSources[i].SetCanceled();
+                }
+            }
+
+            await executionManager.AwaitAllPending();
+
+            Assert.AreEqual(count, pendingTasksCount);
+            Assert.Zero(finishedTasksRes);
         }
     }
 }

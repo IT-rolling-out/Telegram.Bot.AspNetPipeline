@@ -1,16 +1,18 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Telegram.Bot.AspNetPipeline.Builder
 {
     public static class PipelineBuilderExtensions 
     {
-        public static void UseMiddlware(this IPipelineBuilder @this, IMiddleware middleware)
+        /// <summary>
+        /// Resolves middleware form ServiceProvider and use it.
+        /// </summary>
+        public static void UseMiddlware<TMiddleware>(this IPipelineBuilder @this)
+            where TMiddleware:IMiddleware
         {
-            if (middleware == null)
-            {
-                throw new ArgumentNullException(nameof(middleware));
-            }
-            @this.Use(middleware.Invoke);
+            var md=@this.ServiceProvider.GetService<TMiddleware>();
+            @this.Use(md.Invoke);
         }
     }
 }

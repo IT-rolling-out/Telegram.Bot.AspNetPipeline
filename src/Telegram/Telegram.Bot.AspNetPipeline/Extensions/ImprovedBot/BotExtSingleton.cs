@@ -23,7 +23,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         {
             Func<Update, bool> messageValidator = (upd) => CheckFromType(upd, updateContext, fromType);
             return await ReadMessageAsync(updateContext, messageValidator);
-
         }
 
         /// <summary>
@@ -40,55 +39,16 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             //hiddenContext.UpdateProcessingAbortedSource.;
 
             //OnCanceled.
-            updateContext.UpdateProcessingAborted.Register(() => { SetCancelled(taskCompletionSource); });
+            updateContext.UpdateProcessingAborted.Register(() =>
+            {
+                SetCancelled(taskCompletionSource);
+            });
 
             var resUpdate = await taskCompletionSource.Task;
             return resUpdate.Message;
         }
 
-        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, Func<Update, bool> messageValidator)
-        {
-            var sd = new UpdateContextSearchData
-            {
-                CurrentUpdateContext = updateContext,
-                ChatId = updateContext.Update.Message.Chat.Id,
-                BotId = updateContext.Bot.BotId,
-                TaskCompletionSource = taskCompletionSource,
-                MessageValidator = messageValidator
-            };
-            _searchBag.Add(sd);
-        }
-
-        bool CheckFromType(Update upd, UpdateContext origCtx, ReadCallbackFromType fromType)
-        {
-            if (fromType == ReadCallbackFromType.CurrentUser)
-            {
-                return upd.Message.From.Id == origCtx.Message.From.Id;
-            }
-            else if (fromType == ReadCallbackFromType.CurrentUserReply)
-            {
-                if (upd.Message.From.Id != origCtx.Message.From.Id)
-                    return false;
-                if (upd.Message.ReplyToMessage.From.Id != origCtx.Bot.BotId)
-                    return false;
-                return true;
-            }
-            else if (fromType == ReadCallbackFromType.AnyUserReply)
-            {
-                if (upd.Message.ReplyToMessage.From.Id != origCtx.Bot.BotId)
-                    return false;
-                return true;
-            }
-            else if (fromType == ReadCallbackFromType.AnyUser)
-            {
-                //I know that current expression can be removed, but it make code more readable.
-                return true;
-            }
-
-            return true;
-        }
-
-        internal async Task OnUpdateContext(UpdateContext newContext)
+        public async Task OnUpdateInvoke(UpdateContext newContext, Func<Task> next)
         {
             var searchDataNullable = _searchBag.TryFind(newContext.Chat.Id, newContext.Bot.BotId);
             if (searchDataNullable != null)
@@ -99,9 +59,17 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 bool isUpdateValid = false;
                 try
                 {
-                    isUpdateValid = searchData.MessageValidator?.Invoke(newContext.Update) == true;
+                    if (searchData.MessageValidator == null)
+                    {
+                        //True if validator is null.
+                        isUpdateValid = true;
+                    }
+                    else
+                    {
+                        isUpdateValid = searchData.MessageValidator.Invoke(newContext.Update);
+                    }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     SetException(
                         searchData.TaskCompletionSource,
@@ -112,11 +80,78 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 }
 
                 if (!isUpdateValid)
+                {
+                    await next();
                     return;
+                }
 
                 //Force exit only if result valid.
-                newContext.ForceExit();
                 SetResult(searchData.TaskCompletionSource, newContext.Update);
+                _searchBag.TryRemove(newContext.Chat.Id, newContext.Bot.BotId);
+                newContext.ForceExit();
+            }
+            else
+            {
+                await next();
+            }
+        }
+
+        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, Func<Update, bool> messageValidator)
+        {
+            var chatId = updateContext.Update.Message.Chat.Id;
+            var botId = updateContext.Bot.BotId;
+            var prevData = _searchBag.TryRemove(chatId, botId);
+            if (prevData != null)
+            {
+                SetCancelled(prevData.Value.TaskCompletionSource);
+            }
+            var sd = new UpdateContextSearchData
+            {
+                CurrentUpdateContext = updateContext,
+                ChatId = chatId,
+                BotId = botId,
+                TaskCompletionSource = taskCompletionSource,
+                MessageValidator = messageValidator
+            };
+            _searchBag.Add(sd);
+        }
+
+        bool CheckFromType(Update upd, UpdateContext origCtx, ReadCallbackFromType fromType)
+        {
+            try
+            {
+                if (upd.Message.Text.Trim().StartsWith("/"))
+                    return false;
+
+                if (fromType == ReadCallbackFromType.CurrentUser)
+                {
+                    return upd.Message.From.Id == origCtx.Message.From.Id;
+                }
+                else if (fromType == ReadCallbackFromType.CurrentUserReply)
+                {
+                    if (upd.Message.From.Id != origCtx.Message.From.Id)
+                        return false;
+                    if (upd.Message.ReplyToMessage?.From.Id != origCtx.Bot.BotId)
+                        return false;
+                    return true;
+                }
+                else if (fromType == ReadCallbackFromType.AnyUserReply)
+                {
+                    if (upd.Message.ReplyToMessage?.From.Id != origCtx.Bot.BotId)
+                        return false;
+                    return true;
+                }
+                else if (fromType == ReadCallbackFromType.AnyUser)
+                {
+                    //I know that current expression can be removed, but it make code more readable.
+                    return true;
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -124,6 +159,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         {
             //Task will be continued with current thread context of readed UpdateContext object.
             //So we don`t need to start it with IExecutionManager.
+            var t = taskCompletionSource.Task;
+            if (t.IsCanceled || t.IsCompleted || t.IsFaulted)
+                return;
             taskCompletionSource.SetCanceled();
         }
 
@@ -131,14 +169,20 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         {
             //Task will be continued with current thread context of readed UpdateContext object.
             //So we don`t need to start it with IExecutionManager.
-            taskCompletionSource.TrySetResult(upd);
+            var t = taskCompletionSource.Task;
+            if (t.IsCanceled || t.IsCompleted || t.IsFaulted)
+                return;
+            taskCompletionSource.SetResult(upd);
         }
 
         void SetException(TaskCompletionSource<Update> taskCompletionSource, Exception ex)
         {
             //Task will be continued with current thread context of readed UpdateContext object.
             //So we don`t need to start it with IExecutionManager.
-            taskCompletionSource.TrySetException(ex);
+            var t = taskCompletionSource.Task;
+            if (t.IsCanceled || t.IsCompleted || t.IsFaulted)
+                return;
+            taskCompletionSource.SetException(ex);
         }
     }
 }

@@ -13,5 +13,10 @@
         UpdateContextSearchData? TryFind(long chatId, int botId);
 
         bool Contains(long chatId, int botId);
+
+        /// <summary>
+        /// Return removed object or null.
+        /// </summary>
+        UpdateContextSearchData? TryRemove(long chatId, int botId);
     }
 }

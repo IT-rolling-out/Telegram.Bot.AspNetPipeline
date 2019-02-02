@@ -26,7 +26,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
         /// <summary>
         /// Just proxy to UpdateContext.BotExt().
         /// </summary>
-        public BotExt BotExt => UpdateContext.BotExt();
+        public BotExt BotExt => UpdateContext.BotExt;
 
         public IMvcFeatures Features => ControllerContext.Features ;
 

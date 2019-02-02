@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
@@ -8,16 +9,17 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
     public class ImprovedBotMiddleware : IMiddleware
     {
-        BotExtSingleton _botExtSingleton;
+        IBotExtSingleton _botExtSingleton;
 
-        public ImprovedBotMiddleware(IUpdateContextSearchBag searchBag)
+        public ImprovedBotMiddleware()
         {
-            _botExtSingleton = new BotExtSingleton(searchBag);
+
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
         {
-            await _botExtSingleton.OnUpdateContext(ctx);
+            _botExtSingleton = _botExtSingleton ?? ctx.Services.GetService<IBotExtSingleton>();
+            await _botExtSingleton.OnUpdateInvoke(ctx, next);
         }
     }
 }

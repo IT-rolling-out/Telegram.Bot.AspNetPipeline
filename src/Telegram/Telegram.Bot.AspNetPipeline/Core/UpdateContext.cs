@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -57,7 +58,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// </summary>
         public CancellationToken UpdateProcessingAborted { get; }
 
-        
+        public BotExt BotExt => ImprovedBotExtensions.BotExt(this);
 
         public UpdateContext(
             Update update,
@@ -83,7 +84,6 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public void Processed()
         {
             IsProcessed = true;
-
         }
 
         public bool ForceExitRequested { get; private set; }
@@ -91,6 +91,9 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// Set IsProcessed and ForceExitRequested to true.
         /// Next middleware action will not be executed.
+        /// <para></para>
+        /// This method guarantees you that next() delegate will not be called,
+        /// but more clear way is to handle it only by ignoring or invoking next() delegate.
         /// </summary>
         public void ForceExit()
         {

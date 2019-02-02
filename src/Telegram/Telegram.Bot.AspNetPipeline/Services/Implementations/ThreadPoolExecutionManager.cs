@@ -4,16 +4,13 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
+using Telegram.Bot.AspNetPipeline.Extensions;
 
 namespace Telegram.Bot.AspNetPipeline.Services.Implementations
 {
-    public class ThreadPoolExecutionManager:IExecutionManager
+    public class ThreadPoolExecutionManager : IExecutionManager
     {
-        readonly object _locker = new object();
-
         readonly ConcurrentHashSet<Task> _pendingTasks = new ConcurrentHashSet<Task>();
-
-        readonly Mutex _mutex = new Mutex();
 
         public int PendingTasksCount => _pendingTasks.Count;
 
@@ -22,8 +19,6 @@ namespace Telegram.Bot.AspNetPipeline.Services.Implementations
         /// </summary>
         public async Task ProcessUpdate(Func<Task> func)
         {
-            _mutex.WaitOne();
-            _mutex.ReleaseMutex();
             Task resTask = null;
             try
             {
@@ -43,24 +38,18 @@ namespace Telegram.Bot.AspNetPipeline.Services.Implementations
         /// <summary>
         /// Wait all tasks completition with try|cathc block.
         /// </summary>
-        public async Task AwaitAllPending()
+        /// <returns>True if thread terminated because of timeout.</returns>
+        public async Task<bool> AwaitAllPending(TimeSpan? timeout = null)
         {
-            try
+            var res=await TaskExt.WhenAll(_pendingTasks, timeout);
+            foreach (var t in _pendingTasks)
             {
-                _mutex.WaitOne();
-                foreach (var t in _pendingTasks)
+                if (t.IsCanceled || t.IsCompleted || t.IsFaulted)
                 {
-                    try
-                    {
-                        await t;
-                    }
-                    catch { }
+                    _pendingTasks.TryRemove(t);
                 }
             }
-            finally
-            {
-                _mutex.ReleaseMutex();
-            }
+            return res;
         }
 
 

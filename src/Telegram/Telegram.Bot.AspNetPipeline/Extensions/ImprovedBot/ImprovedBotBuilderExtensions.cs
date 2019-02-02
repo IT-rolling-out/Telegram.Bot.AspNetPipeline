@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
@@ -10,8 +11,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// </summary>
         public static void UseBotExt(this IPipelineBuilder @this)
         {
-            var md = @this.ServiceProvider.GetService<ImprovedBotMiddleware>();
-            @this.UseMiddlware(md);
+            @this.UseMiddlware<ImprovedBotMiddleware>();
         }
 
         /// <summary>
@@ -20,6 +20,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         public static void AddBotExt(this IServiceCollection @this)
         {
             @this.AddSingleton<ImprovedBotMiddleware>();
+            @this.AddSingleton<IUpdateContextSearchBag, UpdateContextSearchBag>();
+            @this.AddSingleton<IBotExtSingleton, BotExtSingleton>();
         }
     }
 }

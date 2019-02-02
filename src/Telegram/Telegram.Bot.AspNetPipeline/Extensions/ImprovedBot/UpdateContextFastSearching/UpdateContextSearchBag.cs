@@ -16,8 +16,25 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSe
         /// </summary>
         public UpdateContextSearchData? TryFind(long chatId, int botId)
         {
+            RemoveDisposed();
             var key = UpdateContextSearchData.CreateKey(chatId, botId);
             if (_dict.TryGetValue(key, out var val))
+            {
+                return val;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Return removed object or null.
+        /// </summary>
+        public UpdateContextSearchData? TryRemove(long chatId, int botId)
+        {
+            var key = UpdateContextSearchData.CreateKey(chatId, botId);
+            if (_dict.TryRemove(key, out var val))
             {
                 return val;
             }
@@ -38,7 +55,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSe
         /// </summary>
         public void Add(UpdateContextSearchData searchData)
         {
-            RemoveDisposed();
             _dict[searchData.Key] = searchData;
         }
 
