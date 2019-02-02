@@ -10,7 +10,6 @@ using Telegram.Bot;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Services;
-using Telegram.Bot.AspNetPipeline.Services.Implementations;
 using Telegram.Bot.Types;
 
 namespace IRO.UnitTests.Telegram

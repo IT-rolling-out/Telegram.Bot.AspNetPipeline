@@ -12,7 +12,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
     public static class DevEceptionMessageBuilderExtensions
     {
         /// <summary>
-        /// Invoke before another middleware.
+        /// Invoke before another middleware, but after UseExceptionHandler.
         /// </summary>
         public static void UseDevEceptionMessage(this IPipelineBuilder @this)
         {

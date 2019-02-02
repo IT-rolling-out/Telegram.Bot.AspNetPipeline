@@ -4,10 +4,10 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
-    public static class BotMvcBuilderExtensions
+    public static class UseMvcBuilderExtensions
     {
         public static void MapRouteAction(
-            this IMvcBuilder @this,
+            this IUseMvcBuilder @this,
             RouteActionDelegate routeAction,
             string template = null,
             int order = 0,

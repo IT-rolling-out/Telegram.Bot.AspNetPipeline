@@ -5,6 +5,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
 {
     public interface IControllerActionPreparer
     {
-        Task<UpdateProcessingDelegate> PrepareController(ControllerActionInfo controllerActionDescriptor);
+        Task<UpdateProcessingDelegate> PrepareController(ControllerActionInfo controllerActionInfo);
     }
 }
