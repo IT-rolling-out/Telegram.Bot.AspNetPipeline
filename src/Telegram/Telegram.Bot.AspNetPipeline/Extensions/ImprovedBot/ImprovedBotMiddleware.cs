@@ -9,16 +9,15 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
     public class ImprovedBotMiddleware : IMiddleware
     {
-        IBotExtSingleton _botExtSingleton;
+        readonly IBotExtSingleton _botExtSingleton;
 
-        public ImprovedBotMiddleware()
+        public ImprovedBotMiddleware(IBotExtSingleton botExtSingleton)
         {
-
+            _botExtSingleton = botExtSingleton;
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
         {
-            _botExtSingleton = _botExtSingleton ?? ctx.Services.GetService<IBotExtSingleton>();
             await _botExtSingleton.OnUpdateInvoke(ctx, next);
         }
     }

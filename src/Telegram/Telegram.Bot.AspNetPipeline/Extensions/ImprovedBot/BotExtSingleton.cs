@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
@@ -10,30 +11,38 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
     {
         readonly IUpdateContextSearchBag _searchBag;
 
+        /// <summary>
+        /// Validate all callbacks. All must return true to validate it.
+        /// </summary>
+        public IList<UpdateValidator> GlobalValidators { get; } = new List<UpdateValidator>();
+
         public BotExtSingleton(IUpdateContextSearchBag searchBag)
         {
             _searchBag = searchBag;
         }
-
+        
         /// <summary>
         /// </summary>
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
         /// <param name="fromType">Used to set which members messages must be processed.</param>
         public async Task<Message> ReadMessageAsync(UpdateContext updateContext, ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
         {
-            Func<Update, bool> messageValidator = (upd) => CheckFromType(upd, updateContext, fromType);
-            return await ReadMessageAsync(updateContext, messageValidator);
+            UpdateValidator updateValidator =async (upd) =>
+            {
+                return CheckFromType(upd, updateContext, fromType);
+            };
+            return await ReadMessageAsync(updateContext, updateValidator);
         }
 
         /// <summary>
         /// </summary>
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
-        /// <param name="messageValidator">User delegate to check if Update from current context is fits.
+        /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public async Task<Message> ReadMessageAsync(UpdateContext updateContext, Func<Update, bool> messageValidator)
+        public async Task<Message> ReadMessageAsync(UpdateContext updateContext, UpdateValidator updateValidator)
         {
             TaskCompletionSource<Update> taskCompletionSource = new TaskCompletionSource<Update>();
-            Add(updateContext, taskCompletionSource, messageValidator);
+            Add(updateContext, taskCompletionSource, updateValidator);
 
             //var hiddenContext=HiddenUpdateContext.Resolve(updateContext);
             //hiddenContext.UpdateProcessingAbortedSource.;
@@ -59,14 +68,17 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 bool isUpdateValid = false;
                 try
                 {
-                    if (searchData.MessageValidator == null)
+                    if (searchData.UpdateValidator != null)
                     {
-                        //True if validator is null.
-                        isUpdateValid = true;
+                        isUpdateValid = await searchData.UpdateValidator.Invoke(newContext.Update);
                     }
-                    else
+
+                    foreach (var globalValidator in GlobalValidators)
                     {
-                        isUpdateValid = searchData.MessageValidator.Invoke(newContext.Update);
+                        //Break on first false.
+                        if (!isUpdateValid)
+                            break;
+                        isUpdateValid = await globalValidator.Invoke(newContext.Update);
                     }
                 }
                 catch (Exception ex)
@@ -96,7 +108,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             }
         }
 
-        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, Func<Update, bool> messageValidator)
+        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, UpdateValidator updateValidator)
         {
             var chatId = updateContext.Update.Message.Chat.Id;
             var botId = updateContext.Bot.BotId;
@@ -111,7 +123,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 ChatId = chatId,
                 BotId = botId,
                 TaskCompletionSource = taskCompletionSource,
-                MessageValidator = messageValidator
+                UpdateValidator = updateValidator
             };
             _searchBag.Add(sd);
         }
@@ -120,9 +132,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         {
             try
             {
-                if (upd.Message.Text.Trim().StartsWith("/"))
-                    return false;
-
                 if (fromType == ReadCallbackFromType.CurrentUser)
                 {
                     return upd.Message.From.Id == origCtx.Message.From.Id;

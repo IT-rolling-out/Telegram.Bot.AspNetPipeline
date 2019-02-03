@@ -28,13 +28,14 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             IList<Type> controllers = null;
             if (addMvcOptions.FindControllersByReflection)
             {
+                //Search controllers.
                 controllers = ControllersTypesSearch.FindAllControllers();
             }
             controllers = controllers ?? new List<Type>();
 
-            var addMvcBuilder =new  AddMvcBuilder(
-                addMvcOptions, 
-                controllers, 
+            var addMvcBuilder = new AddMvcBuilder(
+                addMvcOptions,
+                controllers,
                 @this
                 );
             @this.AddSingleton<IAddMvcBuilder>(addMvcBuilder);

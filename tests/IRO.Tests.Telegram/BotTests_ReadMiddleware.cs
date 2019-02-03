@@ -17,6 +17,16 @@ namespace IRO.Tests.Telegram
 
             botHandler.ConfigureBuilder((builder) =>
             {
+                builder.AddBotExtGlobalValidator(async (upd) =>
+                {
+                    if (upd.Message?.Text.StartsWith("/")==true)
+                    {
+                        return false;
+                    }
+                    return true;
+
+                });
+
                 builder.UseDevEceptionMessage();
                 builder.Use(async (ctx, next) =>
                 {

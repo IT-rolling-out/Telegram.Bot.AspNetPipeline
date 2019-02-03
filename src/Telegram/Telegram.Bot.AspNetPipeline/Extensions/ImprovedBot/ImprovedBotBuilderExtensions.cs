@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
@@ -22,6 +24,15 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             @this.AddSingleton<ImprovedBotMiddleware>();
             @this.AddSingleton<IUpdateContextSearchBag, UpdateContextSearchBag>();
             @this.AddSingleton<IBotExtSingleton, BotExtSingleton>();
+        }
+
+        /// <summary>
+        /// Note: Current middleware is registered automatically.
+        /// </summary>
+        public static void AddBotExtGlobalValidator(this IPipelineBuilder @this, UpdateValidator updateValidator)
+        {
+            var botExtSingletone=@this.ServiceProvider.GetService<IBotExtSingleton>();
+            botExtSingletone.GlobalValidators.Add(updateValidator);
         }
     }
 }

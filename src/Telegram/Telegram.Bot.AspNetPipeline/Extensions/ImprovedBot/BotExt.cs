@@ -27,11 +27,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         /// <summary>
         /// </summary>
-       /// <param name="messageValidator">User delegate to check if Update from current context is fits.
+       /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public Task<Message> ReadMessageAsync(Func<Update, bool> messageValidator)
+        public Task<Message> ReadMessageAsync(UpdateValidator updateValidator)
         {
-            return BotExtSingleton.ReadMessageAsync(_updateContext, messageValidator);
+            return BotExtSingleton.ReadMessageAsync(_updateContext, updateValidator);
         }
     }
 }
