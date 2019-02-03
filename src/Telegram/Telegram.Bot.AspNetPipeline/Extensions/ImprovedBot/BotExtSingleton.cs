@@ -27,9 +27,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <param name="fromType">Used to set which members messages must be processed.</param>
         public async Task<Message> ReadMessageAsync(UpdateContext updateContext, ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
         {
-            UpdateValidator updateValidator =async (upd) =>
+            UpdateValidator updateValidator =async (upd, origCtx) =>
             {
-                return CheckFromType(upd, updateContext, fromType);
+                return CheckFromType(upd, origCtx, fromType);
             };
             return await ReadMessageAsync(updateContext, updateValidator);
         }
@@ -64,13 +64,14 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             {
                 //!When find pending task with read-callback and same context.
                 var searchData = searchDataNullable.Value;
+                var origCtx=searchData.CurrentUpdateContext;
 
                 bool isUpdateValid = false;
                 try
                 {
                     if (searchData.UpdateValidator != null)
                     {
-                        isUpdateValid = await searchData.UpdateValidator.Invoke(newContext.Update);
+                        isUpdateValid = await searchData.UpdateValidator.Invoke(newContext.Update,origCtx);
                     }
 
                     foreach (var globalValidator in GlobalValidators)
@@ -78,7 +79,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                         //Break on first false.
                         if (!isUpdateValid)
                             break;
-                        isUpdateValid = await globalValidator.Invoke(newContext.Update);
+                        isUpdateValid = await globalValidator.Invoke(newContext.Update,origCtx);
                     }
                 }
                 catch (Exception ex)

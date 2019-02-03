@@ -21,7 +21,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         /// <param name="addMvcOptions">AddMvcOptions.Default if null.</param>
         /// <returns></returns>
-        public static IAddMvcBuilder AddMvc(this IServiceCollection @this, AddMvcOptions addMvcOptions = null)
+        public static IAddMvcBuilder AddMvc(this ServiceCollectionWrapper @this, AddMvcOptions addMvcOptions = null)
         {
             //IAddMvcBuilder and IUseMvcBuilder can be overrided with ioc.
             addMvcOptions = addMvcOptions ?? new AddMvcOptions();
@@ -36,10 +36,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var addMvcBuilder = new AddMvcBuilder(
                 addMvcOptions,
                 controllers,
-                @this
+                @this.Services
                 );
-            @this.AddSingleton<IAddMvcBuilder>(addMvcBuilder);
-            @this.AddSingleton<IUseMvcBuilder, UseMvcBuilder>();
+            @this.Services.AddSingleton<IAddMvcBuilder>(addMvcBuilder);
+            @this.Services.AddSingleton<IUseMvcBuilder, UseMvcBuilder>();
             return addMvcBuilder;
         }
     }

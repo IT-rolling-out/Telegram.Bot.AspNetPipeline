@@ -19,11 +19,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <summary>
         /// Note: Current middleware is registered automatically.
         /// </summary>
-        public static void AddBotExt(this IServiceCollection @this)
+        public static void AddBotExt(this ServiceCollectionWrapper @this)
         {
-            @this.AddSingleton<ImprovedBotMiddleware>();
-            @this.AddSingleton<IUpdateContextSearchBag, UpdateContextSearchBag>();
-            @this.AddSingleton<IBotExtSingleton, BotExtSingleton>();
+            @this.Services.AddSingleton<ImprovedBotMiddleware>();
+            @this.Services.AddSingleton<IUpdateContextSearchBag, UpdateContextSearchBag>();
+            @this.Services.AddSingleton<IBotExtSingleton, BotExtSingleton>();
         }
 
         /// <summary>

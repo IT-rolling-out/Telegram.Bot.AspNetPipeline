@@ -21,5 +21,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                 throw new ArgumentNullException(nameof(middleware));
             @this.Use(middleware.Invoke);
         }
+
     }
 }

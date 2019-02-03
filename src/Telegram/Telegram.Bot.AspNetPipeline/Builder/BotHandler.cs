@@ -23,9 +23,9 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 
         Action<IPipelineBuilder> _pipelineBuilderAction;
 
-        Action<IServiceCollection> _servicesConfigureAction;
+        Action<ServiceCollectionWrapper> _servicesConfigureAction;
 
-        IServiceCollection _serviceCollection;
+        ServiceCollectionWrapper _serviceCollectionWrapper;
         #endregion
 
         UpdateProcessingDelegate _updateProcessingDelegate;
@@ -57,9 +57,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 
         #endregion
 
-        /// <summary>
-        /// </summary>
-        /// </param>
         public BotHandler(
             ITelegramBotClient bot,
             IServiceCollection servicesCollection = null
@@ -68,35 +65,30 @@ namespace Telegram.Bot.AspNetPipeline.Builder
             if (bot == null)
                 throw new ArgumentNullException(nameof(bot));
             BotContext = new BotClientContext(bot);
-            _serviceCollection = servicesCollection ?? new ServiceCollection();
+            servicesCollection = servicesCollection ?? new ServiceCollection();
+            _serviceCollectionWrapper =new ServiceCollectionWrapper(servicesCollection);
         }
 
         /// <summary>
         /// Recommended to use current method for service registration to register it before any middleware.
         /// </summary>
         /// <param name="servicesConfigureAction"></param>
-        public void ConfigureServices(Action<IServiceCollection> servicesConfigureAction)
+        public void ConfigureServices(Action<ServiceCollectionWrapper> servicesConfigureAction)
         {
-            if (servicesConfigureAction == null)
-                throw new ArgumentNullException(nameof(servicesConfigureAction));
-            if (_servicesConfigureAction != null)
-                throw new Exception("Services configure action was set before");
-            _servicesConfigureAction = servicesConfigureAction;
+            _servicesConfigureAction = servicesConfigureAction 
+                ?? throw new ArgumentNullException(nameof(servicesConfigureAction));
         }
 
         public void ConfigureBuilder(Action<IPipelineBuilder> pipelineBuilderAction)
         {
-            if (pipelineBuilderAction == null)
-                throw new ArgumentNullException(nameof(pipelineBuilderAction));
-            if (_pipelineBuilderAction != null)
-                throw new Exception("Pipeline builder action was set before");
-            _pipelineBuilderAction = pipelineBuilderAction;
+            _pipelineBuilderAction = pipelineBuilderAction 
+               ?? throw new ArgumentNullException(nameof(pipelineBuilderAction));
         }
 
         public void Start()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException("BotHandler");
+                throw new ObjectDisposedException(nameof(BotHandler));
 
             lock (_runLocker)
             {
@@ -107,25 +99,50 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                 SubscribeBotEvents();
                 IsRunning = true;
             }
-
         }
 
-        public void Stop()
+        /// <summary>
+        /// </summary>
+        /// <param name="waitPendingMS">Time to wait before cancellation.</param>
+        /// <param name="waitCancellationMS">Time to wait after cancellation.
+        /// Default is one second to allow threads cancel work normally before UpdateContext disposed.</param>
+        /// <returns>Task to await pending tasks.</returns>
+        public async Task Stop(int waitPendingMS = 0, int waitCancellationMS = 1000)
         {
             if (IsDisposed)
-                throw new ObjectDisposedException("BotHandler");
+                throw new ObjectDisposedException(nameof(BotHandler));
 
-            lock (_runLocker)
+            try
             {
                 if (!IsRunning)
                     return;
+
                 UnsubscribeBotEvents();
+                //Wait before cancel.
+                if (waitPendingMS > 0)
+                    await ExecutionManager.AwaitAllPending(TimeSpan.FromMilliseconds(waitPendingMS));
+                foreach (var item in _pendingUpdateContexts)
+                {
+                    var cancellationTokenSource = HiddenUpdateContext.Resolve(item).UpdateProcessingAbortedSource;
+                    cancellationTokenSource.Cancel();
+                }
+
+                //Wait after cancel.
+                if (waitCancellationMS > 0)
+                    await ExecutionManager.AwaitAllPending(TimeSpan.FromMilliseconds(waitCancellationMS));
+                //Dispose.
                 foreach (var item in _pendingUpdateContexts)
                 {
                     item.Dispose();
                 }
+
                 _pendingUpdateContexts.Clear();
                 IsRunning = false;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error while stopping {nameof(BotHandler)}.");
             }
 
         }
@@ -147,11 +164,19 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                     }
 
                     //Register services.
-                    RegisterMandatoryServices(_serviceCollection);
-                    _servicesConfigureAction?.Invoke(_serviceCollection);
+                    AddMandatoryServices(_serviceCollectionWrapper);
+                    if (_servicesConfigureAction == null)
+                    {
+                        throw new NullReferenceException(
+                            "Can`t init without services configure action. " +
+                            "Probably ConfigureServices wasn't invoked."
+                        );
+                    }
+
+                    _servicesConfigureAction.Invoke(_serviceCollectionWrapper);
                     _servicesConfigureAction = null;
-                    Services = _serviceCollection.BuildServiceProvider();
-                    _serviceCollection = null;
+                    Services = _serviceCollectionWrapper.Services.BuildServiceProvider();
+                    _serviceCollectionWrapper = null;
 
                     //Resolve services needed for BotHandler.
                     ResolveBotHandlerServices();
@@ -160,8 +185,15 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                     IPipelineBuilder pipelineBuilder = new PipelineBuilder(Services);
 
                     //Register middleware.
-                    RegisterMandatoryMiddleware(pipelineBuilder);
-                    _pipelineBuilderAction?.Invoke(pipelineBuilder);
+                    UseMandatoryMiddleware(pipelineBuilder);
+                    if (_pipelineBuilderAction == null)
+                    {
+                        throw new NullReferenceException(
+                            "Can`t init without pipeline builder configure action. " +
+                            "Probably ConfigureBuilder wasn't invoked."
+                        );
+                    }
+                    _pipelineBuilderAction.Invoke(pipelineBuilder);
                     _pipelineBuilderAction = null;
 
                     //Build pipeline.
@@ -178,11 +210,11 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         #region Dispose region.
         public bool IsDisposed { get; private set; }
 
-        public void Dispose()
+        public async void Dispose()
         {
             if (IsDisposed)
                 return;
-            Stop();
+            await Stop();
             Services = null;
             BotContext = null;
             _updateProcessingDelegate = null;
@@ -196,22 +228,22 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// Here only musthave middleware services.
         /// </summary>
         /// <param name="serviceCollection"></param>
-        void RegisterMandatoryServices(IServiceCollection serviceCollection)
+        void AddMandatoryServices(ServiceCollectionWrapper serviceCollectionWrapper)
         {
-            serviceCollection.AddSingleton<IPendingExceededChecker>(
+            serviceCollectionWrapper.AddPendingExceededChecker(
                 (serviceProvider) => new CreationTimePendingExceededChecker(TimeSpan.FromMinutes(30))
                 );
-            serviceCollection.AddSingleton<IExecutionManager, ThreadPoolExecutionManager>();
+            serviceCollectionWrapper.AddExecutionManager<ThreadPoolExecutionManager>();
 
-            serviceCollection.AddBotExt();
+            serviceCollectionWrapper.AddBotExt();
         }
 
         /// <summary>
         /// Mandatory middleware registered through pipelineBuilder because it simple.
-        /// But they have some crunches, that default middleware cant have.
+        /// But they have some crunches, that default middleware can't have.
         /// </summary>
         /// <param name="pipelineBuilder"></param>
-        void RegisterMandatoryMiddleware(IPipelineBuilder pipelineBuilder)
+        void UseMandatoryMiddleware(IPipelineBuilder pipelineBuilder)
         {
             pipelineBuilder.UseBotExt();
         }
@@ -325,7 +357,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                             ExecutionManager.ProcessUpdate(async () =>
                             {
                                 ctx.Dispose();
-
                             });
                         }
                     }

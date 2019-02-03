@@ -7,5 +7,5 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
-    public delegate Task<bool> UpdateValidator(Update update);
+    public delegate Task<bool> UpdateValidator(Update update, UpdateContext originalUpdateContext);
 }

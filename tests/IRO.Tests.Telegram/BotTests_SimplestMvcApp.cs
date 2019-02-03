@@ -1,11 +1,14 @@
 ﻿using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
 using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
+using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
+using Telegram.Bot.Types;
 
 namespace IRO.Tests.Telegram
 {
-    class BotTests_Mvc
+    class BotTests_SimplestMvcApp
     {
         public void Run(BotHandler botHandler, bool isDebug)
         {
@@ -18,19 +21,7 @@ namespace IRO.Tests.Telegram
             {
                 if (isDebug)
                     builder.UseDevEceptionMessage();
-                builder.UseExceptionHandler(async (ctx, ex) =>
-                {
-                    //Throw exception if false. False mean 'not handled'.
-                    return false;
-                });
-
-                builder.UseMvc(mvcBuilder =>
-                {
-                    mvcBuilder.MapRouteAction(async (actionCtx) =>
-                    {
-                        await actionCtx.Features.StartAnotherAction("Help");
-                    }, template: "/info");
-                });
+                builder.UseMvc();
             });
             botHandler.Start();
         }

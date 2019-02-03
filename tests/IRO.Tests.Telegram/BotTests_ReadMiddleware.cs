@@ -6,25 +6,21 @@ using Telegram.Bot.Types;
 
 namespace IRO.Tests.Telegram
 {
-    static class BotTests_ReadMiddleware
+    class BotTests_ReadMiddleware
     {
-        public static void Run(BotHandler botHandler)
+        public void Run(BotHandler botHandler, bool isDebug)
         {
-            botHandler.ConfigureServices((services) =>
-            {
-
-            });
+            botHandler.ConfigureServices((services) => { services.AddBotExt(); });
 
             botHandler.ConfigureBuilder((builder) =>
             {
-                builder.AddBotExtGlobalValidator(async (upd) =>
+                builder.AddBotExtGlobalValidator(async (upd, origCtx) =>
                 {
                     if (upd.Message?.Text.StartsWith("/")==true)
                     {
                         return false;
                     }
                     return true;
-
                 });
 
                 builder.UseDevEceptionMessage();
@@ -86,6 +82,7 @@ namespace IRO.Tests.Telegram
                 });
             });
             botHandler.Start();
+            
         }
     }
 }
