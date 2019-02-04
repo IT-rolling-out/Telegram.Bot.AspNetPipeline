@@ -11,7 +11,6 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Builder
 {
-
     public class BotHandler : IDisposable
     {
         #region Setup and run data
@@ -236,6 +235,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
             serviceCollectionWrapper.AddExecutionManager<ThreadPoolExecutionManager>();
 
             serviceCollectionWrapper.AddBotExt();
+            serviceCollectionWrapper.Services.AddLogging();
         }
 
         /// <summary>

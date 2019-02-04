@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.Types;
 

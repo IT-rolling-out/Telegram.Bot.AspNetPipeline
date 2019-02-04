@@ -111,7 +111,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         #region Dispose region
         public bool IsDisposed { get; private set; }
 
-        public event Func<UpdateContext> Disposed;
+        public event Action<UpdateContext> Disposed;
 
         public void Dispose()
         {
@@ -127,8 +127,14 @@ namespace Telegram.Bot.AspNetPipeline.Core
             ForceExit();
             Properties.Clear();
             IsDisposed = true;
-            Disposed?.Invoke();
+            Disposed?.Invoke(this);
         }
         #endregion
+
+        public override string ToString()
+        {
+            var baseName=base.ToString();
+            return $"{baseName}(Id:{Id.ToString()})";
+        }
     }
 }

@@ -1,4 +1,7 @@
-﻿using Telegram.Bot.AspNetPipeline.Builder;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
@@ -10,7 +13,20 @@ namespace IRO.Tests.Telegram
     {
         public void Run(BotHandler botHandler, bool isDebug)
         {
-            botHandler.ConfigureServices((services) => { services.AddBotExt(); });
+  
+            botHandler.ConfigureServices((servicesWrap) =>
+            {
+                servicesWrap.AddBotExt();
+                servicesWrap.Services.AddLogging((logBuilder) =>
+                {
+                    logBuilder.ClearProviders();
+                    logBuilder.AddNLog(new NLogProviderOptions()
+                    {
+                        IncludeScopes=true, 
+                        CaptureMessageProperties=true
+                    });
+                });
+            });
 
             botHandler.ConfigureBuilder((builder) =>
             {
