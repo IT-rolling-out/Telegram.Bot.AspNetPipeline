@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Builder;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler
 {
-    public static class ExceptionHandlerBuilderExtensions
+    public static class ExceptionHandlingBuilderExtensions
     {
         /// <summary>
         /// Invoke before all another middleware.

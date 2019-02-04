@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Threading;
+using Newtonsoft.Json;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.Types;
 
@@ -9,13 +11,16 @@ namespace Telegram.Bot.AspNetPipeline.Core
     /// <summary>
     /// Just like http context in asp.net mvc.
     /// </summary>
+    [DataContract]
     public class UpdateContext: IDisposable
     {
         /// <summary>
         /// Unique id, used in GetHashCode too.
         /// </summary>
+        [DataMember]
         public Guid Id { get; } = Guid.NewGuid();
 
+        [DataMember]
         public Update Update { get; }
 
         public BotClientContext BotContext { get; }
@@ -79,6 +84,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// They can ignore it or finish their work.
         /// Mvc middleware will set it automatically for all controller actions and read-callbacks.
         /// </summary>
+        [DataMember]
         public bool IsProcessed { get; private set; }
 
         public void Processed()
@@ -86,6 +92,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             IsProcessed = true;
         }
 
+        [DataMember]
         public bool ForceExitRequested { get; private set; }
 
         /// <summary>
@@ -109,6 +116,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         }
 
         #region Dispose region
+        [DataMember]
         public bool IsDisposed { get; private set; }
 
         public event Action<UpdateContext> Disposed;

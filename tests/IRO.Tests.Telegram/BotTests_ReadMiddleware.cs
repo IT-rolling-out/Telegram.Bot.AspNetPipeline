@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.Types;
 
 namespace IRO.Tests.Telegram
@@ -13,26 +15,31 @@ namespace IRO.Tests.Telegram
     {
         public void Run(BotHandler botHandler, bool isDebug)
         {
-  
+
             botHandler.ConfigureServices((servicesWrap) =>
             {
                 servicesWrap.AddBotExt();
-                servicesWrap.Services.AddLogging((logBuilder) =>
+                servicesWrap.LoggingAdvancedConfigure(new LoggingAdvancedOptions
                 {
-                    logBuilder.ClearProviders();
-                    logBuilder.AddNLog(new NLogProviderOptions()
-                    {
-                        IncludeScopes=true, 
-                        CaptureMessageProperties=true
-                    });
+                    LoggingWithSerialization = true
                 });
+                //Default way with Services.AddLogging doesn't work for me.
+                servicesWrap.Services.AddSingleton<ILoggerFactory>(new LoggerFactory(new ILoggerProvider[]
+                {
+                    new NLogLoggerProvider(
+                        new NLogProviderOptions()
+                        {
+                            IncludeScopes=true,
+                            CaptureMessageProperties=true
+                        })
+                }));
             });
 
             botHandler.ConfigureBuilder((builder) =>
             {
                 builder.AddBotExtGlobalValidator(async (upd, origCtx) =>
                 {
-                    if (upd.Message?.Text.StartsWith("/")==true)
+                    if (upd.Message?.Text.StartsWith("/") == true)
                     {
                         return false;
                     }
@@ -98,7 +105,7 @@ namespace IRO.Tests.Telegram
                 });
             });
             botHandler.Start();
-            
+
         }
     }
 }

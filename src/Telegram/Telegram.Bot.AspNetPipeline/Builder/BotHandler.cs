@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Args;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Extensions.Serialization;
 using Telegram.Bot.AspNetPipeline.Services;
 using Telegram.Bot.Types;
 
@@ -13,6 +15,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 {
     public class BotHandler : IDisposable
     {
+        #region Private fields
         #region Setup and run data
         readonly object _setupLocker = new object();
 
@@ -33,7 +36,9 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// UpdateContext from pending tasks.
         /// </summary>
         readonly ConcurrentHashSet<UpdateContext> _pendingUpdateContexts = new ConcurrentHashSet<UpdateContext>();
+        #endregion
 
+        #region Properties
         public IServiceProvider Services { get; private set; }
 
         public BotClientContext BotContext { get; private set; }
@@ -41,6 +46,12 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         public bool IsRunning { get; private set; }
 
         #region Resolved services.
+        /// <summary>
+        /// Private and here too. Resolved from ServiceCollection.
+        /// </summary>
+        LoggingAdvancedOptions LoggingAdvancedOptions { get; set; }
+
+
         /// <summary>
         /// Check if service pending.
         /// Default service is <see cref="CreationTimePendingExceededChecker"/> with 30 minutes delay.
@@ -53,7 +64,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// Can set your handler in ConfigureServices().
         /// </summary>
         public IExecutionManager ExecutionManager { get; private set; }
-
+        #endregion
         #endregion
 
         public BotHandler(
@@ -171,7 +182,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                             "Probably ConfigureServices wasn't invoked."
                         );
                     }
-
                     _servicesConfigureAction.Invoke(_serviceCollectionWrapper);
                     _servicesConfigureAction = null;
                     Services = _serviceCollectionWrapper.Services.BuildServiceProvider();
@@ -223,6 +233,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         #endregion
 
         #region Mandatory middleware and services
+
         /// <summary>
         /// Here only musthave middleware services.
         /// </summary>
@@ -231,11 +242,17 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         {
             serviceCollectionWrapper.AddPendingExceededChecker(
                 (serviceProvider) => new CreationTimePendingExceededChecker(TimeSpan.FromMinutes(30))
-                );
+            );
             serviceCollectionWrapper.AddExecutionManager<ThreadPoolExecutionManager>();
-
             serviceCollectionWrapper.AddBotExt();
             serviceCollectionWrapper.Services.AddLogging();
+
+            //Logging crunch. More info in LoggingAdvancedOptions.
+            //I really can't find better way to serialize UpdateContext to json if logging it and keep it optimized.
+            //So i use LazySerializer and current boolean value as switch. If there no loggers or if current value is false, then
+            //!UpdateContext WILL NOT be seriaalized to json.
+            //I use HiddenUpdateContext and extension method GetLoggerScope to return LazySerializer if true and UpdateContext if false.
+            serviceCollectionWrapper.LoggingAdvancedConfigure(new LoggingAdvancedOptions());
         }
 
         /// <summary>
@@ -252,6 +269,9 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         {
             PendingExceededChecker = Services.GetService<IPendingExceededChecker>();
             ExecutionManager = Services.GetService<IExecutionManager>();
+            var lao = Services.GetService<Func<LoggingAdvancedOptions>>().Invoke();
+            lao.LazySerializerFactory = lao.LazySerializerFactory ?? new LazySerializerFactory();
+            LoggingAdvancedOptions = lao;
         }
         #endregion
 
@@ -298,7 +318,8 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                         //Create hidden context.
                         var hiddenUpdateContext = new HiddenUpdateContext(
                             cancellationTokenSource,
-                            DateTime.Now
+                            DateTime.Now,
+                            LoggingAdvancedOptions
                         );
                         updateContext.Properties[HiddenUpdateContext.DictKeyName] = hiddenUpdateContext;
 

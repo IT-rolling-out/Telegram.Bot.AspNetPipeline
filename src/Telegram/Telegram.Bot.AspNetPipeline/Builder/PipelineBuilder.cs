@@ -7,7 +7,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 {
     public class PipelineBuilder : IPipelineBuilder
     {
-        Stack<UpdateProcessingDelegate> _updateProcessingDelegates = new Stack<UpdateProcessingDelegate>();
+        readonly Stack<UpdateProcessingDelegate> _updateProcessingDelegates = new Stack<UpdateProcessingDelegate>();
 
         public IServiceProvider ServiceProvider { get; }
 

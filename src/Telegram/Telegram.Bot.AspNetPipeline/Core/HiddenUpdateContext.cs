@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
 namespace Telegram.Bot.AspNetPipeline.Core
 {
@@ -20,10 +21,16 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         public DateTime CreatedAt { get;  }
 
-        public HiddenUpdateContext(CancellationTokenSource updateProcessingAbortedSource, DateTime createdAt)
+        /// <summary>
+        /// More info in <see cref="LoggingAdvancedOptions"/> class summary.
+        /// </summary>
+        public LoggingAdvancedOptions LoggingAdvancedOptions { get; }
+
+        public HiddenUpdateContext(CancellationTokenSource updateProcessingAbortedSource, DateTime createdAt, LoggingAdvancedOptions loggingAdvancedOptions)
         {
             UpdateProcessingAbortedSource = updateProcessingAbortedSource;
             CreatedAt = createdAt;
+            LoggingAdvancedOptions = loggingAdvancedOptions;
         }
 
         public static HiddenUpdateContext Resolve(UpdateContext updateContext)
