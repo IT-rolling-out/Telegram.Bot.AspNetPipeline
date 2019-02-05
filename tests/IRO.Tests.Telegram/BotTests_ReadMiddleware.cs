@@ -21,7 +21,7 @@ namespace IRO.Tests.Telegram
                 servicesWrap.AddBotExt();
                 servicesWrap.LoggingAdvancedConfigure(new LoggingAdvancedOptions
                 {
-                    LoggingWithSerialization = true
+                    //LoggingWithSerialization = true
                 });
                 //Default way with Services.AddLogging doesn't work for me.
                 servicesWrap.Services.AddSingleton<ILoggerFactory>(new LoggerFactory(new ILoggerProvider[]

@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
     public class BotExtSingleton : IBotExtSingleton
     {
+        readonly ILogger _logger;
+
         readonly IUpdateContextSearchBag _searchBag;
 
         /// <summary>
@@ -16,21 +20,22 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// </summary>
         public IList<UpdateValidator> GlobalValidators { get; } = new List<UpdateValidator>();
 
-        public BotExtSingleton(IUpdateContextSearchBag searchBag)
+        public BotExtSingleton(IUpdateContextSearchBag searchBag, ILoggerFactory loggerFactory)
         {
+            _logger = loggerFactory.CreateLogger(GetType());
             _searchBag = searchBag;
         }
-        
+
         /// <summary>
         /// </summary>
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
         /// <param name="fromType">Used to set which members messages must be processed.</param>
         public async Task<Message> ReadMessageAsync(UpdateContext updateContext, ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
         {
-            UpdateValidator updateValidator =async (upd, origCtx) =>
-            {
-                return CheckFromType(upd, origCtx, fromType);
-            };
+            UpdateValidator updateValidator = async (upd, origCtx) =>
+             {
+                 return CheckFromType(upd, origCtx, fromType);
+             };
             return await ReadMessageAsync(updateContext, updateValidator);
         }
 
@@ -50,6 +55,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             //OnCanceled.
             updateContext.UpdateProcessingAborted.Register(() =>
             {
+                _logger.LogInformation("{0} will be cancelled.", updateContext.GetLoggerScope());
                 SetCancelled(taskCompletionSource);
             });
 
@@ -59,19 +65,28 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         public async Task OnUpdateInvoke(UpdateContext newContext, Func<Task> next)
         {
+            _logger.LogTrace(
+                "Checking read-callback for '{0}'.",
+                newContext.GetLoggerScope()
+                );
             var searchDataNullable = _searchBag.TryFind(newContext.Chat.Id, newContext.Bot.BotId);
             if (searchDataNullable != null)
             {
+                _logger.LogTrace(
+                    "Found read-callback for '{0}'.",
+                    newContext.GetLoggerScope()
+                );
+
                 //!When find pending task with read-callback and same context.
                 var searchData = searchDataNullable.Value;
-                var origCtx=searchData.CurrentUpdateContext;
+                var origCtx = searchData.CurrentUpdateContext;
 
                 bool isUpdateValid = false;
                 try
                 {
                     if (searchData.UpdateValidator != null)
                     {
-                        isUpdateValid = await searchData.UpdateValidator.Invoke(newContext.Update,origCtx);
+                        isUpdateValid = await searchData.UpdateValidator.Invoke(newContext.Update, origCtx);
                     }
 
                     foreach (var globalValidator in GlobalValidators)
@@ -79,11 +94,17 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                         //Break on first false.
                         if (!isUpdateValid)
                             break;
-                        isUpdateValid = await globalValidator.Invoke(newContext.Update,origCtx);
+                        isUpdateValid = await globalValidator.Invoke(newContext.Update, origCtx);
                     }
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(
+                        "Exception while validating Update '{0}'.\nOrigUpdateContext: '{1}'.\nNewContext: '{2}'.",
+                        ex,
+                        origCtx.GetLoggerScope(),
+                        newContext.GetLoggerScope()
+                        );
                     SetException(
                         searchData.TaskCompletionSource,
                         new Exception("Exception in update validator delegate.", ex)
@@ -94,11 +115,21 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
                 if (!isUpdateValid)
                 {
+                    _logger.LogTrace(
+                        "UpdateContext '{0}' not valid for read-callback of '{1}'.",
+                        origCtx.GetLoggerScope(),
+                        newContext.GetLoggerScope()
+                        );
                     await next();
                     return;
                 }
 
                 //Force exit only if result valid.
+                _logger.LogTrace(
+                    "UpdateContext '{0}'  valid for read-callback of '{1}'.",
+                    origCtx.GetLoggerScope(),
+                    newContext.GetLoggerScope()
+                    );
                 SetResult(searchData.TaskCompletionSource, newContext.Update);
                 _searchBag.TryRemove(newContext.Chat.Id, newContext.Bot.BotId);
                 newContext.ForceExit();
@@ -116,6 +147,10 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             var prevData = _searchBag.TryRemove(chatId, botId);
             if (prevData != null)
             {
+                _logger.LogInformation(
+                    "UpdateContext '{0}' cancelled while adding new context with same chatId and botId.",
+                    prevData.Value.CurrentUpdateContext.GetLoggerScope()
+                    );
                 SetCancelled(prevData.Value.TaskCompletionSource);
             }
             var sd = new UpdateContextSearchData
@@ -127,12 +162,17 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 UpdateValidator = updateValidator
             };
             _searchBag.Add(sd);
+            _logger.LogTrace(
+                "UpdateContext '{0}' added to SearchBag of read-callbacks.",
+                updateContext.GetLoggerScope()
+                );
         }
 
         bool CheckFromType(Update upd, UpdateContext origCtx, ReadCallbackFromType fromType)
         {
             try
             {
+                _logger.LogTrace("Default CheckFromType for {0}.", fromType);
                 if (fromType == ReadCallbackFromType.CurrentUser)
                 {
                     return upd.Message.From.Id == origCtx.Message.From.Id;

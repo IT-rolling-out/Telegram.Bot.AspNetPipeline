@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.Types;
+using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
 namespace Telegram.Bot.AspNetPipeline.Core
 {
@@ -90,6 +93,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public void Processed()
         {
             IsProcessed = true;
+            this.Logger().LogTrace("Processed.");
         }
 
         [DataMember]
@@ -106,6 +110,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         {
             Processed();
             ForceExitRequested = true;
+            this.Logger().LogTrace("Force exit requested.");
         }
 
         #endregion
@@ -121,10 +126,14 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         public event Action<UpdateContext> Disposed;
 
+        public event Action<UpdateContext> Disposing;
+
         public void Dispose()
         {
             if (IsDisposed)
                 return;
+
+            Disposing?.Invoke(this);
             try
             {
                 var hiddenContext=(HiddenUpdateContext)Properties[HiddenUpdateContext.DictKeyName] ;
@@ -133,6 +142,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             catch { }
 
             ForceExit();
+            this.Logger().LogTrace("Disposed.");
             Properties.Clear();
             IsDisposed = true;
             Disposed?.Invoke(this);
@@ -142,7 +152,22 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public override string ToString()
         {
             var baseName=base.ToString();
-            return $"{baseName}(Id:{Id.ToString()})";
+            if (Update.Message == null)
+            {
+                return $"{baseName}(ChatId={Chat?.Id}, Update(Id={Update.Id}, Type={Update.Type}))";
+            }
+            else
+            {
+                string msgText = Message.Text ?? "";
+                if (msgText.Length > 10)
+                {
+                    msgText = msgText.Remove(10);
+                }
+                //Just use to encode.
+                msgText = JsonConvert.SerializeObject(msgText);
+                return $"{baseName}(ChatId={Chat?.Id}, Update(Id={Update.Id}, Type={Update.Type})," +
+                       $" Message=(Id={Message.MessageId}, FromId={Message.From.Id}, Text={msgText}))";
+            }
         }
     }
 }

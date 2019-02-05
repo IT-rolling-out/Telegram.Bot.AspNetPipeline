@@ -12,26 +12,15 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
     public class ImprovedBotMiddleware : IMiddleware
     {
-        readonly ILogger _logger;
-
         readonly IBotExtSingleton _botExtSingleton;
 
-        public ImprovedBotMiddleware(IBotExtSingleton botExtSingleton, ILoggerFactory loggerFactory)
+        public ImprovedBotMiddleware(IBotExtSingleton botExtSingleton)
         {
             _botExtSingleton = botExtSingleton;
-            _logger=loggerFactory.CreateLogger(GetType());
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
         {
-            using (_logger.BeginScope(ctx.GetLoggerScope()))
-            {
-                _logger.LogError("Hi");
-            }
-            using (_logger.BeginScope(ctx.GetLoggerScope()))
-            {
-                _logger.LogError("mark");
-            }
             await _botExtSingleton.OnUpdateInvoke(ctx, next);
         }
     }

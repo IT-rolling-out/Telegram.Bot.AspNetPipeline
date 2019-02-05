@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Args;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
@@ -16,6 +17,12 @@ namespace Telegram.Bot.AspNetPipeline.Builder
     public class BotHandler : IDisposable
     {
         #region Private fields
+        #region Resolved serviced.
+        ILogger _logger;
+
+        ILoggerFactory _loggerFactory;
+        #endregion
+
         #region Setup and run data
         readonly object _setupLocker = new object();
 
@@ -51,7 +58,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// </summary>
         LoggingAdvancedOptions LoggingAdvancedOptions { get; set; }
 
-
         /// <summary>
         /// Check if service pending.
         /// Default service is <see cref="CreationTimePendingExceededChecker"/> with 30 minutes delay.
@@ -76,7 +82,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                 throw new ArgumentNullException(nameof(bot));
             BotContext = new BotClientContext(bot);
             servicesCollection = servicesCollection ?? new ServiceCollection();
-            _serviceCollectionWrapper =new ServiceCollectionWrapper(servicesCollection);
+            _serviceCollectionWrapper = new ServiceCollectionWrapper(servicesCollection);
         }
 
         /// <summary>
@@ -85,13 +91,13 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// <param name="servicesConfigureAction"></param>
         public void ConfigureServices(Action<ServiceCollectionWrapper> servicesConfigureAction)
         {
-            _servicesConfigureAction = servicesConfigureAction 
+            _servicesConfigureAction = servicesConfigureAction
                 ?? throw new ArgumentNullException(nameof(servicesConfigureAction));
         }
 
         public void ConfigureBuilder(Action<IPipelineBuilder> pipelineBuilderAction)
         {
-            _pipelineBuilderAction = pipelineBuilderAction 
+            _pipelineBuilderAction = pipelineBuilderAction
                ?? throw new ArgumentNullException(nameof(pipelineBuilderAction));
         }
 
@@ -130,16 +136,24 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                 UnsubscribeBotEvents();
                 //Wait before cancel.
                 if (waitPendingMS > 0)
+                {
+                    _logger.LogTrace("Waiting pending normally finished.");
                     await ExecutionManager.AwaitAllPending(TimeSpan.FromMilliseconds(waitPendingMS));
+                }
+
                 foreach (var item in _pendingUpdateContexts)
                 {
-                    var cancellationTokenSource = HiddenUpdateContext.Resolve(item).UpdateProcessingAbortedSource;
+                    var cancellationTokenSource = item.HiddenContext().UpdateProcessingAbortedSource;
                     cancellationTokenSource.Cancel();
                 }
 
                 //Wait after cancel.
                 if (waitCancellationMS > 0)
+                {
+                    _logger.LogTrace("Waiting cancellation.");
                     await ExecutionManager.AwaitAllPending(TimeSpan.FromMilliseconds(waitCancellationMS));
+                }
+
                 //Dispose.
                 foreach (var item in _pendingUpdateContexts)
                 {
@@ -148,7 +162,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 
                 _pendingUpdateContexts.Clear();
                 IsRunning = false;
-
+                _logger.LogTrace("BotHandler stopped.");
             }
             catch (Exception ex)
             {
@@ -189,6 +203,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 
                     //Resolve services needed for BotHandler.
                     ResolveBotHandlerServices();
+                    _logger.LogTrace("Services initialized.");
 
                     //Not implemented.
                     IPipelineBuilder pipelineBuilder = new PipelineBuilder(Services);
@@ -208,6 +223,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                     //Build pipeline.
                     _updateProcessingDelegate = pipelineBuilder.Build();
                     _isSetup = true;
+                    _logger.LogTrace("Pipeline builded.");
                 }
                 catch (Exception ex)
                 {
@@ -229,6 +245,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
             _updateProcessingDelegate = null;
             IsDisposed = true;
             GC.Collect();
+            _logger.LogTrace("BotHandler disposed.");
         }
         #endregion
 
@@ -267,6 +284,10 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 
         void ResolveBotHandlerServices()
         {
+            _loggerFactory = Services.GetService<ILoggerFactory>();
+            _logger = _loggerFactory.CreateLogger(GetType());
+            _logger.LogTrace("Logger initialized in BotHandler. BOTHANDLER STARTED.");
+
             PendingExceededChecker = Services.GetService<IPendingExceededChecker>();
             ExecutionManager = Services.GetService<IExecutionManager>();
             var lao = Services.GetService<Func<LoggingAdvancedOptions>>().Invoke();
@@ -301,46 +322,56 @@ namespace Telegram.Bot.AspNetPipeline.Builder
             Func<Task> processingFunc = async () =>
             {
                 UpdateContext pendingUpdateContext = null;
+                IServiceScope servicesScope = Services.CreateScope();
                 try
                 {
-                    using (var servicesScope = Services.CreateScope())
-                    {
-                        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-                        //Create context.
-                        UpdateContext updateContext = new UpdateContext(
-                            update,
-                            BotContext,
-                            servicesScope.ServiceProvider,
-                            cancellationTokenSource.Token
-                        );
+                    //Create context.
+                    UpdateContext updateContext = new UpdateContext(
+                        update,
+                        BotContext,
+                        servicesScope.ServiceProvider,
+                        cancellationTokenSource.Token
+                    );
 
-                        //Create hidden context.
-                        var hiddenUpdateContext = new HiddenUpdateContext(
-                            cancellationTokenSource,
-                            DateTime.Now,
-                            LoggingAdvancedOptions
-                        );
-                        updateContext.Properties[HiddenUpdateContext.DictKeyName] = hiddenUpdateContext;
+                    //Create hidden context.
+                    var hiddenUpdateContext = new HiddenUpdateContext(
+                        cancellationTokenSource,
+                        DateTime.Now,
+                        LoggingAdvancedOptions
+                    );
+                    updateContext.Properties[HiddenUpdateContext.DictKeyName] = hiddenUpdateContext;
 
-                        //Add to pending list.
-                        _pendingUpdateContexts.Add(
-                            updateContext
-                        );
+                    _logger.LogTrace("'{0}' created.", updateContext);
 
-                        pendingUpdateContext = updateContext;
+                    //Add to pending list.
+                    _pendingUpdateContexts.Add(
+                        updateContext
+                    );
+                    pendingUpdateContext = updateContext;
 
-                        //Execute.
-                        await _updateProcessingDelegate.Invoke(updateContext, async () => { });
-                    }
+                    //Execute.
+                    await _updateProcessingDelegate.Invoke(updateContext, async () => { });
                 }
                 finally
                 {
-                    //Remove from pending list.
-                    if (pendingUpdateContext != null)
+                    try
                     {
-                        pendingUpdateContext.Dispose();
-                        _pendingUpdateContexts.TryRemove(pendingUpdateContext);
+                        //Remove from pending list.
+                        if (pendingUpdateContext != null)
+                        {
+                            //throw new Exception("EEEEEEEEEEEEEEEEEEEE");
+                            pendingUpdateContext.Dispose();
+                            _pendingUpdateContexts.TryRemove(pendingUpdateContext);
+                            _logger.LogTrace("'{0}' disposed and removed from pending.", pendingUpdateContext);
+                        }
+                        servicesScope.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogTrace("'{0}' removing exception '{1}'.", pendingUpdateContext, ex);
+                        throw;
                     }
                 }
             };
@@ -367,12 +398,14 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                     if (DateTime.Now - _lastPendingCheck < _checkPendingDelay)
                         return;
 
-
+                    _logger.LogTrace("Pending check started.");
+                    int removedCount = 0;
                     foreach (var ctx in _pendingUpdateContexts)
                     {
                         //If pending time limit exceeded.
                         if (PendingExceededChecker.IsPendingExceeded(ctx) || ctx.IsDisposed)
                         {
+                            removedCount++;
                             _pendingUpdateContexts.TryRemove(ctx);
                             //All dispose operations in separate execution context (probably separate thread).
                             ExecutionManager.ProcessUpdate(async () =>
@@ -381,8 +414,12 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                             });
                         }
                     }
-
                     _lastPendingCheck = DateTime.Now;
+                    _logger.LogTrace(
+                        "Pending check finished. Removed {0}, remained {1}.",
+                        removedCount,
+                        _pendingUpdateContexts.Count
+                    );
                 }
             });
         }

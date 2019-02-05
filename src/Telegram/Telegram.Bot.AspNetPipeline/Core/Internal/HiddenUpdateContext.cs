@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -9,13 +10,15 @@ namespace Telegram.Bot.AspNetPipeline.Core
     /// You can get it from UpdateContext.Properties["HiddenUpdateContext"].
     /// <para></para>
     /// Please, dont use it without important reason.
+    /// <para></para>
+    /// Not really internal now. Was decided to allow the user to use HiddenUpdateContext.
     /// </summary>
     public class HiddenUpdateContext
     {
         /// <summary>
         /// You can access it from UpdateContext using following key.
         /// </summary>
-        public const string DictKeyName = "HiddenUpdateContext";
+        public const string DictKeyName = "_HiddenUpdateContext";
 
         public CancellationTokenSource UpdateProcessingAbortedSource { get; }
 
@@ -33,9 +36,5 @@ namespace Telegram.Bot.AspNetPipeline.Core
             LoggingAdvancedOptions = loggingAdvancedOptions;
         }
 
-        public static HiddenUpdateContext Resolve(UpdateContext updateContext)
-        {
-            return (HiddenUpdateContext)updateContext.Properties[HiddenUpdateContext.DictKeyName];
-        }
     }
 }
