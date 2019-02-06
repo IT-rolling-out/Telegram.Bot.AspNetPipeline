@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot;
@@ -24,6 +25,7 @@ namespace IRO.UnitTests.Telegram
         public void Setup()
         {
             var servicesCollection = new ServiceCollection();
+            servicesCollection.AddLogging();
             var servicesProvider = servicesCollection.BuildServiceProvider();
             _pipelineBuilder = new PipelineBuilder(
                 servicesProvider
@@ -42,7 +44,7 @@ namespace IRO.UnitTests.Telegram
         [Test]
         public async Task NoPending()
         {
-            var executionManager = new ThreadPoolExecutionManager();
+            var executionManager = new ThreadPoolExecutionManager(new LoggerFactory());
             object locker = new object();
             List<Task> tasks = new List<Task>();
             int count = 50;
@@ -71,7 +73,7 @@ namespace IRO.UnitTests.Telegram
         [Test]
         public async Task AllPending_ThreadLock()
         {
-            var executionManager = new ThreadPoolExecutionManager();
+            var executionManager = new ThreadPoolExecutionManager(new LoggerFactory());
             var locker = new object();
             List<Task> tasks = new List<Task>();
             int count = 200;
@@ -110,7 +112,7 @@ namespace IRO.UnitTests.Telegram
         [Test]
         public async Task AllPending_TaskAwait()
         {
-            var executionManager = new ThreadPoolExecutionManager();
+            var executionManager = new ThreadPoolExecutionManager(new LoggerFactory());
             var locker = new object();
             List<Task> tasks = new List<Task>();
             int count = 200;

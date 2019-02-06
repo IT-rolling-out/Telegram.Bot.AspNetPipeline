@@ -19,7 +19,9 @@ namespace IRO.UnitTests.Telegram
         [SetUp]
         public void Setup()
         {
-            var serv = new ServiceCollection().BuildServiceProvider();
+            var servicesCollection = new ServiceCollection();
+            servicesCollection.AddLogging();
+            var serv = servicesCollection.BuildServiceProvider();
             _pipelineBuilder = new PipelineBuilder(
                 serv
                 );

@@ -55,7 +55,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             //OnCanceled.
             updateContext.UpdateProcessingAborted.Register(() =>
             {
-                _logger.LogInformation("{0} will be cancelled.", updateContext.GetLoggerScope());
+                _logger.LogInformation("'{0}' will be cancelled.", updateContext);
                 SetCancelled(taskCompletionSource);
             });
 
@@ -67,14 +67,14 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         {
             _logger.LogTrace(
                 "Checking read-callback for '{0}'.",
-                newContext.GetLoggerScope()
+                newContext
                 );
             var searchDataNullable = _searchBag.TryFind(newContext.Chat.Id, newContext.Bot.BotId);
             if (searchDataNullable != null)
             {
                 _logger.LogTrace(
                     "Found read-callback for '{0}'.",
-                    newContext.GetLoggerScope()
+                    newContext
                 );
 
                 //!When find pending task with read-callback and same context.
@@ -102,8 +102,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                     _logger.LogError(
                         "Exception while validating Update '{0}'.\nOrigUpdateContext: '{1}'.\nNewContext: '{2}'.",
                         ex,
-                        origCtx.GetLoggerScope(),
-                        newContext.GetLoggerScope()
+                        origCtx,
+                        newContext
                         );
                     SetException(
                         searchData.TaskCompletionSource,
@@ -116,9 +116,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 if (!isUpdateValid)
                 {
                     _logger.LogTrace(
-                        "UpdateContext '{0}' not valid for read-callback of '{1}'.",
-                        origCtx.GetLoggerScope(),
-                        newContext.GetLoggerScope()
+                        "'{0}' not valid for read-callback of '{1}'.",
+                        origCtx,
+                        newContext
                         );
                     await next();
                     return;
@@ -126,9 +126,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
                 //Force exit only if result valid.
                 _logger.LogTrace(
-                    "UpdateContext '{0}'  valid for read-callback of '{1}'.",
-                    origCtx.GetLoggerScope(),
-                    newContext.GetLoggerScope()
+                    "'{0}'  valid for read-callback of '{1}'.",
+                    origCtx,
+                    newContext
                     );
                 SetResult(searchData.TaskCompletionSource, newContext.Update);
                 _searchBag.TryRemove(newContext.Chat.Id, newContext.Bot.BotId);
@@ -149,7 +149,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             {
                 _logger.LogInformation(
                     "UpdateContext '{0}' cancelled while adding new context with same chatId and botId.",
-                    prevData.Value.CurrentUpdateContext.GetLoggerScope()
+                    prevData.Value.CurrentUpdateContext
                     );
                 SetCancelled(prevData.Value.TaskCompletionSource);
             }
@@ -164,7 +164,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             _searchBag.Add(sd);
             _logger.LogTrace(
                 "UpdateContext '{0}' added to SearchBag of read-callbacks.",
-                updateContext.GetLoggerScope()
+                updateContext
                 );
         }
 

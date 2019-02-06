@@ -10,37 +10,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
 {
     public static class LoggingUpdateContextExtensions
     {
-        const string LazySerializerPropertyName = "_LazySerializer";
-
         const string LoggerPropertyName = "_Logger";
-
-        /// <summary>
-        /// Return LazySerializer or UpdateContext.
-        /// Used to enable custom serialization for UpdateContext, when it used as logger scope.
-        /// More info in <see cref="LoggingAdvancedOptions"/>.
-        /// </summary>
-        public static object GetLoggerScope(this UpdateContext @this)
-        {
-            var hiddenCtx = @this.HiddenContext();
-            if (hiddenCtx.LoggingAdvancedOptions.LoggingWithSerialization)
-            {
-                if (@this.Properties.TryGetValue(LazySerializerPropertyName, out var lazySerializerNotCasted))
-                {
-                    return (LazySerializer<UpdateContext>)lazySerializerNotCasted;
-                }
-                else
-                {
-                    var lazySerializer = hiddenCtx.LoggingAdvancedOptions.LazySerializerFactory.Create(@this);
-                    @this.Properties[LazySerializerPropertyName] = lazySerializer;
-                    return lazySerializer;
-                }
-            }
-            else
-            {
-                return @this;
-            }
-        }
-
+       
         /// <summary>
         /// Fast way to log message in UpdateContext scope.
         /// <para></para>
@@ -55,7 +26,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
             else
             {
                 var loggerFactory = @this.Services.GetService<ILoggerFactory>();
-                var logger = loggerFactory.CreateLogger(GetLoggerScope(@this).ToString());
+                var logger = loggerFactory.CreateLogger(@this.GetType());
                 @this.Properties[LoggerPropertyName] = logger;
                 return logger;
             }

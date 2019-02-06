@@ -361,7 +361,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                         //Remove from pending list.
                         if (pendingUpdateContext != null)
                         {
-                            //throw new Exception("EEEEEEEEEEEEEEEEEEEE");
                             pendingUpdateContext.Dispose();
                             _pendingUpdateContexts.TryRemove(pendingUpdateContext);
                             _logger.LogTrace("'{0}' disposed and removed from pending.", pendingUpdateContext);
@@ -371,7 +370,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                     catch (Exception ex)
                     {
                         _logger.LogTrace("'{0}' removing exception '{1}'.", pendingUpdateContext, ex);
-                        throw;
                     }
                 }
             };

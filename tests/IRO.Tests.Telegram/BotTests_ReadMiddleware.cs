@@ -1,12 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Runtime.ExceptionServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
+using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Services;
 using Telegram.Bot.Types;
 
 namespace IRO.Tests.Telegram
@@ -45,10 +49,15 @@ namespace IRO.Tests.Telegram
                     }
                     return true;
                 });
-
+                builder.UseExceptionHandler(async (ctx, ex) =>
+                {
+                    return false;
+                });
                 builder.UseDevEceptionMessage();
                 builder.Use(async (ctx, next) =>
                 {
+                    throw new System.Exception();
+
                     if (ctx.Message?.Text == null)
                     {
                         await ctx.SendTextMessageAsync("Not text message.");

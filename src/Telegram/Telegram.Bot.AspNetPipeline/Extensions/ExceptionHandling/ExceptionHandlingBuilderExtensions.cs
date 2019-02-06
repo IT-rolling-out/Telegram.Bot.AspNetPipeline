@@ -30,7 +30,10 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler
                 {
                     if (ex is TaskCanceledException)
                         return;
-                    ctx.Logger().LogError("Exception catched in exception handler '{0}'.", ex);
+                    ctx.Logger().MultipleScope((logger) =>
+                    {
+                        logger.LogError("Exception in exception handler '{0}'.", ex);
+                    }, typeof(ExceptionHandlingBuilderExtensions));
                     var edi=ExceptionDispatchInfo.Capture(ex);
                     var handled=await updateProcessingExceptionDelegate(ctx, ex);
                     if (!handled)
