@@ -30,30 +30,26 @@ namespace Telegram.Bot.AspNetPipeline.Services
             try
             {
                 //!If we await default Task.Run(func) - exception will not be shown in VS.
-                //But even with current crunch it showed only here, not on called method.
-                ExceptionDispatchInfo exceptionDispatchInfo = null;
-                await Task.Run(async ()=>
+                //But even with current crunch it showed only here, not in method where it was thrown.
+                //Please, contact me if you know how to fix it.
+                Exception catchedException = null;
+                resTask = Task.Run(async ()=>
                 {
                     try
                     {
-                        resTask= func.Invoke();
+                        await func.Invoke();
                     }
                     catch(Exception ex)
-                    {
-                        exceptionDispatchInfo = ExceptionDispatchInfo.Capture(ex);
+                    {    
+                        catchedException = ex;
                     }
                 });
                 _pendingTasks.Add(resTask);
                 await resTask.ContinueWith((t) =>
                 {
-                    if (exceptionDispatchInfo != null)
+                    if (catchedException != null)
                     {
-                        Task.Run(() =>
-                        {
-                            _logger.LogError("Exception in executed delegate '{0}'",
-                                exceptionDispatchInfo.SourceException);
-                            exceptionDispatchInfo.Throw();
-                        });
+                        throw catchedException;
                     }
                 });
             }

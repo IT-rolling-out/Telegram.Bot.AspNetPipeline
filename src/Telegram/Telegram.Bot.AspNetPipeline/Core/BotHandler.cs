@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Args;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Core.Exceptions;
+using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Extensions.Serialization;
@@ -263,6 +265,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
             serviceCollectionWrapper.AddExecutionManager<ThreadPoolExecutionManager>();
             serviceCollectionWrapper.AddBotExt();
             serviceCollectionWrapper.Services.AddLogging();
+            serviceCollectionWrapper.AddExceptionHandling();
 
             //Logging crunch. More info in LoggingAdvancedOptions.
             //I really can't find better way to serialize UpdateContext to json if logging it and keep it optimized.
@@ -279,6 +282,8 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// <param name="pipelineBuilder"></param>
         void UseMandatoryMiddleware(IPipelineBuilder pipelineBuilder)
         {
+            //Exception handling must used before all other.
+            pipelineBuilder.UseExceptionHandling();
             pipelineBuilder.UseBotExt();
         }
 
@@ -309,7 +314,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
 
         void OnUpdateEventHandler(object sender, UpdateEventArgs updateEventArgs)
         {
-            //Launc pending updates checker.
+            //Launch pending updates checker.
             AbortPendingExceeded();
 
             //Processing current update.
@@ -317,64 +322,77 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         }
         #endregion
 
+        #region Processing update.
         void ProcessUpdate(Update update)
         {
             Func<Task> processingFunc = async () =>
             {
-                UpdateContext pendingUpdateContext = null;
-                IServiceScope servicesScope = Services.CreateScope();
                 try
                 {
-                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-                    //Create context.
-                    UpdateContext updateContext = new UpdateContext(
-                        update,
-                        BotContext,
-                        servicesScope.ServiceProvider,
-                        cancellationTokenSource.Token
-                    );
-
-                    //Create hidden context.
-                    var hiddenUpdateContext = new HiddenUpdateContext(
-                        cancellationTokenSource,
-                        DateTime.Now,
-                        LoggingAdvancedOptions
-                    );
-                    updateContext.Properties[HiddenUpdateContext.DictKeyName] = hiddenUpdateContext;
-
-                    _logger.LogTrace("'{0}' created.", updateContext);
-
-                    //Add to pending list.
-                    _pendingUpdateContexts.Add(
-                        updateContext
-                    );
-                    pendingUpdateContext = updateContext;
-
-                    //Execute.
-                    await _updateProcessingDelegate.Invoke(updateContext, async () => { });
+                    await UpdateProcessingHandler(update);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        //Remove from pending list.
-                        if (pendingUpdateContext != null)
-                        {
-                            pendingUpdateContext.Dispose();
-                            _pendingUpdateContexts.TryRemove(pendingUpdateContext);
-                            _logger.LogTrace("'{0}' disposed and removed from pending.", pendingUpdateContext);
-                        }
-                        servicesScope.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogTrace("'{0}' removing exception '{1}'.", pendingUpdateContext, ex);
-                    }
+                    _logger.LogError(
+                        "Exception in executed UpdateProcessingDelegate: '{0}'.",
+                        ex
+                        );
+                    throw new UpdateProcessingException(
+                        "Exception in executed UpdateProcessingDelegate. Open log to see stacktrace.",
+                        ex
+                        );
                 }
             };
-
             ExecutionManager.ProcessUpdate(processingFunc);
+        }
+        #endregion
+
+        async Task UpdateProcessingHandler(Update update)
+        {
+            UpdateContext pendingUpdateContext = null;
+            IServiceScope servicesScope = Services.CreateScope();
+            try
+            {
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+                //Create context.
+                UpdateContext updateContext = new UpdateContext(
+                    update,
+                    BotContext,
+                    servicesScope.ServiceProvider,
+                    cancellationTokenSource.Token
+                );
+
+                //Create hidden context.
+                var hiddenUpdateContext = new HiddenUpdateContext(
+                    cancellationTokenSource,
+                    DateTime.Now,
+                    LoggingAdvancedOptions
+                );
+                updateContext.Properties[HiddenUpdateContext.DictKeyName] = hiddenUpdateContext;
+
+                _logger.LogTrace("'{0}' created.", updateContext);
+
+                //Add to pending list.
+                _pendingUpdateContexts.Add(
+                    updateContext
+                );
+                pendingUpdateContext = updateContext;
+
+                //Execute.
+                await _updateProcessingDelegate.Invoke(updateContext, async () => { });
+            }
+            finally
+            {
+                //Remove from pending list.
+                if (pendingUpdateContext != null)
+                {
+                    pendingUpdateContext.Dispose();
+                    _pendingUpdateContexts.TryRemove(pendingUpdateContext);
+                    _logger.LogTrace("'{0}' disposed and removed from pending.", pendingUpdateContext);
+                }
+                servicesScope.Dispose();
+            }
         }
 
         #region Check pending.

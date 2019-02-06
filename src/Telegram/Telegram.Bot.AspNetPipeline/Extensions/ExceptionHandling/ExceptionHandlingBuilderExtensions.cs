@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.ExceptionServices;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
@@ -11,37 +11,35 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler
     {
         /// <summary>
         /// Invoke before all another middleware.
-        /// <para>Return false from delegate if want to throw exception.</para>
+        /// <para></para>
+        /// Return false from delegate if want to throw exception.
         /// </summary>
         public static void UseExceptionHandler(
-            this IPipelineBuilder @this, 
+            this IPipelineBuilder @this,
             UpdateProcessingExceptionDelegate updateProcessingExceptionDelegate
             )
         {
             if (updateProcessingExceptionDelegate == null)
                 throw new ArgumentNullException(nameof(updateProcessingExceptionDelegate));
-            @this.Use(async (ctx, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    if (ex is TaskCanceledException)
-                        return;
-                    ctx.Logger().MultipleScope((logger) =>
-                    {
-                        logger.LogError("Exception in exception handler '{0}'.", ex);
-                    }, typeof(ExceptionHandlingBuilderExtensions));
-                    var edi=ExceptionDispatchInfo.Capture(ex);
-                    var handled=await updateProcessingExceptionDelegate(ctx, ex);
-                    if (!handled)
-                    {
-                        edi.Throw();
-                    }
-                }
-            });
+            var md = @this.ServiceProvider.GetService<ExceptionHandlingMiddleware>();
+            md.ExceptionHandlers.Insert(0, updateProcessingExceptionDelegate);
+        }
+
+        /// <summary>
+        /// Mandatory used.
+        /// </summary>
+        internal static void UseExceptionHandling(this IPipelineBuilder @this)
+        {
+            var md = @this.ServiceProvider.GetService<ExceptionHandlingMiddleware>();
+            @this.Use(md.Invoke);
+        }
+
+        /// <summary>
+        /// Mandatory used.
+        /// </summary>
+        internal static void AddExceptionHandling(this ServiceCollectionWrapper @this)
+        {
+            @this.Services.AddSingleton<ExceptionHandlingMiddleware>();
         }
     }
 }

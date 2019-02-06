@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
@@ -16,22 +17,16 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
         /// </summary>
         public static void UseDevEceptionMessage(this IPipelineBuilder @this)
         {
-            @this.Use(async (ctx, next) =>
+            @this.UseExceptionHandler(async (ctx, ex) =>
             {
-                try
+                if (!(ex is TaskCanceledException))
                 {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    if (ex is TaskCanceledException)
-                        return;
                     await ctx.SendTextMessageAsync(
                         "```" + ex.ToString() + "```",
                         parseMode: ParseMode.Markdown
-                        );
-                    ExceptionDispatchInfo.Capture(ex).Throw();
+                    );
                 }
+                return false;
             });
         }
     }

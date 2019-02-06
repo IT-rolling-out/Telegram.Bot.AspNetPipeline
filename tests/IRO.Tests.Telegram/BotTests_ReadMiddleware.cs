@@ -49,11 +49,6 @@ namespace IRO.Tests.Telegram
                     }
                     return true;
                 });
-                builder.UseExceptionHandler(async (ctx, ex) =>
-                {
-                    return false;
-                });
-                builder.UseDevEceptionMessage();
                 builder.Use(async (ctx, next) =>
                 {
                     throw new System.Exception();
@@ -112,7 +107,14 @@ namespace IRO.Tests.Telegram
                     //    await ctx.SendTextMessageAsync($"Not processed '{ctx.Message.Text}'.");
                     await next();
                 });
+
+                builder.UseExceptionHandler(async (ctx, ex) =>
+                {
+                    return false;
+                });
+                builder.UseDevEceptionMessage();
             });
+
             botHandler.Start();
 
         }
