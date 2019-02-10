@@ -1,0 +1,6 @@
+foreach Order
+    foreach TemplateMatchingStrings
+		dictSearch templateMatchingString
+			if(updateTypes.Contains(Update.Type)
+				ROUTE
+			

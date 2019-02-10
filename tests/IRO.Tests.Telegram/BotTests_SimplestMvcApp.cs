@@ -1,7 +1,6 @@
 ﻿using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
-using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
 using Telegram.Bot.Types;

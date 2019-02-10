@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.Types;
 using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.AspNetPipeline.Core.Internal;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -15,7 +16,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
     /// Just like http context in asp.net mvc.
     /// </summary>
     [DataContract]
-    public class UpdateContext: IDisposable
+    public class UpdateContext : IDisposable
     {
         /// <summary>
         /// Unique id, used in GetHashCode too.
@@ -136,7 +137,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             Disposing?.Invoke(this);
             try
             {
-                var hiddenContext=(HiddenUpdateContext)Properties[HiddenUpdateContext.DictKeyName] ;
+                var hiddenContext = (HiddenUpdateContext)Properties[HiddenUpdateContext.DictKeyName];
                 hiddenContext.UpdateProcessingAbortedSource.Cancel();
             }
             catch { }
@@ -151,7 +152,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         public override string ToString()
         {
-            var baseName=base.ToString();
+            var baseName = base.ToString();
             if (Update.Message == null)
             {
                 return $"{baseName}(ChatId={Chat?.Id}, Update(Id={Update.Id}, Type={Update.Type}))";
@@ -159,9 +160,10 @@ namespace Telegram.Bot.AspNetPipeline.Core
             else
             {
                 string msgText = Message.Text ?? "";
-                if (msgText.Length > 10)
+                const int wordsLimit = 20;
+                if (msgText.Length > wordsLimit)
                 {
-                    msgText = msgText.Remove(10);
+                    msgText = msgText.Remove(wordsLimit - 3) + "...";
                 }
                 //Just use to encode.
                 msgText = JsonConvert.SerializeObject(msgText);

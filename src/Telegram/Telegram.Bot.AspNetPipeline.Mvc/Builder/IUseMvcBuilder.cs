@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
@@ -17,7 +18,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         void MapRouteAction(RouteActionDelegate routeAction, RouteInfo routeInfo);
 
-        IEnumerable<Tuple<RouteActionDelegate, RouteInfo>> GetRouteActions();
+        IEnumerable<RouteDescriptionData> GetRouteActions();
     }
 
 

@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types.Enums;
 
-namespace Telegram.Bot.AspNetPipeline.Core
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     public static class UpdateTypeExtensions
     {

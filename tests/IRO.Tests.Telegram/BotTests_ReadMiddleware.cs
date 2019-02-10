@@ -6,8 +6,9 @@ using NLog;
 using NLog.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
-using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
+using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Services;
@@ -22,7 +23,6 @@ namespace IRO.Tests.Telegram
 
             botHandler.ConfigureServices((servicesWrap) =>
             {
-                servicesWrap.AddBotExt();
                 servicesWrap.LoggingAdvancedConfigure(new LoggingAdvancedOptions
                 {
                     //LoggingWithSerialization = true
@@ -51,8 +51,6 @@ namespace IRO.Tests.Telegram
                 });
                 builder.Use(async (ctx, next) =>
                 {
-                    throw new System.Exception();
-
                     if (ctx.Message?.Text == null)
                     {
                         await ctx.SendTextMessageAsync("Not text message.");

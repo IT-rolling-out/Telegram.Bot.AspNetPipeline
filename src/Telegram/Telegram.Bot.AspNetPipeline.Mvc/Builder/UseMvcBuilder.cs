@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
     public class UseMvcBuilder : IUseMvcBuilder
     {
-        readonly IList<Tuple<RouteActionDelegate, RouteInfo>> _routeAction=new List<Tuple<RouteActionDelegate, RouteInfo>>();
+        readonly IList<RouteDescriptionData> _routeDescriptions=new List<RouteDescriptionData>();
 
-        public UseMvcBuilder(IList<IRouter> routers)
-        {
-            Routers = routers;
-        }
-
-        public IList<IRouter> Routers { get; }
+        public IList<IRouter> Routers { get; } = new List<IRouter>();
 
         /// <summary>
         /// Just like you do with controller methods, but for delegates.
@@ -27,12 +23,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             if (routeInfo == null)
                 throw new ArgumentNullException(nameof(routeInfo));
             var tuple = new Tuple<RouteActionDelegate, RouteInfo>(routeAction, routeInfo);
-            _routeAction.Add(tuple);
+            _routeDescriptions.Add(new RouteDescriptionData(routeAction, routeInfo));
+
         }
 
-        public IEnumerable<Tuple<RouteActionDelegate, RouteInfo>> GetRouteActions()
+        public IEnumerable<RouteDescriptionData> GetRouteActions()
         {
-            return _routeAction.ToList();
+            return _routeDescriptions.ToList();
         }
     }
 

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
+using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
@@ -21,8 +21,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
             {
                 if (!(ex is TaskCanceledException))
                 {
-                    await ctx.SendTextMessageAsync(
-                        "```" + ex.ToString() + "```",
+                    await UpdateContextExtensions.SendTextMessageAsync(ctx, "```" + ex.ToString() + "```",
                         parseMode: ParseMode.Markdown
                     );
                 }

@@ -8,4 +8,8 @@
     <ProjectReference Include="..\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Routing\RouteSearcing\Abstractions\" />
+  </ItemGroup>
+
 </Project>

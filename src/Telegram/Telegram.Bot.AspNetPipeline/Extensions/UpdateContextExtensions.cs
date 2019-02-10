@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Telegram.Bot.AspNetPipeline.Core
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     public static class UpdateContextExtensions
     {

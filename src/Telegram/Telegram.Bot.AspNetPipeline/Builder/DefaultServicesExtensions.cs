@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Services;
 
 namespace Telegram.Bot.AspNetPipeline.Builder

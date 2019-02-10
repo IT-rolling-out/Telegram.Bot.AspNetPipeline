@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler
+namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
 {
     internal class ExceptionHandlingMiddleware:IMiddleware
     {

@@ -1,4 +1,6 @@
-﻿using Telegram.Bot.Types.Enums;
+﻿using System.Collections.Generic;
+using IRO.Common.Collections;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
 {
@@ -14,17 +16,22 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
             string template=null, 
             int order=0, 
             string name=null, 
-            UpdateType[] updateTypes=null
+            IEnumerable<UpdateType> updateTypes=null
             )
         {
             Template = template;
             Order = order;
             Name = name;
-            UpdateTypes = updateTypes;
+            if (updateTypes != null)
+            {
+                UpdateTypes = EnumerableExtensions.ToHashSet(updateTypes);
+            }
         }
 
         /// <summary>
         /// The route template. May be null if the action has no attribute routes.
+        /// <para></para>
+        /// Can be null.
         /// </summary>
         public string Template { get; }
 
@@ -35,8 +42,18 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         /// </summary>
         public int Order { get; }
 
+        /// <summary>
+        /// Case sensitive.
+        /// <para></para>
+        /// Can be null. Than will not be registered.
+        /// </summary>
         public string Name { get;  }
 
-        public UpdateType[] UpdateTypes { get; }
+        /// <summary>
+        /// Used hash set for fast search.
+        /// <para></para>
+        /// Can be null.
+        /// </summary>
+        public HashSet<UpdateType> UpdateTypes { get; }
     }
 }

@@ -10,8 +10,10 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
     {
         /// <summary>
         /// Note: Current middleware is registered automatically.
+        /// <para></para>
+        /// Invoked automatically in BotHandler.
         /// </summary>
-        public static void UseBotExt(this IPipelineBuilder @this)
+        internal static void UseBotExt(this IPipelineBuilder @this)
         {
             @this.UseMiddlware<ImprovedBotMiddleware>();
         }
@@ -19,7 +21,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <summary>
         /// Note: Current middleware is registered automatically.
         /// </summary>
-        public static void AddBotExt(this ServiceCollectionWrapper @this)
+        internal static void AddBotExt(this ServiceCollectionWrapper @this)
         {
             @this.Services.AddSingleton<ImprovedBotMiddleware>();
             @this.Services.AddSingleton<IUpdateContextSearchBag, UpdateContextSearchBag>();
@@ -28,6 +30,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         /// <summary>
         /// Note: Current middleware is registered automatically.
+        /// <para></para>
+        /// Invoked automatically in BotHandler.
         /// </summary>
         public static void AddBotExtGlobalValidator(this IPipelineBuilder @this, UpdateValidator updateValidator)
         {

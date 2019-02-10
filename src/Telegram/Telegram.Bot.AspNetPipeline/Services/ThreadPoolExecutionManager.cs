@@ -47,7 +47,7 @@ namespace Telegram.Bot.AspNetPipeline.Services
                 _pendingTasks.Add(resTask);
                 await resTask.ContinueWith((t) =>
                 {
-                    if (catchedException != null)
+                    if (catchedException != null && !(catchedException is TaskCanceledException))
                     {
                         throw catchedException;
                     }

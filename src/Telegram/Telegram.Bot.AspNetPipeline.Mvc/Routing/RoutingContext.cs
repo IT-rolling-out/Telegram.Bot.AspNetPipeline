@@ -5,12 +5,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
 {
     /// <summary>
     /// Used to describe and handle UpdateContext routing.
-    /// <para></para>
-    /// Note, that IRouter can set any handler in RoutingContext, like it can do in asp.net.
-    /// IRouter can only customize routing by TemplateMatchingStrings. It can add|remove|edit
-    /// current list of strings.
-    /// <para></para>
-    /// TemplateMatchingStrings used one by one only for fast searching of [BotRoute(temlate)] in indexed Dictionary.
     /// </summary>
     public class RoutingContext
     {

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
-using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
-namespace Telegram.Bot.AspNetPipeline.Core
+namespace Telegram.Bot.AspNetPipeline.Core.Internal
 {
     /// <summary>
     /// Some data and services for main (mandatory) middleware.

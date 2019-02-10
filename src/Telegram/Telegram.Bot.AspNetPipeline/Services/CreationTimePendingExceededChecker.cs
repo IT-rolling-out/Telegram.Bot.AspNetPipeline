@@ -1,5 +1,6 @@
 ﻿using System;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Core.Internal;
 
 namespace Telegram.Bot.AspNetPipeline.Services
 {

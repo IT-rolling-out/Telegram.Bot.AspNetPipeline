@@ -5,16 +5,17 @@ using ConcurrentCollections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Args;
-using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core.Exceptions;
-using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler;
+using Telegram.Bot.AspNetPipeline.Core.Internal;
+using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Extensions.Serialization;
 using Telegram.Bot.AspNetPipeline.Services;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.AspNetPipeline.Builder
+namespace Telegram.Bot.AspNetPipeline.Core
 {
     public class BotHandler : IDisposable
     {
@@ -266,12 +267,6 @@ namespace Telegram.Bot.AspNetPipeline.Builder
             serviceCollectionWrapper.AddBotExt();
             serviceCollectionWrapper.Services.AddLogging();
             serviceCollectionWrapper.AddExceptionHandling();
-
-            //Logging crunch. More info in LoggingAdvancedOptions.
-            //I really can't find better way to serialize UpdateContext to json if logging it and keep it optimized.
-            //So i use LazySerializer and current boolean value as switch. If there no loggers or if current value is false, then
-            //!UpdateContext WILL NOT be seriaalized to json.
-            //I use HiddenUpdateContext and extension method GetLoggerScope to return LazySerializer if true and UpdateContext if false.
             serviceCollectionWrapper.LoggingAdvancedConfigure(new LoggingAdvancedOptions());
         }
 
@@ -396,22 +391,36 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         }
 
         #region Check pending.
-        TimeSpan _checkPendingDelay = TimeSpan.FromMinutes(1);
+        /// <summary>
+        /// Delay to check pending requests.
+        /// Default is 1 minute.
+        /// </summary>
+        public TimeSpan CheckPendingDelay = TimeSpan.FromMinutes(1);
+
+        /// <summary>
+        /// If pending requests count is more - will start aborting pending requests.
+        /// Default value is 100.
+        /// </summary>
+        public int MaxPendingContextCount = 0;
 
         readonly object _checkPendingLocker = new object();
 
         DateTime _lastPendingCheck = DateTime.Now;
 
+        /// <summary>
+        /// Abort timeouted pending requests if there CheckPendingDelay passed or count limit. 
+        /// </summary>
         void AbortPendingExceeded()
         {
-            if (DateTime.Now - _lastPendingCheck < _checkPendingDelay)
+            if (!IsPendingAbortAllowed())
                 return;
 
             Task.Run(() =>
             {
                 lock (_checkPendingLocker)
                 {
-                    if (DateTime.Now - _lastPendingCheck < _checkPendingDelay)
+                    //New check in locker scope.
+                    if (!IsPendingAbortAllowed())
                         return;
 
                     _logger.LogTrace("Pending check started.");
@@ -431,13 +440,18 @@ namespace Telegram.Bot.AspNetPipeline.Builder
                         }
                     }
                     _lastPendingCheck = DateTime.Now;
-                    _logger.LogTrace(
+                    _logger.LogInformation(
                         "Pending check finished. Removed {0}, remained {1}.",
                         removedCount,
                         _pendingUpdateContexts.Count
                     );
                 }
             });
+        }
+
+        bool IsPendingAbortAllowed()
+        {
+            return DateTime.Now - _lastPendingCheck > CheckPendingDelay || _pendingUpdateContexts.Count > MaxPendingContextCount;
         }
         #endregion
 

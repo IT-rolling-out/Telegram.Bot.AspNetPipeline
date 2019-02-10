@@ -1,4 +1,4 @@
-﻿namespace Telegram.Bot.AspNetPipeline.Core
+﻿namespace Telegram.Bot.AspNetPipeline.Core.Internal
 {
     /// <summary>
     /// Not really internal now. Was decided to allow the user to use HiddenUpdateContext.

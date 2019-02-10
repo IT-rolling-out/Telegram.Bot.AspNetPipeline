@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
-using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandler
+namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
 {
     public static class ExceptionHandlingBuilderExtensions
     {
