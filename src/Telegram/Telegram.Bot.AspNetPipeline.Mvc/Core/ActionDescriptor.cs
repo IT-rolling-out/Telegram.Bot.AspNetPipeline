@@ -3,15 +3,16 @@
 namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 {
     /// <summary>
-    /// Static data about registered method or delegate.
+    /// Static data about registered delegate.
     /// </summary>
-    public class ActionInfo
+    public class ActionDescriptor
     {
-        public ActionInfo(RouteInfo routeInfo)
+        public ActionDescriptor(RouteInfo routeInfo)
         {
             RouteInfo = routeInfo;
         }
 
         public RouteInfo RouteInfo { get; }
+
     }
 }

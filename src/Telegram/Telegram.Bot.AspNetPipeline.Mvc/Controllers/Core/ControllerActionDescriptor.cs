@@ -3,11 +3,11 @@ using System.Reflection;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
-    public class ControllerActionInfo:ActionInfo
+    public class ControllerActionDescriptor:ActionDescriptor
     {
-        public ControllerActionInfo(MethodInfo methodInfo, Type controllerType, RouteInfo routeInfo):base(routeInfo)
+        public ControllerActionDescriptor(MethodInfo methodInfo, Type controllerType, RouteInfo routeInfo):base(routeInfo)
         {
             MethodInfo = methodInfo;
             ControllerType = controllerType;

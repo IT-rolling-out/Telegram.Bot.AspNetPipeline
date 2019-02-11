@@ -1,6 +1,6 @@
-﻿using Telegram.Bot.AspNetPipeline.Mvc.Core;
+﻿using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
+namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 {
     /// <summary>
     /// Main route object, contains all data about one route.

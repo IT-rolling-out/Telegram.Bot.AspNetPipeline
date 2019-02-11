@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
-    public class UseMvcBuilder : IUseMvcBuilder
+    internal class UseMvcBuilder : IUseMvcBuilder
     {
         readonly IList<RouteDescriptionData> _routeDescriptions=new List<RouteDescriptionData>();
 

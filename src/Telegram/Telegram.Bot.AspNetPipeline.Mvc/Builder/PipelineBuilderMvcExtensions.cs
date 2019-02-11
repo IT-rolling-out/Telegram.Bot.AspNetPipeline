@@ -8,11 +8,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
     public static class PipelineBuilderMvcExtensions
     {
-        public static void UseMvc(this IPipelineBuilder @this, Action<IUseMvcBuilder> configureUseMvcBuilder = null)
+        public static void UseMvc(
+            this IPipelineBuilder @this,
+            Action<IUseMvcBuilder> configureUseMvcBuilder = null)
         {
             var addMvcBuilder = @this.ServiceProvider.GetService<IAddMvcBuilder>();
             var useMvcBuilder = @this.ServiceProvider.GetService<IUseMvcBuilder>();
-            configureUseMvcBuilder?.Invoke(useMvcBuilder);
             var md = new MvcMiddleware(addMvcBuilder, useMvcBuilder);
             @this.UseMiddlware(md);
         }
@@ -21,26 +22,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         /// <param name="addMvcOptions">AddMvcOptions.Default if null.</param>
         /// <returns></returns>
-        public static IAddMvcBuilder AddMvc(this ServiceCollectionWrapper @this, AddMvcOptions addMvcOptions = null)
+        public static void AddMvc(
+            this ServiceCollectionWrapper @this,
+            MvcOptions addMvcOptions = null,
+            Action<IAddMvcBuilder> configureAddMvcBuilder = null)
         {
-            //IAddMvcBuilder and IUseMvcBuilder can be overrided with ioc.
-            addMvcOptions = addMvcOptions ?? new AddMvcOptions();
-            IList<Type> controllers = null;
-            if (addMvcOptions.FindControllersByReflection)
-            {
-                //Search controllers.
-                controllers = ControllersTypesSearch.FindAllControllers();
-            }
-            controllers = controllers ?? new List<Type>();
-
-            var addMvcBuilder = new AddMvcBuilder(
-                addMvcOptions,
-                controllers,
-                @this.Services
-                );
-            @this.Services.AddSingleton<IAddMvcBuilder>(addMvcBuilder);
-            @this.Services.AddSingleton<IUseMvcBuilder, UseMvcBuilder>();
-            return addMvcBuilder;
+            MvcMiddleware.RegisterServices(@this, addMvcOptions, configureAddMvcBuilder);
         }
     }
 }

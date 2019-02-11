@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding
 {
     public class ModelBinderContext
     {
-        public ControllerActionInfo ControllerActionInfo { get; }
+        public ControllerActionDescriptor ControllerActionDescriptor { get; }
 
         public ParameterInfo[] Parameters { get; }
 
-        public ModelBinderContext(ControllerActionInfo controllerActionInfo, ParameterInfo[] parameters)
+        public ModelBinderContext(ControllerActionDescriptor controllerActionDescriptor, ParameterInfo[] parameters)
         {
-            ControllerActionInfo = controllerActionInfo;
+            ControllerActionDescriptor = controllerActionDescriptor;
             Parameters = parameters;
         }
 

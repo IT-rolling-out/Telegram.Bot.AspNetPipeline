@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
 {
@@ -18,7 +19,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         /// <summary>
         /// Set it if route match.
         /// </summary>
-        public UpdateProcessingDelegate Handler { get; set; }
+        public RouteDescriptionData RouteDescriptionData { get; set; } = RouteDescriptionData.Empty;
 
         #region Properties bag.
         IDictionary<object, object> _properties;

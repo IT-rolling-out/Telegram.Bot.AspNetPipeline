@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
+namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
     /// <summary>
     /// Set handler for current RoteData if match.

@@ -1,23 +1,26 @@
 ﻿using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
+    /// <summary>
+    /// Static data about registered method or method.
+    /// </summary>
     public class ControllerActionContext : ActionContext
     {
         public ControllerActionContext(
             UpdateContext updateContext,
-            ControllerActionInfo controllerActionInfo,
+            ControllerActionDescriptor controllerActionDescriptor,
             IMvcFeatures features
             ) 
-            : base(updateContext, controllerActionInfo, features)
+            : base(updateContext, controllerActionDescriptor, features)
         {
         }
 
         /// <summary>
         /// Info about controller method. Casted ActionInfo.
         /// </summary>
-        public ControllerActionInfo ControllerActionInfo => (ControllerActionInfo)ActionInfo;
+        public new ControllerActionDescriptor ActionDescriptor => (ControllerActionDescriptor)base.ActionDescriptor;
     }
 
 

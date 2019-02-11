@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
+namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
     public abstract class BaseStringMatchRouter:IRouter
     {
@@ -26,6 +26,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         public async Task RouteAsync(RoutingContext routeContext)
         {
             await SetTemplateMatchingStrings(routeContext);
+
             //TODO: Here must be searching in dictionary with actions.
             throw new System.NotImplementedException();
         }

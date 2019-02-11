@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
 {
     public static class ControllersTypesSearch
     {
+        /// <summary>
+        /// Find controllers with reflection.
+        /// </summary>
         public static IList<Type> FindAllControllers()
         {
             var baseType = typeof(BotController);

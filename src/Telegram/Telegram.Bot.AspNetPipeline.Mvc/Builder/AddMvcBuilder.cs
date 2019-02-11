@@ -7,7 +7,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
-    public class AddMvcBuilder : IAddMvcBuilder
+    internal class AddMvcBuilder : IAddMvcBuilder
     {
         public bool ConfigureBotExtWithMvc { get; }
 
@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         public IServiceCollection ServiceCollection { get; }
 
         public AddMvcBuilder(
-            AddMvcOptions addMvcOptions,
+            MvcOptions addMvcOptions,
             IList<Type> controllers,
             IServiceCollection serviceCollection
             )

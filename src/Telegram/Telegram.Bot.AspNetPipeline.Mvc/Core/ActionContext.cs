@@ -7,16 +7,16 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core
     /// </summary>
     public class ActionContext
     {
-        public ActionContext(UpdateContext updateContext, ActionInfo actionInfo, IMvcFeatures features)
+        public ActionContext(UpdateContext updateContext, ActionDescriptor actionDescriptor, IMvcFeatures features)
         {
             UpdateContext = updateContext;
-            ActionInfo = actionInfo;
+            ActionDescriptor = actionDescriptor;
             Features = features;
         }
 
         public UpdateContext UpdateContext { get; }
 
-        public ActionInfo ActionInfo { get; }
+        public ActionDescriptor ActionDescriptor { get; }
 
         public IMvcFeatures Features { get; }
     }

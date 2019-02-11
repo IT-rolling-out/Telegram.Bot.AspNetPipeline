@@ -4,7 +4,7 @@ using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
     public abstract class BotController
     {

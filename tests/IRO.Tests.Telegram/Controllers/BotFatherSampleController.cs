@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Mvc;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
