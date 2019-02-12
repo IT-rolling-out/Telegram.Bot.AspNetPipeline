@@ -15,7 +15,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
-    public class MvcMiddleware:IMiddleware
+    public class MvcMiddleware : IMiddleware
     {
         readonly MainRouter _mainRouter;
 
@@ -30,7 +30,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         public MvcMiddleware(IAddMvcBuilder addMvcBuilder, IUseMvcBuilder useMvcBuilder)
         {
-            _mainRouter =new MainRouter(useMvcBuilder.Routers);
+            _mainRouter = new MainRouter(useMvcBuilder.Routers);
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
@@ -39,18 +39,19 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             await _mainRouter.RouteAsync(routingCtx);
 
             //Handler found.
-            var actDesc=routingCtx.ActionDescriptor;
+            var actDesc = routingCtx.ActionDescriptor;
             if (actDesc != null)
             {
-                _contextPreparer.CreateContext(ctx, actDesc);
+                var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
+                await actDesc.Handler.Invoke(actionContext);
             }
             await next();
         }
 
         void ResolveServices(IServiceProvider serviceProvider)
         {
-            _controllerInpector=serviceProvider.GetService<IControllerInpector>();
-            _contextPreparer= serviceProvider.GetService<IContextPreparer>();
+            _controllerInpector = serviceProvider.GetService<IControllerInpector>();
+            _contextPreparer = serviceProvider.GetService<IContextPreparer>();
         }
 
         #region Register services.
@@ -77,7 +78,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 
             //Third step. Register all services based on IAddMvcBuilder.
             RegisterServises_RequiredBuilder(
-                serviceCollectionWrapper, 
+                serviceCollectionWrapper,
                 addMvcBuilder
                 );
 
@@ -90,6 +91,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         {
             var serv = serviceCollectionWrapper.Services;
             serviceCollectionWrapper.AddControllersFactory<ControllersFactory>();
+            serv.AddSingleton<ControllerInpector>();
         }
 
         static void RegisterServises_RequiredBuilder(ServiceCollectionWrapper serviceCollectionWrapper, IAddMvcBuilder addMvcBuilder)
