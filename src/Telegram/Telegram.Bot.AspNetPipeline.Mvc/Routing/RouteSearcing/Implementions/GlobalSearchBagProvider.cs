@@ -8,7 +8,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
     {
         GlobalSearchBag _globalSearchBagSingleton;
 
-        public void Init(IEnumerable<RouteDescriptionData> routeDescriptions)
+        public void Init(IEnumerable<ActionDescriptor> routeDescriptions)
         {
             routeDescriptions = routeDescriptions ?? throw new ArgumentNullException(nameof(routeDescriptions));
             _globalSearchBagSingleton = new GlobalSearchBag(routeDescriptions);

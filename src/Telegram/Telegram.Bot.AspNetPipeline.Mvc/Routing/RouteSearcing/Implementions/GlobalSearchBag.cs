@@ -9,24 +9,24 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
     {
         readonly IReadOnlyDictionary<int, IOrderScopeSearchBag> _orderScopeSearchBags;
 
-        readonly IEnumerable<RouteDescriptionData> _routeDescriptions;
+        readonly IEnumerable<ActionDescriptor> _routes;
 
-        readonly IReadOnlyDictionary<string, RouteDescriptionData> _routeDescriptionsByName;
+        readonly IReadOnlyDictionary<string, ActionDescriptor> _routesByName;
 
         readonly IOrderedEnumerable<IOrderScopeSearchBag> _allSorted;
 
-        public GlobalSearchBag(IEnumerable<RouteDescriptionData> routeDescriptions)
+        public GlobalSearchBag(IEnumerable<ActionDescriptor> routeDescriptions)
         {
             if(routeDescriptions==null)
                 throw new ArgumentNullException(nameof(routeDescriptions));
-            _routeDescriptions=routeDescriptions
+            _routes=routeDescriptions
                 .Where(x => x.RouteInfo != null)
                 .ToList();
-            _routeDescriptionsByName = _routeDescriptions
+            _routesByName = _routes
                 .Where(x => x.RouteInfo?.Name != null)
                 .ToDictionary(x => x.RouteInfo.Name);
 
-            _orderScopeSearchBags = PrepareDict(_routeDescriptions);
+            _orderScopeSearchBags = PrepareDict(_routes);
             _allSorted = _orderScopeSearchBags
                 .Select(x => x.Value)
                 .OrderBy((x) => x.Order);
@@ -42,9 +42,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
         /// Return all found SearchData for current search bag.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<RouteDescriptionData> GetFoundData()
+        public IEnumerable<ActionDescriptor> GetFoundData()
         {
-            return _routeDescriptions;
+            return _routes;
         }
 
         /// <summary>
@@ -62,13 +62,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
             return null;
         }
 
-        public RouteDescriptionData FindByName(string routeActionName)
+        public ActionDescriptor FindByName(string routeActionName)
         {
-            if (_routeDescriptionsByName.TryGetValue(routeActionName, out var value))
+            if (_routesByName.TryGetValue(routeActionName, out var value))
             {
                 return value;
             }
-            return default(RouteDescriptionData);
+            return default(ActionDescriptor);
         }
 
         /// <summary>
@@ -79,15 +79,15 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
             return _allSorted;
         }
 
-        IReadOnlyDictionary<int, IOrderScopeSearchBag> PrepareDict(IEnumerable<RouteDescriptionData> routeDescriptions)
+        IReadOnlyDictionary<int, IOrderScopeSearchBag> PrepareDict(IEnumerable<ActionDescriptor> routeDescriptions)
         {
-            var dict = new Dictionary<int, List<RouteDescriptionData>>();
+            var dict = new Dictionary<int, List<ActionDescriptor>>();
             foreach (var routDesc in routeDescriptions)
             {
                 var order = routDesc.RouteInfo.Order;
                 if (!dict.TryGetValue(order, out var list))
                 {
-                    dict[order] = list = new List<RouteDescriptionData>();
+                    dict[order] = list = new List<ActionDescriptor>();
                 }
                 list.Add(routDesc);
             }

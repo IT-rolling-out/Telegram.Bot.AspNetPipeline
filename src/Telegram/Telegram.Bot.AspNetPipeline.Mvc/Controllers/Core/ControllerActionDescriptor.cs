@@ -5,9 +5,19 @@ using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
-    public class ControllerActionDescriptor:ActionDescriptor
+    /// <summary>
+    /// Static data about registered method or method.
+    /// <para></para>
+    /// Controller routes top object with static data.
+    /// </summary>
+    public class ControllerActionDescriptor : ActionDescriptor
     {
-        public ControllerActionDescriptor(MethodInfo methodInfo, Type controllerType, RouteInfo routeInfo):base(routeInfo)
+        public ControllerActionDescriptor(
+            RouteActionDelegate handler,
+            RouteInfo routeInfo,
+            MethodInfo methodInfo,
+            Type controllerType
+            ) : base(handler,routeInfo)
         {
             MethodInfo = methodInfo;
             ControllerType = controllerType;

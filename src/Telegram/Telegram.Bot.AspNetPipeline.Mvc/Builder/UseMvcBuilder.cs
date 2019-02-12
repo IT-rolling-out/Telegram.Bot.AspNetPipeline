@@ -10,7 +10,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
     internal class UseMvcBuilder : IUseMvcBuilder
     {
-        readonly IList<RouteDescriptionData> _routeDescriptions=new List<RouteDescriptionData>();
+        readonly IList<ActionDescriptor> _routes = new List<ActionDescriptor>();
 
         public IList<IRouter> Routers { get; } = new List<IRouter>();
 
@@ -24,13 +24,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             if (routeInfo == null)
                 throw new ArgumentNullException(nameof(routeInfo));
             var tuple = new Tuple<RouteActionDelegate, RouteInfo>(routeAction, routeInfo);
-            _routeDescriptions.Add(new RouteDescriptionData(routeAction, routeInfo));
+            _routes.Add(new ActionDescriptor(routeAction, routeInfo));
 
         }
 
-        public IEnumerable<RouteDescriptionData> GetRouteActions()
+        public IEnumerable<ActionDescriptor> GetRoutes()
         {
-            return _routeDescriptions.ToList();
+            return _routes.ToList();
         }
     }
 

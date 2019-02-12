@@ -2,14 +2,23 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices.Implementions
 {
-    public class ControllerInpector
+    /// <summary>
+    /// Main object to create controller actions.
+    /// </summary>
+    public class ControllerInpector : IControllerInpector
     {
+        readonly IControllerActionPreparer _controllerActionPreparer;
+
+        public ControllerInpector(IControllerActionPreparer controllerActionPreparer)
+        {
+            _controllerActionPreparer = controllerActionPreparer;
+        }
+
         /// <summary>
         /// Invoked on each controller method (with BotRouteAttribute) with controller, MethodInfo, action info.
         /// </summary>
@@ -18,7 +27,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
         /// <summary>
         /// Inspect controller methods with reflection and resolve ControllerActionDescriptor.
         /// </summary>
-        public IEnumerable<RouteDescriptionData> Inspect(Type controllerType)
+        public IEnumerable<ControllerActionDescriptor> Inspect(Type controllerType)
         {
             if (!controllerType.IsInstanceOfType(typeof(BotController)))
             {
@@ -33,6 +42,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
                 throw new Exception($"Controller type '{controllerType}' can't be Generic definitions.");
             }
 
+            var resList = new List<ControllerActionDescriptor>();
             foreach (var method in controllerType.GetMethods())
             {
                 var arr = method.GetCustomAttributes(typeof(BotRouteAttribute), true);
@@ -45,14 +55,15 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
                 {
                     //Found controller action method.
                     var botRouteAttribute = (BotRouteAttribute)arr[0];
-                    ProcessMethod(controllerType, method, botRouteAttribute);
+                    var controllerActionDescriptor= ProcessMethodInfo(controllerType, method, botRouteAttribute);
+                    resList.Add(controllerActionDescriptor);
                 }
             }
 
-            throw new NotImplementedException();
+            return resList;
         }
 
-        void ProcessMethod(Type controllerType, MethodInfo methodInfo, BotRouteAttribute routeAttr)
+        ControllerActionDescriptor ProcessMethodInfo(Type controllerType, MethodInfo methodInfo, BotRouteAttribute routeAttr)
         {
             var routeInfo = new RouteInfo(
                 routeAttr.Template,
@@ -61,11 +72,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
                 routeAttr.UpdateTypes
                 );
 
-            var controllerActionDescriptor = new ControllerActionDescriptor(methodInfo, controllerType, routeInfo);
-            //var routeDescription = new RouteDescriptionData(handler, routeInfo);
-            //ProcessingMethodInfo?.Invoke();
+            var handler = _controllerActionPreparer.CreateAction(controllerType, methodInfo, routeInfo);
+
+            var controllerActionDescriptor = new ControllerActionDescriptor(handler, routeInfo, methodInfo, controllerType);
+            ProcessingMethodInfo?.Invoke(controllerActionDescriptor);
+            return controllerActionDescriptor;
         }
-
-
     }
 }

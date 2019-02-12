@@ -9,17 +9,17 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
     {
         readonly IReadOnlyDictionary<string, ITemplateScopeSearchBag> _templateScopeSearchBags;
 
-        readonly IEnumerable<RouteDescriptionData> _routeDescriptions;
+        readonly IEnumerable<ActionDescriptor> _routes;
 
         readonly IEnumerable<ITemplateScopeSearchBag> _all;
 
         public int Order { get; }
 
-        public OrderScopeSearchBag(int order, IEnumerable<RouteDescriptionData> routeDescriptions)
+        public OrderScopeSearchBag(int order, IEnumerable<ActionDescriptor> routeDescriptions)
         {
             Order = order;
-            _routeDescriptions = routeDescriptions ?? throw new ArgumentNullException(nameof(routeDescriptions));
-            _templateScopeSearchBags = PrepareDict(_routeDescriptions);
+            _routes = routeDescriptions ?? throw new ArgumentNullException(nameof(routeDescriptions));
+            _templateScopeSearchBags = PrepareDict(_routes);
             _all = _templateScopeSearchBags.Select(x => x.Value);
         }
 
@@ -49,20 +49,20 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
         /// <summary>
         /// Return all found SearchData for current search bag.
         /// </summary>
-        public IEnumerable<RouteDescriptionData> GetFoundData()
+        public IEnumerable<ActionDescriptor> GetFoundData()
         {
-            return _routeDescriptions;
+            return _routes;
         }
 
-        IReadOnlyDictionary<string, ITemplateScopeSearchBag> PrepareDict(IEnumerable<RouteDescriptionData> routeDescriptions)
+        IReadOnlyDictionary<string, ITemplateScopeSearchBag> PrepareDict(IEnumerable<ActionDescriptor> routeDescriptions)
         {
-            var dict = new Dictionary<string, List<RouteDescriptionData>>();
+            var dict = new Dictionary<string, List<ActionDescriptor>>();
             foreach (var routDesc in routeDescriptions)
             {
                 var template = RealTemplate(routDesc.RouteInfo.Template);
                 if (!dict.TryGetValue(template, out var list))
                 {
-                    dict[template] = list = new List<RouteDescriptionData>();
+                    dict[template] = list = new List<ActionDescriptor>();
                 }
                 list.Add(routDesc);
             }

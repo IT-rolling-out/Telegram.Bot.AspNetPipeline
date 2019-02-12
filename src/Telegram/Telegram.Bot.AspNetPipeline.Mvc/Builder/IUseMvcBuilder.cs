@@ -19,7 +19,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         void MapRouteAction(RouteActionDelegate routeAction, RouteInfo routeInfo);
 
-        IEnumerable<RouteDescriptionData> GetRouteActions();
+        IEnumerable<ActionDescriptor> GetRoutes();
     }
 
 

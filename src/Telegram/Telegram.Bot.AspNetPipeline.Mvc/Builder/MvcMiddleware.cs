@@ -6,7 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices.Implementions;
+using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers;
 
@@ -16,14 +19,38 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
     {
         readonly MainRouter _mainRouter;
 
+        #region Resolved services.
+        IControllerInpector _controllerInpector;
+
+        IContextPreparer _contextPreparer;
+        #endregion
+
+        /// <summary>
+        /// All other services will be resolved from ServiceProvider.
+        /// </summary>
         public MvcMiddleware(IAddMvcBuilder addMvcBuilder, IUseMvcBuilder useMvcBuilder)
         {
             _mainRouter =new MainRouter(useMvcBuilder.Routers);
         }
 
-        public Task Invoke(UpdateContext ctx, Func<Task> next)
+        public async Task Invoke(UpdateContext ctx, Func<Task> next)
         {
-            throw new NotImplementedException();
+            var routingCtx = new RoutingContext(ctx);
+            await _mainRouter.RouteAsync(routingCtx);
+
+            //Handler found.
+            var actDesc=routingCtx.ActionDescriptor;
+            if (actDesc != null)
+            {
+                _contextPreparer.CreateContext(ctx, actDesc);
+            }
+            await next();
+        }
+
+        void ResolveServices(IServiceProvider serviceProvider)
+        {
+            _controllerInpector=serviceProvider.GetService<IControllerInpector>();
+            _contextPreparer= serviceProvider.GetService<IContextPreparer>();
         }
 
         #region Register services.

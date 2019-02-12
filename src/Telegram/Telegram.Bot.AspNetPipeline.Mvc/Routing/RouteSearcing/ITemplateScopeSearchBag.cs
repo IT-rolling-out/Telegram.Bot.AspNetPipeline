@@ -9,11 +9,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing
         string Template { get; }
 
         /// <summary>
-        /// Note that we found many RouteSearchData's, because one UpdateType can be used
+        /// Note that we found many data, because one UpdateType can be used
         /// with different templates.
         /// <para></para>
         /// Return default of type if not found.
         /// </summary>
-        IEnumerable<RouteDescriptionData> FindByUpdateTypes(IEnumerable<UpdateType> updateTypes, int limit = int.MaxValue);
+        IEnumerable<ActionDescriptor> FindByUpdateTypes(IEnumerable<UpdateType> updateTypes, int limit = int.MaxValue);
     }
 }

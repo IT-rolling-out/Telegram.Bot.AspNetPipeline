@@ -4,7 +4,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Core;
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
     /// <summary>
-    /// Static data about registered method or method.
+    /// Created on each request.
     /// </summary>
     public class ControllerActionContext : ActionContext
     {

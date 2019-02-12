@@ -15,60 +15,60 @@ namespace IRO.UnitTests.Telegram
 {
     public class RouteSearchBagsTests
     {
-        List<RouteDescriptionData> _routeDescriptions;
+        List<ActionDescriptor> _routes;
 
         IGlobalSearchBag _sb;
 
         [SetUp]
         public void Setup()
         {
-            _routeDescriptions = new List<RouteDescriptionData>();
-            _routeDescriptions.Add(
-                new RouteDescriptionData(
+            _routes = new List<ActionDescriptor>();
+            _routes.Add(
+                new ActionDescriptor(
                     null,
                     null
                 ));
 
-            _routeDescriptions.Add(
-                new RouteDescriptionData(
+            _routes.Add(
+                new ActionDescriptor(
                     null,
                     new RouteInfo(updateTypes: UpdateTypeExtensions.All)
                 ));
-            _routeDescriptions.Add(
-               new RouteDescriptionData(
+            _routes.Add(
+               new ActionDescriptor(
                    null,
                    new RouteInfo(template: "        ", updateTypes: UpdateTypeExtensions.All)
                ));
 
-            _routeDescriptions.Add(
-                new RouteDescriptionData(
+            _routes.Add(
+                new ActionDescriptor(
                     async (ctx) => { SetHandlerIdentifier(ctx, "M_LowPriority"); },
                     new RouteInfo(template: "t2", order: 2, name: "LowPriority", updateTypes: UpdateTypeExtensions.All)
                 ));
-            _routeDescriptions.Add(
-                new RouteDescriptionData(
+            _routes.Add(
+                new ActionDescriptor(
                      async (ctx) => { SetHandlerIdentifier(ctx, "M_HightPriority"); },
                     new RouteInfo(template: "t2", order: -1, name: "HightPriority", updateTypes: UpdateTypeExtensions.All)
                 ));
-            _routeDescriptions.Add(
-                new RouteDescriptionData(
+            _routes.Add(
+                new ActionDescriptor(
                      async (ctx) => { SetHandlerIdentifier(ctx, "M_NormalPriority"); },
                     new RouteInfo(template: "t2", order: 1, name: "NormalPriority", updateTypes: UpdateTypeExtensions.All)
                 ));
 
-            _routeDescriptions.Add(
-               new RouteDescriptionData(
+            _routes.Add(
+               new ActionDescriptor(
                     async (ctx) => { SetHandlerIdentifier(ctx, "Message"); },
                     new RouteInfo(template: "t3", order: 1, updateTypes: new UpdateType[] { UpdateType.Message })
                ));
-            _routeDescriptions.Add(
-               new RouteDescriptionData(
+            _routes.Add(
+               new ActionDescriptor(
                     async (ctx) => { SetHandlerIdentifier(ctx, "ChannelPost"); },
                     new RouteInfo(template: "t3", order: 1, updateTypes: new UpdateType[] { UpdateType.ChannelPost })
                ));
 
             var provider = new GlobalSearchBagProvider();
-            provider.Init(_routeDescriptions);
+            provider.Init(_routes);
             _sb = provider.Resolve();
 
         }
@@ -85,7 +85,7 @@ namespace IRO.UnitTests.Telegram
         public void TestNullRouteInfoRemoved()
         {
             var withoutNullRouteInfo = _sb.GetFoundData().ToList();
-            Assert.AreEqual(_routeDescriptions.Count, withoutNullRouteInfo.Count + 1);
+            Assert.AreEqual(_routes.Count, withoutNullRouteInfo.Count + 1);
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace IRO.UnitTests.Telegram
         [Test]
         public void TestUpdateType()
         {
-            var rddMessage = RouteDescriptionData.Empty;
+            var rddMessage = ActionDescriptor.Empty;
             foreach (var item in _sb.All())
             {
                 var templateScope = item
@@ -113,7 +113,7 @@ namespace IRO.UnitTests.Telegram
                 }
             }
 
-            var rddChannelPost = RouteDescriptionData.Empty;
+            var rddChannelPost = ActionDescriptor.Empty;
             foreach (var item in _sb.All())
             {
                 var templateScope = item
@@ -156,7 +156,7 @@ namespace IRO.UnitTests.Telegram
         public void TestDefaultSearchAndPriority()
         {
             var orderScopeSearchBags = _sb.All();
-            List<RouteDescriptionData> rddList = new List<RouteDescriptionData>();
+            List<ActionDescriptor> rddList = new List<ActionDescriptor>();
             foreach (var item in orderScopeSearchBags)
             {
                 var templateScope = item
@@ -186,7 +186,7 @@ namespace IRO.UnitTests.Telegram
 
         string _actionId;
 
-        string GetHandlerIdentifier(RouteDescriptionData routeDescriptionData)
+        string GetHandlerIdentifier(ActionDescriptor routeDescriptionData)
         {
             lock (_idLocker)
             {

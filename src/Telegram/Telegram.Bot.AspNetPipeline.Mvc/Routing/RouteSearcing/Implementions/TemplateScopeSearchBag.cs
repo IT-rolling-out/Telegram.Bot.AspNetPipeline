@@ -8,14 +8,14 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
 {
     internal class TemplateScopeSearchBag : ITemplateScopeSearchBag
     {
-        readonly IEnumerable<RouteDescriptionData> _routeDescriptions;
+        readonly IEnumerable<ActionDescriptor> _routes;
 
         public string Template { get; }
 
-        public TemplateScopeSearchBag(string template, IEnumerable<RouteDescriptionData> routeDescriptions)
+        public TemplateScopeSearchBag(string template, IEnumerable<ActionDescriptor> routes)
         {
             Template = template ?? throw new ArgumentNullException(nameof(template));
-            _routeDescriptions = routeDescriptions ?? throw new ArgumentNullException(nameof(routeDescriptions));
+            _routes = routes ?? throw new ArgumentNullException(nameof(routes));
         }
 
         /// <summary>
@@ -24,13 +24,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
         /// <para></para>
         /// Return default of type if not found.
         /// </summary>
-        public IEnumerable<RouteDescriptionData> FindByUpdateTypes(
+        public IEnumerable<ActionDescriptor> FindByUpdateTypes(
             IEnumerable<UpdateType> updateTypes,
             int limit = int.MaxValue
             )
         {
-            var res = new List<RouteDescriptionData>();
-            foreach (var routeDesc in _routeDescriptions)
+            var res = new List<ActionDescriptor>();
+            foreach (var routeDesc in _routes)
             {
                 bool updatesAllowed = true;
                 foreach (var item in updateTypes)
@@ -54,9 +54,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
             return res;
         }
 
-        public IEnumerable<RouteDescriptionData> GetFoundData()
+        public IEnumerable<ActionDescriptor> GetFoundData()
         {
-            return _routeDescriptions;
+            return _routes;
         }
     }
 }

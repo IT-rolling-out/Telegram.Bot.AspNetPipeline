@@ -11,7 +11,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing
         /// <summary>
         /// Called once.
         /// </summary>
-        void Init(IEnumerable<RouteDescriptionData> routeDescriptions);
+        void Init(IEnumerable<ActionDescriptor> routeDescriptions);
        
         IGlobalSearchBag Resolve();
     }

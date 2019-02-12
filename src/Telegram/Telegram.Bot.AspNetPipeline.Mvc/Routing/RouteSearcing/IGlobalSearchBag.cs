@@ -13,7 +13,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing
         /// </summary>
         IOrderScopeSearchBag FindOrderScope(int order);
 
-        RouteDescriptionData FindByName(string routeActionName);
+        ActionDescriptor FindByName(string routeActionName);
 
         /// <summary>
         /// Return enumerable sorted by order number.

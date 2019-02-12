@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices.Implementions
 {
     public static class ControllersTypesSearch
     {

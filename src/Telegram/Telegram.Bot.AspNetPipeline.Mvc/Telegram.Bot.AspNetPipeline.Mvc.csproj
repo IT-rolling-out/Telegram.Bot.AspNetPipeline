@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Routing\RouteSearcing\Abstractions\" />
     <Folder Include="Extensions\ImprovedBot\" />
   </ItemGroup>
 

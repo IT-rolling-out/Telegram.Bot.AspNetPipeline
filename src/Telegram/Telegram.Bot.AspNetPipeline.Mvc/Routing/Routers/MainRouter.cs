@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
         {
             foreach (var router in _routers)
             {
-                if (routeContext.RouteDescriptionData.Handler!=null)
+                if (routeContext.ActionDescriptor.Handler!=null)
                     return;
                 await router.RouteAsync(routeContext);
             }

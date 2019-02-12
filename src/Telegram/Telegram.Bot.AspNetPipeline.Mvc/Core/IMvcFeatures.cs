@@ -4,6 +4,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 {
     /// <summary>
     /// Some other mvc features.
+    /// <para></para>
+    /// Can't be resolved with IOC.
     /// </summary>
     public interface IMvcFeatures
     {

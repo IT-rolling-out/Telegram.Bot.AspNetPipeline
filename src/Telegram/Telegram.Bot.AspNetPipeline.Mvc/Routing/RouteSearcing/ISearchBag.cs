@@ -6,10 +6,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing
     public interface ISearchBag
     {
         /// <summary>
-        /// Return all found SearchData for current search bag.
+        /// Return all found data for current search bag.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<RouteDescriptionData> GetFoundData();
+        IEnumerable<ActionDescriptor> GetFoundData();
     }
 
     public interface ISearchBag<TInnerBag> : ISearchBag

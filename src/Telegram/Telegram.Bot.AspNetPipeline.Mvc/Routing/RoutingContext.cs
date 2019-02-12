@@ -19,7 +19,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         /// <summary>
         /// Set it if route match.
         /// </summary>
-        public RouteDescriptionData RouteDescriptionData { get; set; } = RouteDescriptionData.Empty;
+        public ActionDescriptor ActionDescriptor { get; set; } 
 
         #region Properties bag.
         IDictionary<object, object> _properties;
