@@ -29,7 +29,7 @@ namespace IRO.Tests.Telegram
                 {
                     mvcBuilder.MapRouteAction(async (actionCtx) =>
                     {
-                        await actionCtx.Features.StartAnotherAction("Help");
+                        //await actionCtx.Features.StartAnotherAction("Help");
                     }, template: "/info");
                 });
             });

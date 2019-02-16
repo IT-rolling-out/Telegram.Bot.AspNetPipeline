@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services
 {
     /// <summary>
     /// Main object to create controller actions.

@@ -8,11 +8,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing
     /// </summary>
     public interface IGlobalSearchBagProvider
     {
-        /// <summary>
-        /// Called once.
-        /// </summary>
-        void Init(IEnumerable<ActionDescriptor> routeDescriptions);
-       
         IGlobalSearchBag Resolve();
     }
 }

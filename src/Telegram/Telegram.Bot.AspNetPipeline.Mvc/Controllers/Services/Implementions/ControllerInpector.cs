@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices.Implementions
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
 {
     /// <summary>
     /// Main object to create controller actions.

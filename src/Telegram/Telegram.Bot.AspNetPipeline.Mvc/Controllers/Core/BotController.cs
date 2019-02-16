@@ -28,8 +28,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         /// </summary>
         public BotExt BotExt => UpdateContext.BotExt;
 
-        public IMvcFeatures Features => ControllerContext.Features ;
-
         public CancellationToken UpdateProcessingAborted => UpdateContext.UpdateProcessingAborted;
         #endregion
 

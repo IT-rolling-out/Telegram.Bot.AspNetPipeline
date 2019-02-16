@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading.Tasks;
-using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices
+namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services
 {
     /// <summary>
     /// Used in default ControllerInspector.

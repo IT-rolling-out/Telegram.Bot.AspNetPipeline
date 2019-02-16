@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 {
@@ -10,21 +12,15 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core
     /// </summary>
     public class ActionContext
     {
-        public ActionContext(UpdateContext updateContext, ActionDescriptor actionDescriptor, IMvcFeatures features)
+        public ActionContext(UpdateContext updateContext, ActionDescriptor actionDescriptor)
         {
             UpdateContext = updateContext;
             ActionDescriptor = actionDescriptor;
-            Features = features;
         }
 
         public UpdateContext UpdateContext { get; }
 
         public ActionDescriptor ActionDescriptor { get; }
-
-        /// <summary>
-        /// Allow you to interract with mvc middleware.
-        /// </summary>
-        public IMvcFeatures Features { get; }
 
         #region Properties bag.
         IDictionary<object, object> _properties;

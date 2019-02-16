@@ -14,24 +14,22 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// <summary>
         /// All will be registered as services.
         /// </summary>
-        public IList<Type> Controllers { get; }
+        public IList<Type> Controllers  { get; set; } = new List<Type>();
 
         /// <summary>
         /// Without ModelBinderProvider and more simpler.
         /// But you can build your own asp-like model binding middleware, if needed.
         /// </summary>
-        public IList<IModelBinder> ModelBinders { get; } = new List<IModelBinder>();
+        public IList<IModelBinder> ModelBinders { get; set; } = new List<IModelBinder>();
 
         public IServiceCollection ServiceCollection { get; }
 
         public AddMvcBuilder(
             MvcOptions addMvcOptions,
-            IList<Type> controllers,
             IServiceCollection serviceCollection
             )
         {
             ConfigureBotExtWithMvc = addMvcOptions.ConfigureBotExtWithMvc;
-            Controllers = controllers;
             ServiceCollection = serviceCollection;
         }
     }

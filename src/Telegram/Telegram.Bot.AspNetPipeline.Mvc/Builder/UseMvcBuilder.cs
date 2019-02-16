@@ -12,7 +12,14 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
     {
         readonly IList<ActionDescriptor> _routes = new List<ActionDescriptor>();
 
+        public IServiceProvider ServiceProvider { get; }
+
         public IList<IRouter> Routers { get; } = new List<IRouter>();
+
+        public UseMvcBuilder(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
 
         /// <summary>
         /// Just like you do with controller methods, but for delegates.

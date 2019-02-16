@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers1\**" />
+    <EmbeddedResource Remove="Controllers1\**" />
+    <None Remove="Controllers1\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
   </ItemGroup>
 

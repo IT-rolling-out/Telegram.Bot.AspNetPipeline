@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
-using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices;
-using Telegram.Bot.AspNetPipeline.Mvc.Controllers.MiddlewareServices.Implementions;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
@@ -20,9 +23,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         readonly MainRouter _mainRouter;
 
         #region Resolved services.
-        IControllerInpector _controllerInpector;
+        readonly IContextPreparer _contextPreparer;
 
-        IContextPreparer _contextPreparer;
+        readonly ServicesBus _servicesBus;
+
+        readonly IGlobalSearchBag _globalSearchBag;
         #endregion
 
         /// <summary>
@@ -30,7 +35,24 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         public MvcMiddleware(IAddMvcBuilder addMvcBuilder, IUseMvcBuilder useMvcBuilder)
         {
+            var serv = useMvcBuilder.ServiceProvider;
             _mainRouter = new MainRouter(useMvcBuilder.Routers);
+            _contextPreparer = serv.GetService<IContextPreparer>();
+
+            var controllers = addMvcBuilder.Controllers;
+            var startupRoutes = useMvcBuilder.GetRoutes();
+            _globalSearchBag = InitGlobalSearchBagProvider(serv, startupRoutes, controllers);
+
+            //Init services bus.
+            _servicesBus = serv.GetService<ServicesBus>();
+            var outerMiddlewaresInformer = new OuterMiddlewaresInformer(_mainRouter);
+            var mvcFeatures = new MvcFeatures();
+            _servicesBus.Init(
+                _mainRouter, 
+                outerMiddlewaresInformer, 
+                mvcFeatures
+                );
+
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
@@ -44,83 +66,55 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             {
                 var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
                 await actDesc.Handler.Invoke(actionContext);
+
+                await InvokeActionByName(actionContext);
             }
             await next();
         }
 
-        void ResolveServices(IServiceProvider serviceProvider)
+        async Task InvokeActionByName(ActionContext prevActionContext)
         {
-            _controllerInpector = serviceProvider.GetService<IControllerInpector>();
-            _contextPreparer = serviceProvider.GetService<IContextPreparer>();
-        }
+            var startAnotherActionData = MvcFeatures.GetData(prevActionContext);
+            if (startAnotherActionData == null)
+                return;
 
-        #region Register services.
-        /// <summary>
-        /// I think it must be here, not in extensions class.
-        /// <para></para>
-        /// Static, because MvcMiddleware created after DI container builded, when we can't add new services.
-        /// </summary>
-        internal static void RegisterServices(
-            ServiceCollectionWrapper serviceCollectionWrapper,
-            MvcOptions mvcOptions = null,
-            Action<IAddMvcBuilder> configureAddMvcBuilder = null)
-        {
-            var serv = serviceCollectionWrapper.Services;
-            //First step. Register all services, that can be registered before IAddMvcBuilder configurations.
-            RegisterServises_NotRequiredBuilder(serviceCollectionWrapper);
-
-            //Second step. Init AddMvcBuilder parameters with MvcOptions to pass it to callback.
-            mvcOptions = mvcOptions ?? new MvcOptions();
-            var addMvcBuilder = InitAddMvcBuilder(serviceCollectionWrapper, mvcOptions);
-
-            //Custom configs.
-            configureAddMvcBuilder?.Invoke(addMvcBuilder);
-
-            //Third step. Register all services based on IAddMvcBuilder.
-            RegisterServises_RequiredBuilder(
-                serviceCollectionWrapper,
-                addMvcBuilder
-                );
-
-            //Finish. Register builders to be resolved in middleware.
-            serv.AddSingleton<IAddMvcBuilder>(addMvcBuilder);
-            serv.AddSingleton<IUseMvcBuilder, UseMvcBuilder>();
-        }
-
-        static void RegisterServises_NotRequiredBuilder(ServiceCollectionWrapper serviceCollectionWrapper)
-        {
-            var serv = serviceCollectionWrapper.Services;
-            serviceCollectionWrapper.AddControllersFactory<ControllersFactory>();
-            serv.AddSingleton<ControllerInpector>();
-        }
-
-        static void RegisterServises_RequiredBuilder(ServiceCollectionWrapper serviceCollectionWrapper, IAddMvcBuilder addMvcBuilder)
-        {
-            var serv = serviceCollectionWrapper.Services;
-            foreach (var controllerType in addMvcBuilder.Controllers)
+            var ctx = prevActionContext.UpdateContext;
+            var actDesc = _globalSearchBag.FindByName(startAnotherActionData.ActionName);
+            if (actDesc != null)
             {
-                serv.AddTransient(controllerType);
+                var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
+                await actDesc.Handler.Invoke(actionContext);
+
+                //Check again.
+                await InvokeActionByName(actionContext);
+            }
+        }
+
+        IGlobalSearchBag InitGlobalSearchBagProvider(
+            IServiceProvider serv, 
+            IEnumerable<ActionDescriptor> startupRoutes, 
+            IList<Type> controllers
+            )
+        {
+            //Init routes (ActionDescriptors) search bag.
+
+            //Smallest controllers code in MvcMiddleware class that i can write.
+            var controllersInspector = serv.GetService<IControllerInpector>();
+            var controllersRoutes = new List<ActionDescriptor>();
+            foreach (var controllerType in controllers)
+            {
+                var routes = controllersInspector.Inspect(controllerType);
+                controllersRoutes.AddRange(routes);
             }
 
-        }
+            var allRoutes = controllersRoutes.ToList();
+            allRoutes.AddRange(startupRoutes);
+            var globalSearchBagProvider = serv.GetService<GlobalSearchBagProvider>();
+            globalSearchBagProvider.Init(allRoutes);
+            //Search bag initialized. 
+            //All routes you can get only with IGlobalSearchBag.
 
-        static IAddMvcBuilder InitAddMvcBuilder(ServiceCollectionWrapper serviceCollectionWrapper, MvcOptions mvcOptions)
-        {
-            var serv = serviceCollectionWrapper.Services;
-            IList<Type> controllers = null;
-            if (mvcOptions.FindControllersByReflection)
-            {
-                //Search controllers.
-                controllers = ControllersTypesSearch.FindAllControllers();
-            }
-            controllers = controllers ?? new List<Type>();
-            IAddMvcBuilder addMvcBuilder = new AddMvcBuilder(
-                mvcOptions,
-                controllers,
-                serv
-                );
-            return addMvcBuilder;
+            return globalSearchBagProvider.Resolve();
         }
-        #endregion
     }
 }

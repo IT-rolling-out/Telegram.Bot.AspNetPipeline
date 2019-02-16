@@ -113,18 +113,17 @@ namespace IRO.UnitTests.Telegram
         public async Task AllPending_TaskAwait()
         {
             var executionManager = new ThreadPoolExecutionManager(new LoggerFactory());
-            var locker = new object();
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
             int count = 200;
             int finishedTasks = 0;
-            List<TaskCompletionSource<object>> tasksSources = new List<TaskCompletionSource<object>>();
+            var tasksSources = new List<TaskCompletionSource<object>>();
 
             //Launch many threads.
             for (int i = 0; i < count; i++)
             {
                 var t = executionManager.ProcessUpdate(async () =>
                 {
-                    var tcs = new TaskCompletionSource<object>();
+                    var tcs = new TaskCompletionSource<object>(TaskContinuationOptions.RunContinuationsAsynchronously);
                     lock (tasksSources)
                     {
                         tasksSources.Add(tcs);

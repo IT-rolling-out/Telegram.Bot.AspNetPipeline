@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
@@ -10,10 +11,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
     {
         public ControllerActionContext(
             UpdateContext updateContext,
-            ControllerActionDescriptor controllerActionDescriptor,
-            IMvcFeatures features
+            ControllerActionDescriptor controllerActionDescriptor
             ) 
-            : base(updateContext, controllerActionDescriptor, features)
+            : base(updateContext, controllerActionDescriptor)
         {
         }
 

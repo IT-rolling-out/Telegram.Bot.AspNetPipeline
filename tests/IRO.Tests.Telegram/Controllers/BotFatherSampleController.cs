@@ -35,7 +35,7 @@ namespace IRO.Tests.Telegram.Controllers
             UpdateContext.Processed();
 
             //Start another method with name "Help" after current will be finished.
-            Features.StartAnotherAction("Help");
+            //Features.StartAnotherAction("Help");
         }
 
         /// <summary>

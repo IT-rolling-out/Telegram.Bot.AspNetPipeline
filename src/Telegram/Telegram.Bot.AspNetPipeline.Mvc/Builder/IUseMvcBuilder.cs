@@ -7,8 +7,13 @@ using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
+    /// <summary>
+    /// Not added to DI conteiner.
+    /// </summary>
     public interface IUseMvcBuilder
     {
+        IServiceProvider ServiceProvider { get; }
+
         /// <summary>
         /// Default routers.  
         /// </summary>

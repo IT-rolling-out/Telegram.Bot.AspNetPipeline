@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Core
+namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Services
 {
     public interface IContextPreparer
     {
@@ -9,4 +9,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core
         /// </summary>
         ActionContext CreateContext(UpdateContext ctx, ActionDescriptor actionDescriptor);
     }
+
+
 }

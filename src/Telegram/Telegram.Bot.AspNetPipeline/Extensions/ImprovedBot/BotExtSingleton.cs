@@ -46,7 +46,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
         public async Task<Message> ReadMessageAsync(UpdateContext updateContext, UpdateValidator updateValidator)
         {
-            TaskCompletionSource<Update> taskCompletionSource = new TaskCompletionSource<Update>();
+            var taskCompletionSource = new TaskCompletionSource<Update>(
+                TaskContinuationOptions.RunContinuationsAsynchronously
+                );
             Add(updateContext, taskCompletionSource, updateValidator);
 
             //var hiddenContext=HiddenUpdateContext.Resolve(updateContext);
