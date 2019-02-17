@@ -17,11 +17,23 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
         /// <para></para>
         /// All controller logic (like creating controllers, ModelBinders etc.) must be here.
         /// To know why - read readme.txt in Telegram.Bot.AspNetPipeline.Mvc.Controllers folder.
+        /// <para></para>
+        /// Current implemention use only <see cref="ControllerActionContext"/>, but you can use passed parameters
+        /// to generate some predefined code to make it faster.
         /// </summary>
         public RouteActionDelegate CreateAction(Type controllerType, MethodInfo methodInfo, RouteInfo routeInfo)
         {
             RouteActionDelegate routeActionDelegate = async (actionContext) =>
              {
+#if DEBUG
+                 if (actionContext is ControllerActionContext controllerActionContext)
+                 {
+                     if (controllerActionContext.ActionDescriptor.MethodInfo != methodInfo)
+                     {
+                         throw new Exception("Predefined MethodInfo and context MethodInfo is different.");
+                     }
+                 }
+#endif
                  if (!(actionContext is ControllerActionContext))
                  {
                      throw new Exception(

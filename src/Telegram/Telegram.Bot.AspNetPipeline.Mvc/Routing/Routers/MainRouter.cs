@@ -8,7 +8,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
     /// <summary>
     /// Used only to aggregate all routers.
     /// <para></para>
-    /// Registered in IOC as self.
+    /// Registered in IOC as self. Please, don't use it in your implementions.
     /// </summary>
     public class MainRouter:IRouter
     {
@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
         {
             foreach (var router in _routers)
             {
-                if (routeContext.ActionDescriptor.Handler!=null)
+                if (routeContext.ActionDescriptor?.Handler!=null)
                     return;
                 await router.RouteAsync(routeContext);
             }

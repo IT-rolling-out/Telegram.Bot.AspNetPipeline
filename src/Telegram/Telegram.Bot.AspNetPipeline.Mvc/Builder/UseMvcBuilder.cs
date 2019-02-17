@@ -14,7 +14,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 
         public IServiceProvider ServiceProvider { get; }
 
-        public IList<IRouter> Routers { get; } = new List<IRouter>();
+        public IList<IRouter> Routers { get; } = new List<IRouter>()
+        {
+            new FullMatchRouter()
+        };
 
         public UseMvcBuilder(IServiceProvider serviceProvider)
         {

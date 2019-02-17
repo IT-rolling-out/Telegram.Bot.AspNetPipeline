@@ -230,7 +230,9 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("BotHandler setup exception.", ex);
+                    var exception = new Exception("BotHandler setup exception.", ex);
+                    _logger.LogError(exception, "");
+                    throw exception;
                 }
             }
         }

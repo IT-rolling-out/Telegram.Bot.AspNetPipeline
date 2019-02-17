@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.ExceptionServices;
+using IRO.Tests.Telegram.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -23,20 +24,7 @@ namespace IRO.Tests.Telegram
 
             botHandler.ConfigureServices((servicesWrap) =>
             {
-                servicesWrap.LoggingAdvancedConfigure(new LoggingAdvancedOptions
-                {
-                    //LoggingWithSerialization = true
-                });
-                //Default way with Services.AddLogging doesn't work for me.
-                servicesWrap.Services.AddSingleton<ILoggerFactory>(new LoggerFactory(new ILoggerProvider[]
-                {
-                    new NLogLoggerProvider(
-                        new NLogProviderOptions()
-                        {
-                            IncludeScopes=true,
-                            CaptureMessageProperties=true
-                        })
-                }));
+                LoggerStarter.InitLogger(servicesWrap);
             });
 
             botHandler.ConfigureBuilder((builder) =>

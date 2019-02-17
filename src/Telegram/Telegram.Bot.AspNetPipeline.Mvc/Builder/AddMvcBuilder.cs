@@ -17,10 +17,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         public IList<Type> Controllers  { get; set; } = new List<Type>();
 
         /// <summary>
+        /// Types must implement <see cref="IModelBinder"/>.
+        /// <para></para>
         /// Without ModelBinderProvider and more simpler.
         /// But you can build your own asp-like model binding middleware, if needed.
         /// </summary>
-        public IList<IModelBinder> ModelBinders { get; set; } = new List<IModelBinder>();
+        public IList<Type> ModelBinders { get; set; } = new List<Type>();
 
         public IServiceCollection ServiceCollection { get; }
 

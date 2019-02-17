@@ -26,7 +26,7 @@ namespace IRO.Tests.Telegram
             var bot = new TelegramBotClient(token);
             var botHandler = new BotHandler(bot);
 
-            var botTest = new BotTests_ReadMiddleware();
+            var botTest = new BotTests_Mvc();
             botTest.Run(botHandler, true);
 
             while (true)

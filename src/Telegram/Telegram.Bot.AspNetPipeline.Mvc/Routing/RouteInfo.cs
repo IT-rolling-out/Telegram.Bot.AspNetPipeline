@@ -52,7 +52,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         /// <summary>
         /// Used hash set for fast search.
         /// <para></para>
-        /// Can be null.
+        /// Can be null. Null mean all update types.
         /// </summary>
         public HashSet<UpdateType> UpdateTypes { get; }
     }

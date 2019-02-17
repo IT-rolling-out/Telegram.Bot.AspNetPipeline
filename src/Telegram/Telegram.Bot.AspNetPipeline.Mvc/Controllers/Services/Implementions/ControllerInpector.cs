@@ -29,7 +29,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
         /// </summary>
         public IEnumerable<ControllerActionDescriptor> Inspect(Type controllerType)
         {
-            if (!controllerType.IsInstanceOfType(typeof(BotController)))
+            if (!typeof(BotController).IsAssignableFrom(controllerType))
             {
                 throw new Exception($"Type '{controllerType}' is not instance of type '{typeof(BotController)}'");
             }

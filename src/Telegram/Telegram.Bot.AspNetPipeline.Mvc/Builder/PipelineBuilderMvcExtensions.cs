@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
+using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
@@ -40,17 +43,17 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             mvcOptions = mvcOptions ?? new MvcOptions();
             var addMvcBuilder = InitAddMvcBuilder(serviceCollectionWrapper, mvcOptions);
 
-            //Custom configs.
-            configureAddMvcBuilder?.Invoke(addMvcBuilder);
-
             //Third step. Register all services based on IAddMvcBuilder.
             AddServises_RequiredBuilder(
                 serviceCollectionWrapper,
                 addMvcBuilder
                 );
-            
+
             //!Add controllers services.
-            ControllersMiddlewareExtensions.AddControllersServices(serviceCollectionWrapper);
+            ControllersMiddlewareExtensions.AddControllersServices(addMvcBuilder);
+
+            //Custom configs.
+            configureAddMvcBuilder?.Invoke(addMvcBuilder);
 
             //Finish. Register builders to be resolved in middleware.
             serv.AddSingleton<IAddMvcBuilder>(addMvcBuilder);
@@ -59,6 +62,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         static void AddServises_NotRequiredBuilder(ServiceCollectionWrapper serviceCollectionWrapper)
         {
             var serv = serviceCollectionWrapper.Services;
+
+            var globalSearchBagProvider = new GlobalSearchBagProvider();
+            serv.AddSingleton<IGlobalSearchBagProvider>(globalSearchBagProvider);
+            serv.AddSingleton<GlobalSearchBagProvider>(globalSearchBagProvider);
+
+            serv.AddSingleton<IContextPreparer, ContextPreparer>();
 
             //Register services bus for services, created in MvcMiddleware.
             var servicesBus = new ServicesBus();

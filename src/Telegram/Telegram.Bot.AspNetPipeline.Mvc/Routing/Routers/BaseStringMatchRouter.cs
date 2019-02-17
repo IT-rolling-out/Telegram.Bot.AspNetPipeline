@@ -1,15 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
-    public abstract class BaseStringMatchRouter:IRouter
+    public abstract class BaseStringMatchRouter : IRouter
     {
-        protected BaseStringMatchRouter()
-        {
-            //TODO: Here actions dictionary must be invoked.
-        }
-
         /// <summary>
         /// Note, that StringMatchRouter.SetTemplateMatchingStrings must not set any handler in RoutingContext.
         /// It can only customize routing by TemplateMatchingStrings. It can add|remove|edit
@@ -20,20 +17,41 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
         /// After each IRouter processing mvc middleware will search all TemplateMatchingStrings in dictionary.
         /// If not find - call next router.
         /// </summary>
-        protected IList<string> TemplateMatchingStrings { get; set; } = new List<string>();
-
-        
         public async Task RouteAsync(RoutingContext routeContext)
         {
-            await SetTemplateMatchingStrings(routeContext);
+            var templateMatchingStrings = new List<string>();
+            await SetTemplateMatchingStrings(routeContext,templateMatchingStrings);
 
-            //TODO: Here must be searching in dictionary with actions.
-            throw new System.NotImplementedException();
+            if (templateMatchingStrings.Count==0)
+            {
+                return;
+            }
+
+            var globalSearchBagProvider =
+                routeContext.UpdateContext.Services.GetService<IGlobalSearchBagProvider>();
+            var globalSearchBag = globalSearchBagProvider.Resolve();
+            foreach (var fullMatchTemplate in templateMatchingStrings)
+            {
+                foreach (var orderScope in globalSearchBag.AllSorted())
+                {
+                    var templateScope = orderScope.FindTemplateScope(fullMatchTemplate);
+                    if (templateScope != null)
+                    {
+                        var updType = routeContext.UpdateContext.Update.Type;
+                        var actDesc = templateScope.FindOneByUpdateType(updType);
+                        if (actDesc != null)
+                        {
+                            routeContext.ActionDescriptor = actDesc;
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Can only set TemplateMatchingStrings that used in searching of handler.
         /// </summary>
-        protected abstract Task SetTemplateMatchingStrings(RoutingContext routeContext);
+        protected abstract Task SetTemplateMatchingStrings(RoutingContext routeContext,IList<string> templateMatchingStrings);
     }
 }
