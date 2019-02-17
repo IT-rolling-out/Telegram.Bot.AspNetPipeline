@@ -35,8 +35,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
                 bool updatesAllowed = true;
                 foreach (var item in updateTypes)
                 {
-                    //If null - allow all updates.
-                    if (!(routeDesc.RouteInfo.UpdateTypes == null || routeDesc.RouteInfo.UpdateTypes.Contains(item)))
+                    bool allUpdatesAllowed = routeDesc.RouteInfo.UpdateTypes == null ||
+                                             routeDesc.RouteInfo.UpdateTypes.Count <= 0;
+                    if (!(allUpdatesAllowed || routeDesc.RouteInfo.UpdateTypes.Contains(item)))
                     {
                         updatesAllowed = false;
                         break;

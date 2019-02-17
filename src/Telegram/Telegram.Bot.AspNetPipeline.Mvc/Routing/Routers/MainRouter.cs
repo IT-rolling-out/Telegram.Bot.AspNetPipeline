@@ -7,8 +7,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
     /// <summary>
     /// Used only to aggregate all routers.
-    /// <para></para>
-    /// Registered in IOC as self. Please, don't use it in your implementions.
     /// </summary>
     public class MainRouter:IRouter
     {

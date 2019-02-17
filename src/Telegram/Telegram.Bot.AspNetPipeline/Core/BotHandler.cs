@@ -20,6 +20,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
     public class BotHandler : IDisposable
     {
         #region Private fields
+        readonly ITelegramBotClient _bot;
+
         #region Resolved serviced.
         ILogger _logger;
 
@@ -51,6 +53,9 @@ namespace Telegram.Bot.AspNetPipeline.Core
         #region Properties
         public IServiceProvider Services { get; private set; }
 
+        /// <summary>
+        /// Initialized on setup.
+        /// </summary>
         public BotClientContext BotContext { get; private set; }
 
         public bool IsRunning { get; private set; }
@@ -83,7 +88,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         {
             if (bot == null)
                 throw new ArgumentNullException(nameof(bot));
-            BotContext = new BotClientContext(bot);
+            _bot = bot;
             servicesCollection = servicesCollection ?? new ServiceCollection();
             _serviceCollectionWrapper = new ServiceCollectionWrapper(servicesCollection);
         }
@@ -114,7 +119,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 if (IsRunning)
                     return;
                 Setup();
-                BotContext.Bot.StartReceiving();
+                _bot.StartReceiving();
                 SubscribeBotEvents();
                 IsRunning = true;
             }
@@ -189,6 +194,9 @@ namespace Telegram.Bot.AspNetPipeline.Core
                     {
                         return;
                     }
+
+                    var botInfo=_bot.GetMeAsync().Result;
+                    BotContext = new BotClientContext(_bot, botInfo);
 
                     //Register services.
                     AddMandatoryServices(_serviceCollectionWrapper);
@@ -286,13 +294,13 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         void ResolveBotHandlerServices()
         {
-            _loggerFactory = Services.GetService<ILoggerFactory>();
+            _loggerFactory = Services.GetRequiredService<ILoggerFactory>();
             _logger = _loggerFactory.CreateLogger(GetType());
             _logger.LogTrace("Logger initialized in BotHandler. BOTHANDLER STARTED.");
 
-            PendingExceededChecker = Services.GetService<IPendingExceededChecker>();
-            ExecutionManager = Services.GetService<IExecutionManager>();
-            var lao = Services.GetService<Func<LoggingAdvancedOptions>>().Invoke();
+            PendingExceededChecker = Services.GetRequiredService<IPendingExceededChecker>();
+            ExecutionManager = Services.GetRequiredService<IExecutionManager>();
+            var lao = Services.GetRequiredService<Func<LoggingAdvancedOptions>>().Invoke();
             lao.LazySerializerFactory = lao.LazySerializerFactory ?? new LazySerializerFactory();
             LoggingAdvancedOptions = lao;
         }

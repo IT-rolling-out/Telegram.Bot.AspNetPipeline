@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
@@ -19,8 +20,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             this IPipelineBuilder @this,
             Action<IUseMvcBuilder> configureUseMvcBuilder = null)
         {
-            var addMvcBuilder = @this.ServiceProvider.GetService<IAddMvcBuilder>();
+            var addMvcBuilder = @this.ServiceProvider.GetRequiredService<IAddMvcBuilder>();
             var useMvcBuilder = new UseMvcBuilder(@this.ServiceProvider);
+
+            //Controllers settiongs.
+            ControllersMiddlewareExtensions.InitUseMvcBuilder(useMvcBuilder);
+
+            //Custom settings.
             configureUseMvcBuilder?.Invoke(useMvcBuilder);
             var md = new MvcMiddleware(addMvcBuilder, useMvcBuilder);
             @this.UseMiddlware(md);
@@ -75,6 +81,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             serv.AddSingleton<IMainRouterProvider>(servicesBus);
             serv.AddSingleton<IOuterMiddlewaresInformerProvider>(servicesBus);
             serv.AddSingleton<IMvcFeaturesProvider>(servicesBus);
+            //Controllers service.
+            serv.AddSingleton<IMainModelBinderProvider>(servicesBus);
         }
 
         static void AddServises_RequiredBuilder(ServiceCollectionWrapper serviceCollectionWrapper, IAddMvcBuilder addMvcBuilder)

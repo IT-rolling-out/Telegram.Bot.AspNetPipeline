@@ -28,7 +28,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
             }
 
             var globalSearchBagProvider =
-                routeContext.UpdateContext.Services.GetService<IGlobalSearchBagProvider>();
+                routeContext.UpdateContext.Services.GetRequiredService<IGlobalSearchBagProvider>();
             var globalSearchBag = globalSearchBagProvider.Resolve();
             foreach (var fullMatchTemplate in templateMatchingStrings)
             {

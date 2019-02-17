@@ -11,7 +11,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         public static void UseMiddlware<TMiddleware>(this IPipelineBuilder @this)
             where TMiddleware : IMiddleware
         {
-            var md = @this.ServiceProvider.GetService<TMiddleware>();
+            var md = @this.ServiceProvider.GetRequiredService<TMiddleware>();
             @this.UseMiddlware(md);
         }
 

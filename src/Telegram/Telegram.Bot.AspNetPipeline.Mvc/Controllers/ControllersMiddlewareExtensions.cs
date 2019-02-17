@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
@@ -25,31 +26,29 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
             {
                 serv.AddTransient(controllerType);
             }
-            
-            //TODO Add Model binders.
-            
         }
 
         public static void InitAddMvcBuilder(MvcOptions options, IAddMvcBuilder builder)
         {
-            IList<Type> controllers = null;
             if (options.FindControllersByReflection)
             {
                 //Search controllers.
-                controllers = ControllersTypesSearch.FindAllControllers();
+                builder.Controllers = ControllersTypesSearch.FindAllControllers();
             }
-            if (controllers != null)
-            {
-                builder.Controllers = controllers;
-            }
+        }
 
-            builder.ModelBinders = new List<Type>
+        public static void InitUseMvcBuilder(IUseMvcBuilder builder)
+        {
+            //Add Model binders.
+            builder.ModelBinders = new List<IModelBinder>
             {
-
+                new SpacingModelBinder()
             };
 
 
 
         }
+
+        
     }
 }

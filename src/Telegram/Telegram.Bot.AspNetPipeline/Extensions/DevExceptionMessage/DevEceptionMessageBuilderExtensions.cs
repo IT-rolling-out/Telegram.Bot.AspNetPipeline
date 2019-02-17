@@ -21,7 +21,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
             {
                 if (!(ex is TaskCanceledException))
                 {
-                    await UpdateContextExtensions.SendTextMessageAsync(ctx, "```" + ex.ToString() + "```",
+                    var msg=ex.ToString();
+                    //Max for telegram is 4096 UTF8  characters.
+                    if (msg.Length > 4080)
+                        msg = msg.Remove(4080) + "...";
+                    await UpdateContextExtensions.SendTextMessageAsync(ctx, "```" + msg + "```",
                         parseMode: ParseMode.Markdown
                     );
                 }

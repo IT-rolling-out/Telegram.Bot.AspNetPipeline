@@ -1,8 +1,10 @@
 ﻿using System;
+using Newtonsoft.Json;
+using Telegram.Bot.AspNetPipeline.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
-    public class MvcOptions
+    public class MvcOptions:ICloneable
     {
         /// <summary>
         /// Default is true. Find controllers and register them in ioc as services.
@@ -25,8 +27,25 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// All route actions, that has bigger or equals order than BotExtOrder value (actions with lower priority)
         /// will be executed after ReadMessageAsync callback on conflicts.
         /// <para></para>
-        /// Default value is null.
+        /// Default value is 0.
         /// </summary>
         public int BotExtOrder { get; set; } = 0;
+
+        /// <summary>
+        /// Limit of StartAnotherAction calls for one <see cref="UpdateContext"/>.
+        /// Default is 5.
+        /// </summary>
+        public int StartAnotherActionMaxStackLevel { get; set; } = 5;
+
+
+        /// <summary>Creates a new object that is a copy of the current instance.</summary>
+        /// <returns>A new object that is a copy of this instance.</returns>
+        public object Clone()
+        {
+            //Lazy deep copy.
+            var str= JsonConvert.SerializeObject(this);
+            var clone = JsonConvert.DeserializeObject(str, GetType());
+            return clone;
+        }
     }
 }

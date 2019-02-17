@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 
@@ -49,13 +51,25 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
         public static async Task Handler(ControllerActionContext controllerActionContext)
         {
             var serv = controllerActionContext.UpdateContext.Services;
-            var factory = serv.GetService<IControllersFactory>();
+            var factory = serv.GetRequiredService<IControllersFactory>();
             BotController controller = factory.Create(controllerActionContext);
             BotController.InvokeInitializer(controller, controllerActionContext);
-
             var methodInfo = controllerActionContext.ActionDescriptor.MethodInfo;
 
-            //TODO model binders create parameters, invoke methodinfo.
+            //Model binding.
+            var modelBindingContext = new ModelBindingContext(controllerActionContext);
+            var mainModelBinder = serv
+                .GetRequiredService<IMainModelBinderProvider>().MainModelBinder;
+            await mainModelBinder.Bind(modelBindingContext);
+            controllerActionContext.IsModelStateValid = modelBindingContext.IsAllBinded();
+            var invokationParams = modelBindingContext.ToMethodParameters();
+
+            //Invoke.
+            var methodResult=methodInfo.Invoke(controller, invokationParams);
+            if (methodResult is Task task)
+            {
+                await task;
+            }
         }
     }
 }

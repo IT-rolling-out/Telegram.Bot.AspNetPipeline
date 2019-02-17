@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
             }
             else
             {
-                var loggerFactory = @this.Services.GetService<ILoggerFactory>();
+                var loggerFactory = @this.Services.GetRequiredService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger(@this.GetType());
                 @this.Properties[LoggerPropertyName] = logger;
                 return logger;

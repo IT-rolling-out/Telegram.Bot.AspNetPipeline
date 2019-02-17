@@ -32,7 +32,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 }
                 else
                 {
-                    botExt = new BotExt(@this.Services.GetService<IBotExtSingleton>(), @this);
+                    botExt = new BotExt(@this.Services.GetRequiredService<IBotExtSingleton>(), @this);
                     @this.Properties[ctxPropName] = botExt;
                 }
 

@@ -33,15 +33,12 @@ namespace IRO.Tests.Telegram.Controllers
             //In mvc middleware called by default if found command or read-callback.
             //Next middleware can ignore it.
             UpdateContext.Processed();
-
-            //Start another method with name "Help" after current will be finished.
-            //Features.StartAnotherAction("Help");
         }
 
         /// <summary>
         /// Will cancel NewBot.
         /// </summary>
-        [BotRoute("/help", UpdateType.Message, Name ="help")]
+        [BotRoute("/help", UpdateType.Message, Name ="Help")]
         public async Task Help()
         {
             await Bot.SendTextMessageAsync(Chat.Id, "Commands list:\n" +
@@ -55,10 +52,13 @@ namespace IRO.Tests.Telegram.Controllers
         /// So will not cancel NewBot.
         /// NOTE: Bigger Order mean lower priority, asp.net naming.
         /// </summary>
-        [BotRoute(Order =-1)]
+        [BotRoute(Order =-1, Name ="Default")]
         public async Task Default()
         {
+            
             await Bot.SendTextMessageAsync(Chat.Id, "Hi, i am BotFather.");
+            //Start another method with name "Help" after current will be finished.
+            Features.StartAnotherAction("Help");
         }
     }
 }

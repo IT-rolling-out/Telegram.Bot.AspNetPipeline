@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
@@ -22,6 +23,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
     {
         readonly MainRouter _mainRouter;
 
+        readonly MvcOptions _mvcOptions;
+
         #region Resolved services.
         readonly IContextPreparer _contextPreparer;
 
@@ -35,22 +38,31 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         public MvcMiddleware(IAddMvcBuilder addMvcBuilder, IUseMvcBuilder useMvcBuilder)
         {
+            addMvcBuilder.Controllers = addMvcBuilder.Controllers ?? new List<Type>();
+            useMvcBuilder.Routers = useMvcBuilder.Routers ?? new List<IRouter>();
+            useMvcBuilder.ModelBinders = useMvcBuilder.ModelBinders ?? new List<IModelBinder>();
+
+            _mvcOptions = (MvcOptions)addMvcBuilder.MvcOptions.Clone();
+
             var serv = useMvcBuilder.ServiceProvider;
             _mainRouter = new MainRouter(useMvcBuilder.Routers);
-            _contextPreparer = serv.GetService<IContextPreparer>();
+            _contextPreparer = serv.GetRequiredService<IContextPreparer>();
 
+            //Controllers.
             var controllers = addMvcBuilder.Controllers;
             var startupRoutes = useMvcBuilder.GetRoutes();
             _globalSearchBag = InitGlobalSearchBagProvider(serv, startupRoutes, controllers);
+            var mainModelBinder = new MainModelBinder(useMvcBuilder.ModelBinders);
 
             //Init services bus.
-            _servicesBus = serv.GetService<ServicesBus>();
+            _servicesBus = serv.GetRequiredService<ServicesBus>();
             var outerMiddlewaresInformer = new OuterMiddlewaresInformer(_mainRouter);
             var mvcFeatures = new MvcFeatures();
             _servicesBus.Init(
-                _mainRouter, 
-                outerMiddlewaresInformer, 
-                mvcFeatures
+                _mainRouter,
+                outerMiddlewaresInformer,
+                mvcFeatures,
+                mainModelBinder
                 );
 
         }
@@ -67,39 +79,48 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
                 var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
                 await actDesc.Handler.Invoke(actionContext);
 
-                await InvokeActionByName(actionContext);
+                await InvokeActionByName(actionContext, 1);
             }
             await next();
         }
 
-        async Task InvokeActionByName(ActionContext prevActionContext)
+        async Task InvokeActionByName(ActionContext prevActionContext, int invokesCount)
         {
+            var max = _mvcOptions.StartAnotherActionMaxStackLevel;
+            if (invokesCount > max)
+                throw new Exception($"StartAnotherAction invoked recursive more than {max} times. " +
+                                    $"You can change max value in MvcOptions.");
+
             var startAnotherActionData = MvcFeatures.GetData(prevActionContext);
             if (startAnotherActionData == null)
                 return;
+            var actName= startAnotherActionData.ActionName;
 
             var ctx = prevActionContext.UpdateContext;
-            var actDesc = _globalSearchBag.FindByName(startAnotherActionData.ActionName);
-            if (actDesc != null)
+            var actDesc = _globalSearchBag.FindByName(actName);
+            if (actDesc == null)
             {
-                var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
+                throw new Exception($"Can't find action with name '{actName}'.");
+            }
+
+            var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
                 await actDesc.Handler.Invoke(actionContext);
 
                 //Check again.
-                await InvokeActionByName(actionContext);
-            }
+                await InvokeActionByName(actionContext, invokesCount + 1);
+            
         }
 
         IGlobalSearchBag InitGlobalSearchBagProvider(
-            IServiceProvider serv, 
-            IEnumerable<ActionDescriptor> startupRoutes, 
+            IServiceProvider serv,
+            IEnumerable<ActionDescriptor> startupRoutes,
             IList<Type> controllers
             )
         {
             //Init routes (ActionDescriptors) search bag.
 
             //Smallest controllers code in MvcMiddleware class that i can write.
-            var controllersInspector = serv.GetService<IControllerInpector>();
+            var controllersInspector = serv.GetRequiredService<IControllerInpector>();
             var controllersRoutes = new List<ActionDescriptor>();
             foreach (var controllerType in controllers)
             {
@@ -109,7 +130,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 
             var allRoutes = controllersRoutes.ToList();
             allRoutes.AddRange(startupRoutes);
-            var globalSearchBagProvider = serv.GetService<GlobalSearchBagProvider>();
+            var globalSearchBagProvider = serv.GetRequiredService<GlobalSearchBagProvider>();
             globalSearchBagProvider.Init(allRoutes);
             //Search bag initialized. 
             //All routes you can get only with IGlobalSearchBag.

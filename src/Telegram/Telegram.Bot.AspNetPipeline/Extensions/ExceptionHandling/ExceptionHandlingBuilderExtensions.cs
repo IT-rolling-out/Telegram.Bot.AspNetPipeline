@@ -18,7 +18,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
         {
             if (updateProcessingExceptionDelegate == null)
                 throw new ArgumentNullException(nameof(updateProcessingExceptionDelegate));
-            var md = @this.ServiceProvider.GetService<ExceptionHandlingMiddleware>();
+            var md = @this.ServiceProvider.GetRequiredService<ExceptionHandlingMiddleware>();
             md.ExceptionHandlers.Insert(0, updateProcessingExceptionDelegate);
         }
 
@@ -27,7 +27,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
         /// </summary>
         internal static void UseExceptionHandling(this IPipelineBuilder @this)
         {
-            var md = @this.ServiceProvider.GetService<ExceptionHandlingMiddleware>();
+            var md = @this.ServiceProvider.GetRequiredService<ExceptionHandlingMiddleware>();
             @this.Use(md.Invoke);
         }
 

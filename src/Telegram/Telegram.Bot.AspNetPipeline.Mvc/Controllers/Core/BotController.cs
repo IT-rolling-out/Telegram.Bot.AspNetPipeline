@@ -2,6 +2,8 @@
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
@@ -29,6 +31,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         public BotExt BotExt => UpdateContext.BotExt;
 
         public CancellationToken UpdateProcessingAborted => UpdateContext.UpdateProcessingAborted;
+
+        public ContextMvcFeatures Features => ControllerContext.Features();
         #endregion
 
         bool _isInit;

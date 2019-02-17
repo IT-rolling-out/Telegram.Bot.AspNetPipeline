@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
@@ -21,11 +22,28 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         {
             MethodInfo = methodInfo;
             ControllerType = controllerType;
+            Parameters=methodInfo.GetParameters();
+            foreach (var param in Parameters)
+            {
+                _parametersByName[param.Name] = param;
+            }
         }
+
+        IDictionary<string, ParameterInfo> _parametersByName = new Dictionary<string, ParameterInfo>();
 
         public MethodInfo MethodInfo { get; }
 
+        public ParameterInfo[] Parameters { get; }
+
         public Type ControllerType { get; }
+
+        /// <summary>
+        /// Optimized parameters searching.
+        /// </summary>
+        public ParameterInfo FindParameter(string paramName)
+        {
+            return _parametersByName[paramName];
+        }
 
     }
 }

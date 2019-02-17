@@ -21,6 +21,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         /// Info about controller method. Casted ActionInfo.
         /// </summary>
         public new ControllerActionDescriptor ActionDescriptor => (ControllerActionDescriptor)base.ActionDescriptor;
+
+        /// <summary>
+        /// If all parameters successfully binded.
+        /// </summary>
+        public bool IsModelStateValid { get; set; }
     }
 
 

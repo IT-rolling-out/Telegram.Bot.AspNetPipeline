@@ -9,7 +9,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
     /// </summary>
     public class MvcFeatures : IMvcFeatures
     {
-        const string StartAnotherActionDataName = "StartAnotherActionData";
+        const string StartAnotherActionDataName = "_StartAnotherActionData";
 
         public MvcFeatures()
         {
