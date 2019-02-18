@@ -18,6 +18,33 @@ namespace Telegram.Bot.AspNetPipeline.Core
     [DataContract]
     public class UpdateContext : IDisposable
     {
+
+        #region Chatting with bot
+        bool _chattingWithBotValueCalculated;
+        bool _chattingWithBot;
+
+        /// <summary>
+        /// Return true if current chat is chat with bot.
+        /// <para></para>
+        /// If chatId can't be resolved - return null.
+        /// </summary>
+        public bool? IsChattingWithBot
+        {
+            get
+            {
+                if (!_chattingWithBotValueCalculated)
+                {
+                    if (Update.Message != null)
+                    {
+                        _chattingWithBot = Message.Chat.Id == Message.From.Id;
+                    }
+                    _chattingWithBotValueCalculated = true;
+                }
+                return _chattingWithBot;
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Unique id, used in GetHashCode too.
         /// </summary>
@@ -168,7 +195,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 //Just use to encode.
                 msgText = JsonConvert.SerializeObject(msgText);
                 return $"{baseName}(ChatId={Chat?.Id}, Update(Id={Update.Id}, Type={Update.Type})," +
-                       $" Message=(Id={Message.MessageId}, FromId={Message.From.Id}, Text={msgText}))";
+                       $" Message=(Id={Message.MessageId}, FromId={Message.From.Id}," +
+                       $" FromUsername=@{Message.From.Username}, Text={msgText}))";
             }
         }
     }

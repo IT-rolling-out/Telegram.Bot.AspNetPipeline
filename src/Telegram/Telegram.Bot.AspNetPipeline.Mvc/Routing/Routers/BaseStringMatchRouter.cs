@@ -2,11 +2,14 @@
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
     public abstract class BaseStringMatchRouter : IRouter
     {
+        protected ILogger Logger { get; private set; }
+
         /// <summary>
         /// Note, that StringMatchRouter.SetTemplateMatchingStrings must not set any handler in RoutingContext.
         /// It can only customize routing by TemplateMatchingStrings. It can add|remove|edit
@@ -19,10 +22,29 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
         /// </summary>
         public async Task RouteAsync(RoutingContext routeContext)
         {
-            var templateMatchingStrings = new List<string>();
-            await SetTemplateMatchingStrings(routeContext,templateMatchingStrings);
+            if (Logger == null)
+            {
+                var loggerFactory = routeContext.UpdateContext.Services.GetRequiredService<ILoggerFactory>();
+                Logger = loggerFactory.CreateLogger(GetType());
+            }
 
-            if (templateMatchingStrings.Count==0)
+            var templateMatchingStrings = new List<string>();
+            await SetTemplateMatchingStrings(routeContext, templateMatchingStrings);
+            
+            if (Logger.IsEnabled(LogLevel.Trace))
+            {
+                string allTemplates = "";
+                foreach (var str in templateMatchingStrings)
+                {
+                    allTemplates += $"\"{str}\", ";
+                }
+                allTemplates = allTemplates.Trim();
+                if (allTemplates.Length>0)
+                    allTemplates=allTemplates.Remove(allTemplates.Length-1);
+                Logger.LogTrace("Templates resolved from context:\n " + allTemplates);
+            }
+
+            if (templateMatchingStrings.Count == 0)
             {
                 return;
             }
@@ -52,6 +74,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
         /// <summary>
         /// Can only set TemplateMatchingStrings that used in searching of handler.
         /// </summary>
-        protected abstract Task SetTemplateMatchingStrings(RoutingContext routeContext,IList<string> templateMatchingStrings);
+        protected abstract Task SetTemplateMatchingStrings(RoutingContext routeContext, IList<string> templateMatchingStrings);
     }
 }

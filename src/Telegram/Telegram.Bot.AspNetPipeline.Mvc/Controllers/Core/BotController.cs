@@ -1,6 +1,8 @@
 ﻿using System.Threading;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
@@ -32,7 +34,16 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 
         public CancellationToken UpdateProcessingAborted => UpdateContext.UpdateProcessingAborted;
 
+        /// <summary>
+        /// Just proxy to ControllerContext.Features().
+        /// </summary>
         public ContextMvcFeatures Features => ControllerContext.Features();
+
+        /// <summary>
+        /// Just proxy to UpdateContext.Logger().
+        /// Useful for fast easy logging, but better to create logger by <see cref="ILoggerFactory"/>.
+        /// </summary>
+        public ILogger Logger => UpdateContext.Logger();
         #endregion
 
         bool _isInit;

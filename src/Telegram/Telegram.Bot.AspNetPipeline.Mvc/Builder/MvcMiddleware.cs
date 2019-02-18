@@ -4,14 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
@@ -76,6 +79,15 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var actDesc = routingCtx.ActionDescriptor;
             if (actDesc != null)
             {
+                var ctxLogger = ctx.Logger();
+                if (ctxLogger.IsEnabled(LogLevel.Trace))
+                {
+                    ctxLogger
+                        .LogTrace(
+                            $"Mvc start processing context with '{actDesc.RouteInfo.Template ?? actDesc.RouteInfo.Name}'."
+                            );
+                }
+
                 var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
                 await actDesc.Handler.Invoke(actionContext);
 
@@ -94,7 +106,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var startAnotherActionData = MvcFeatures.GetData(prevActionContext);
             if (startAnotherActionData == null)
                 return;
-            var actName= startAnotherActionData.ActionName;
+            var actName = startAnotherActionData.ActionName;
 
             var ctx = prevActionContext.UpdateContext;
             var actDesc = _globalSearchBag.FindByName(actName);
@@ -104,11 +116,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             }
 
             var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
-                await actDesc.Handler.Invoke(actionContext);
+            await actDesc.Handler.Invoke(actionContext);
 
-                //Check again.
-                await InvokeActionByName(actionContext, invokesCount + 1);
-            
+            //Check again.
+            await InvokeActionByName(actionContext, invokesCount + 1);
+
         }
 
         IGlobalSearchBag InitGlobalSearchBagProvider(

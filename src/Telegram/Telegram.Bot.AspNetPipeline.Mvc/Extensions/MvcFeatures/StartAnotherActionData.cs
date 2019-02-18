@@ -1,4 +1,4 @@
-﻿namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
+﻿namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures
 {
     public class StartAnotherActionData
     {

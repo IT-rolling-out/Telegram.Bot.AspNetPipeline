@@ -2,7 +2,7 @@
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
+namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures
 {
     /// <summary>
     /// Now just can inform middleware to execute action, not do it self.

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
+using IRO.Common.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Args;
@@ -11,7 +12,6 @@ using Telegram.Bot.AspNetPipeline.Core.Internal;
 using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
-using Telegram.Bot.AspNetPipeline.Extensions.Serialization;
 using Telegram.Bot.AspNetPipeline.Services;
 using Telegram.Bot.Types;
 

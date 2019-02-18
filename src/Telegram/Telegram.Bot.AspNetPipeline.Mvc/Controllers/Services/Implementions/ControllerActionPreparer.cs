@@ -25,6 +25,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
         /// </summary>
         public RouteActionDelegate CreateAction(Type controllerType, MethodInfo methodInfo, RouteInfo routeInfo)
         {
+            if (!typeof(Task).IsAssignableFrom(methodInfo.ReturnType))
+            {
+                throw new Exception($"Exception with '{methodInfo}' in '{controllerType.Name}'. " +
+                                    $"Controller method must return Task.");
+            }
+
             RouteActionDelegate routeActionDelegate = async (actionContext) =>
              {
 #if DEBUG

@@ -1,10 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
-using Telegram.Bot.AspNetPipeline.Extensions.Serialization;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
 {

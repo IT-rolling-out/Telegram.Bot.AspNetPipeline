@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
-using Telegram.Bot.AspNetPipeline.Core;
+﻿using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
+namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures
 {
     /// <summary>
     /// Some other mvc features.

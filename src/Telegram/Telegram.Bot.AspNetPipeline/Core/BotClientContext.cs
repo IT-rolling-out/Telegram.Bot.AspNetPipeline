@@ -8,6 +8,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         {
             Bot = bot;
             BotInfo = botInfo;
+            ChatId = new ChatId(BotInfo.Id);
         }
 
         public ITelegramBotClient Bot { get; }
@@ -18,5 +19,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public User BotInfo { get; }
 
         public string Username => BotInfo.Username;
+
+        public ChatId ChatId { get; }
     }
 }

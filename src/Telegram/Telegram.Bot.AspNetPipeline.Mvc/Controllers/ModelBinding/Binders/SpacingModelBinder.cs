@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders
@@ -12,49 +15,73 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders
     /// </summary>
     public class SpacingModelBinder:IModelBinder
     {
+        ILogger _logger;
+
         public async Task Bind(ModelBindingContext modelBinderContext)
         {
-            var msgText=modelBinderContext.ControllerContext.UpdateContext.Update?.Message?.Text;
-            if (msgText != null)
+            if (_logger == null)
             {
-                var arr = msgText.Split(' ');
-                var notWhiteSpaceList = new List<string>();
-                foreach (var str in arr)
+                var loggerFactory = modelBinderContext.ControllerContext
+                    .UpdateContext.Services.GetRequiredService<ILoggerFactory>();
+                _logger = loggerFactory.CreateLogger(GetType());
+            }
+
+            try
+            {
+                var msgText = modelBinderContext.ControllerContext.UpdateContext.Update?.Message?.Text;
+                if (msgText != null)
                 {
-                    if (str != "")
-                        notWhiteSpaceList.Add(str);
-                }
-                //Remove cmd name.
-                notWhiteSpaceList.RemoveAt(0);
-
-                for(int i = 0; i < notWhiteSpaceList.Count; i++)
-                {
-                    var valueStr = notWhiteSpaceList[i];
-                    var param=modelBinderContext.Parameters[i];
-
-                    //Ignore binded.
-                    if (modelBinderContext.IsBinded(param.Name))
-                        continue;
-
-                    //Convert.
-                    object value = null;
-                    if (param.ParameterType.IsAssignableFrom(typeof(string)))
+                    msgText = msgText.Replace("\t", " ");
+                    var arr = msgText.Split(' ');
+                    var notWhiteSpaceList = new List<string>();
+                    foreach (var str in arr)
                     {
-                        value = valueStr;
+                        if (str != "")
+                            notWhiteSpaceList.Add(str);
                     }
-                    else
+
+                    //Remove cmd name.
+                    if (notWhiteSpaceList[0].StartsWith("/"))
                     {
-                        try
+                        notWhiteSpaceList.RemoveAt(0);
+                    }
+
+                    for (int i = 0; i < notWhiteSpaceList.Count; i++)
+                    {
+                        var valueStr = notWhiteSpaceList[i];
+                        var param = modelBinderContext.Parameters[i];
+
+                        //Ignore binded.
+                        if (modelBinderContext.IsBinded(param.Name))
+                            continue;
+
+                        //Convert.
+                        object value = null;
+                        if (param.ParameterType.IsAssignableFrom(typeof(string)))
                         {
-                            value = JsonConvert.DeserializeObject(
-                                valueStr,
-                                param.ParameterType
-                            );
+                            value = valueStr;
                         }
-                        catch { }
+                        else
+                        {
+                            try
+                            {
+                                value = JsonConvert.DeserializeObject(
+                                    valueStr,
+                                    param.ParameterType
+                                );
+                            }
+                            catch
+                            {
+                            }
+                        }
+
+                        modelBinderContext.BindValue(param.Name, value);
                     }
-                    modelBinderContext.BindValue(param.Name, value);
                 }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error while binding model.");
             }
         }
     }

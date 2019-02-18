@@ -32,10 +32,11 @@ namespace IRO.UnitTests.Telegram
                 );
             var bot = new Mock<ITelegramBotClient>();
             var update = new Mock<Update>();
+            var user = new Mock<User>();
             var cts = new CancellationTokenSource();
             _ctx = new UpdateContext(
                 update.Object,
-                new BotClientContext(bot.Object),
+                new BotClientContext(bot.Object,user.Object),
                 servicesProvider,
                 cts.Token
             );
