@@ -7,12 +7,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
     public class MvcOptions:ICloneable
     {
         /// <summary>
-        /// Default is true. Find controllers and register them in ioc as services.
+        /// Default is true. If false - controllers list in <see cref="IAddMvcBuilder"/> will be empty.
         /// </summary>
         public bool FindControllersByReflection { get; set; } = true;
 
         /// <summary>
-        /// Set validator to BotExt ReadMessageAsync.
+        /// If tue - mvc middleware will set validator to BotExt ReadMessageAsync.
         /// Allow to use controller methods with hight priority before BotExt.
         /// <para></para>
         /// Default is true. If you disable it - ReadMessageAsync callbacks will be always handled first,
@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// <summary>
         /// Same to controllers BotRouteAttribute order.
         /// All route actions, that has bigger or equals order than BotExtOrder value (actions with lower priority)
-        /// will be executed after ReadMessageAsync callback on conflicts.
+        /// will be processed after ReadMessageAsync callbacks.
         /// <para></para>
         /// Default value is 0.
         /// </summary>

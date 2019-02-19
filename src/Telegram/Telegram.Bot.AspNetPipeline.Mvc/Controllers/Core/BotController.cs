@@ -44,6 +44,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         /// Useful for fast easy logging, but better to create logger by <see cref="ILoggerFactory"/>.
         /// </summary>
         public ILogger Logger => UpdateContext.Logger();
+
+        public bool IsModelStateValid => ControllerContext.IsModelStateValid;
         #endregion
 
         bool _isInit;

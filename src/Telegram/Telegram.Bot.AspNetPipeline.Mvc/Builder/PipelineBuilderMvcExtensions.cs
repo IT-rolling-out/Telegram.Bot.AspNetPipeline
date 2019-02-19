@@ -7,6 +7,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
@@ -22,7 +23,12 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             Action<IUseMvcBuilder> configureUseMvcBuilder = null)
         {
             var addMvcBuilder = @this.ServiceProvider.GetRequiredService<IAddMvcBuilder>();
+            var options=addMvcBuilder.MvcOptions;
             var useMvcBuilder = new UseMvcBuilder(@this.ServiceProvider);
+
+            //Add BotExt validator. 
+            if(options.ConfigureBotExtWithMvc)
+                @this.AddBotExtMvcGlobalValidator(options.BotExtOrder);
 
             //Controllers settiongs.
             ControllersMiddlewareExtensions.InitUseMvcBuilder(useMvcBuilder);

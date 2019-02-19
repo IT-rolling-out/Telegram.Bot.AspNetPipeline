@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
                     //In bot chat we expect command without bot name.
                     templateMatchingStrings.Add(beforeFirstSpaceTemplate);
                 }
-
+                
                 //Add commands from group. Example: "/cmd@bot_name".
                 //But they can be used in chat with bot too.
                 var botName = "@" + routeContext.UpdateContext.BotContext.Username;

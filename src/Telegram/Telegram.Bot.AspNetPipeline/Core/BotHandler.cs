@@ -358,10 +358,10 @@ namespace Telegram.Bot.AspNetPipeline.Core
             IServiceScope servicesScope = Services.CreateScope();
             try
             {
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                var cancellationTokenSource = new CancellationTokenSource();
 
                 //Create context.
-                UpdateContext updateContext = new UpdateContext(
+                var updateContext = new UpdateContext(
                     update,
                     BotContext,
                     servicesScope.ServiceProvider,

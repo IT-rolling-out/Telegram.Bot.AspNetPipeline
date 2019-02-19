@@ -33,9 +33,9 @@ namespace IRO.Tests.Telegram
                 {
                     if (upd.Message?.Text.StartsWith("/") == true)
                     {
-                        return false;
+                        return UpdateValidatorResult.AbortWaiter;
                     }
-                    return true;
+                    return UpdateValidatorResult.Valid;
                 });
                 builder.Use(async (ctx, next) =>
                 {

@@ -2,20 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Prerelease version.</Description>
+    <Version>$(AsmVersion_Telegram)</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers1\**" />
-    <EmbeddedResource Remove="Controllers1\**" />
-    <None Remove="Controllers1\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Extensions\ImprovedBot\" />
   </ItemGroup>
 
 </Project>

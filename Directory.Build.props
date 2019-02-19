@@ -22,7 +22,7 @@
   <!-- Category versions list. Use it in target projects and to set nuget dependencies. -->
   <PropertyGroup>
     <!-- Use current same version for all or define special for category-->
-    <VersionPostfix>-alpha</VersionPostfix>	
+    <VersionPostfix></VersionPostfix>	
 	
     <!-- Versions for remote nuget libs management. ///-->
 	<RemoteVersionPostfix></RemoteVersionPostfix>
@@ -37,6 +37,6 @@
     <AsmVersion_Storage>2.2.5$(RemoteVersionPostfix)</AsmVersion_Storage>
 	<!--/// Versions for remote nuget libs management.-->
 	
-	<AsmVersion_Telegram>1.0.0$(VersionPostfix)</AsmVersion_Telegram>
+	<AsmVersion_Telegram>1.0.1$(VersionPostfix)</AsmVersion_Telegram>
   </PropertyGroup>
 </Project>

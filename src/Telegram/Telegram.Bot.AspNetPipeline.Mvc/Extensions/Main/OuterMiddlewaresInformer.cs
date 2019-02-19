@@ -25,7 +25,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
             await _mainRouter.RouteAsync(routingContext);
             if (routingContext.ActionDescriptor != null)
             {
-                return routingContext.ActionDescriptor.RouteInfo.Order < yourMethodOrder;
+                return routingContext.ActionDescriptor.RouteInfo.Order <= yourMethodOrder;
             }
             return false;
         }

@@ -11,7 +11,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <summary>
         /// Validate all callbacks. All must return true to validate it.
         /// </summary>
-        IList<UpdateValidator> GlobalValidators { get; }
+        IList<UpdateValidatorDelegate> GlobalValidators { get; }
 
         /// <summary>
         /// </summary>
@@ -29,7 +29,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
         Task<Message> ReadMessageAsync(
             UpdateContext updateContext,
-            UpdateValidator updateValidator
+            UpdateValidatorDelegate updateValidator
             );
 
         Task OnUpdateInvoke(UpdateContext newContext, Func<Task> next);

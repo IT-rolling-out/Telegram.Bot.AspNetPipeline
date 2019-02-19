@@ -7,5 +7,9 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
-    public delegate Task<bool> UpdateValidator(Update update, UpdateContext originalUpdateContext);
+    /// <summary>
+    /// </summary>
+    /// <param name="newUpdateContext">New message from current chat. Passed before middlewares will process it.</param>
+    /// <param name="originalUpdateContext">Update context of waiting method (where ReadMessageAsync invoked).</param>
+    public delegate Task<UpdateValidatorResult> UpdateValidatorDelegate(UpdateContext newUpdateContext, UpdateContext originalUpdateContext);
 }

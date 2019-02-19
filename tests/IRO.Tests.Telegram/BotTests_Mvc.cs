@@ -15,7 +15,10 @@ namespace IRO.Tests.Telegram
             botHandler.ConfigureServices((servicesWrap) =>
             {
                 LoggerStarter.InitLogger(servicesWrap);
-                servicesWrap.AddMvc();
+                servicesWrap.AddMvc(new MvcOptions()
+                {
+                    //ConfigureBotExtWithMvc = false
+                });
             });
 
             botHandler.ConfigureBuilder((builder) =>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Core.Internal;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.Types;
@@ -18,7 +19,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <summary>
         /// Validate all callbacks. All must return true to validate it.
         /// </summary>
-        public IList<UpdateValidator> GlobalValidators { get; } = new List<UpdateValidator>();
+        public IList<UpdateValidatorDelegate> GlobalValidators { get; } = new List<UpdateValidatorDelegate>();
 
         public BotExtSingleton(IUpdateContextSearchBag searchBag, ILoggerFactory loggerFactory)
         {
@@ -32,9 +33,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <param name="fromType">Used to set which members messages must be processed.</param>
         public async Task<Message> ReadMessageAsync(UpdateContext updateContext, ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
         {
-            UpdateValidator updateValidator = async (upd, origCtx) =>
+            UpdateValidatorDelegate updateValidator = async (newCtx, origCtx) =>
              {
-                 return CheckFromType(upd, origCtx, fromType);
+                 return CheckFromType(newCtx, origCtx, fromType);
              };
             return await ReadMessageAsync(updateContext, updateValidator);
         }
@@ -44,15 +45,12 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
         /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public async Task<Message> ReadMessageAsync(UpdateContext updateContext, UpdateValidator updateValidator)
+        public async Task<Message> ReadMessageAsync(UpdateContext updateContext, UpdateValidatorDelegate updateValidator)
         {
             var taskCompletionSource = new TaskCompletionSource<Update>(
                 TaskContinuationOptions.RunContinuationsAsynchronously
                 );
             Add(updateContext, taskCompletionSource, updateValidator);
-
-            //var hiddenContext=HiddenUpdateContext.Resolve(updateContext);
-            //hiddenContext.UpdateProcessingAbortedSource.;
 
             //OnCanceled.
             updateContext.UpdateProcessingAborted.Register(() =>
@@ -65,38 +63,38 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             return resUpdate.Message;
         }
 
-        public async Task OnUpdateInvoke(UpdateContext newContext, Func<Task> next)
+        public async Task OnUpdateInvoke(UpdateContext newCtx, Func<Task> next)
         {
             _logger.LogTrace(
                 "Checking read-callback for '{0}'.",
-                newContext
+                newCtx
                 );
-            var searchDataNullable = _searchBag.TryFind(newContext.Chat.Id, newContext.Bot.BotId);
+            var searchDataNullable = _searchBag.TryFind(newCtx.Chat.Id, newCtx.Bot.BotId);
             if (searchDataNullable != null)
             {
                 _logger.LogTrace(
                     "Found read-callback for '{0}'.",
-                    newContext
+                    newCtx
                 );
 
                 //!When find pending task with read-callback and same context.
                 var searchData = searchDataNullable.Value;
                 var origCtx = searchData.CurrentUpdateContext;
 
-                bool isUpdateValid = false;
+                UpdateValidatorResult updateValidatorRes = UpdateValidatorResult.ContinueWaiting;
                 try
                 {
                     if (searchData.UpdateValidator != null)
                     {
-                        isUpdateValid = await searchData.UpdateValidator.Invoke(newContext.Update, origCtx);
+                        updateValidatorRes = await searchData.UpdateValidator.Invoke(newCtx, origCtx);
                     }
 
                     foreach (var globalValidator in GlobalValidators)
                     {
-                        //Break on first false.
-                        if (!isUpdateValid)
+                        //Break on first not valid.
+                        if (updateValidatorRes!=UpdateValidatorResult.Valid)
                             break;
-                        isUpdateValid = await globalValidator.Invoke(newContext.Update, origCtx);
+                        updateValidatorRes = await globalValidator.Invoke(newCtx, origCtx);
                     }
                 }
                 catch (Exception ex)
@@ -105,7 +103,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                         "Exception while validating Update '{0}'.\nOrigUpdateContext: '{1}'.\nNewContext: '{2}'.",
                         ex,
                         origCtx,
-                        newContext
+                        newCtx
                         );
                     SetException(
                         searchData.TaskCompletionSource,
@@ -115,26 +113,31 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                     return;
                 }
 
-                if (!isUpdateValid)
+                _logger.LogTrace(
+                    "'{0}'  validation result for read-callback of '{1}' is {2}.",
+                    origCtx,
+                    newCtx,
+                    updateValidatorRes
+                    );
+
+                if (updateValidatorRes==UpdateValidatorResult.ContinueWaiting)
                 {
-                    _logger.LogTrace(
-                        "'{0}' not valid for read-callback of '{1}'.",
-                        origCtx,
-                        newContext
-                        );
+                    await next();
+                    return;
+                }
+                if (updateValidatorRes == UpdateValidatorResult.AbortWaiter)
+                {
+                    _searchBag.TryRemove(origCtx.Chat.Id, origCtx.Bot.BotId);
+                    origCtx.HiddenContext().UpdateProcessingAbortedSource.Cancel();
                     await next();
                     return;
                 }
 
                 //Force exit only if result valid.
-                _logger.LogTrace(
-                    "'{0}'  valid for read-callback of '{1}'.",
-                    origCtx,
-                    newContext
-                    );
-                SetResult(searchData.TaskCompletionSource, newContext.Update);
-                _searchBag.TryRemove(newContext.Chat.Id, newContext.Bot.BotId);
-                newContext.ForceExit();
+
+                SetResult(searchData.TaskCompletionSource, newCtx.Update);
+                _searchBag.TryRemove(newCtx.Chat.Id, newCtx.Bot.BotId);
+                newCtx.ForceExit();
             }
             else
             {
@@ -142,7 +145,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             }
         }
 
-        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, UpdateValidator updateValidator)
+        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, UpdateValidatorDelegate updateValidator)
         {
             var chatId = updateContext.Update.Message.Chat.Id;
             var botId = updateContext.Bot.BotId;
@@ -170,8 +173,15 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 );
         }
 
-        bool CheckFromType(Update upd, UpdateContext origCtx, ReadCallbackFromType fromType)
+        UpdateValidatorResult CheckFromType(UpdateContext newCtx, UpdateContext origCtx, ReadCallbackFromType fromType)
         {
+            var res = CheckFromType_BoolResult(newCtx, origCtx, fromType);
+            return res ? UpdateValidatorResult.Valid : UpdateValidatorResult.ContinueWaiting;
+        }
+
+        bool CheckFromType_BoolResult(UpdateContext newCtx, UpdateContext origCtx, ReadCallbackFromType fromType)
+        {
+            var upd = newCtx.Update;
             try
             {
                 _logger.LogTrace("Default CheckFromType for {0}.", fromType);

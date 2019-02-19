@@ -33,7 +33,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <para></para>
         /// Invoked automatically in BotHandler.
         /// </summary>
-        public static void AddBotExtGlobalValidator(this IPipelineBuilder @this, UpdateValidator updateValidator)
+        public static void AddBotExtGlobalValidator(this IPipelineBuilder @this, UpdateValidatorDelegate updateValidator)
         {
             var botExtSingletone=@this.ServiceProvider.GetRequiredService<IBotExtSingleton>();
             botExtSingletone.GlobalValidators.Add(updateValidator);

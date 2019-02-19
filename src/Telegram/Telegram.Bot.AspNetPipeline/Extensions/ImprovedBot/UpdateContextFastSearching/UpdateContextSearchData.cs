@@ -18,7 +18,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSe
 
         public TaskCompletionSource<Update> TaskCompletionSource { get; set; }
 
-        public UpdateValidator UpdateValidator { get; set; }
+        public UpdateValidatorDelegate UpdateValidator { get; set; }
 
         public string Key => CreateKey(ChatId, BotId);
 
