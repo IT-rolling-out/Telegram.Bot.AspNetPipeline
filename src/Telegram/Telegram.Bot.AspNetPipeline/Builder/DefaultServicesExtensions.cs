@@ -11,7 +11,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
     public static class DefaultServicesExtensions
     {
         /// <summary>
-        /// Used in <see cref="BotHandler"/>.
+        /// Used in <see cref="BotManager"/>.
         /// Override default singleton.
         /// </summary>
         public static void AddPendingExceededChecker<TPendingExceededChecker>(this ServiceCollectionWrapper @this)
@@ -21,7 +21,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         }
 
         /// <summary>
-        /// Used in <see cref="BotHandler"/>.
+        /// Used in <see cref="BotManager"/>.
         /// Override default singleton.
         /// </summary>
         public static void AddPendingExceededChecker(this ServiceCollectionWrapper @this, Func<IServiceProvider, IPendingExceededChecker> func)
@@ -30,7 +30,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         }
 
         /// <summary>
-        /// Used in <see cref="BotHandler"/>.
+        /// Used in <see cref="BotManager"/>.
         /// Override default singleton.
         /// </summary>
         public static void AddExecutionManager<TExecutionManager>(this ServiceCollectionWrapper @this)
@@ -40,7 +40,7 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         }
 
         /// <summary>
-        /// Used in <see cref="BotHandler"/>.
+        /// Used in <see cref="BotManager"/>.
         /// Override default singleton.
         /// </summary>
         public static void AddPendingExceededChecker(this ServiceCollectionWrapper @this, Func<IServiceProvider, IExecutionManager> func)

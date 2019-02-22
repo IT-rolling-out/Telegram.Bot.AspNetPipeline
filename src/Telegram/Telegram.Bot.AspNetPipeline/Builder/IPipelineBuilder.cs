@@ -4,7 +4,7 @@ using Telegram.Bot.AspNetPipeline.Core;
 namespace Telegram.Bot.AspNetPipeline.Builder
 {
     /// <summary>
-    /// Like IApplicationBuilder in asp.net .
+    /// Like IApplicationBuilder in ASP.NET .
     /// </summary>
     public interface IPipelineBuilder
     {

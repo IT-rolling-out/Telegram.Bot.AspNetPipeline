@@ -1,13 +1,14 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
     public static class ImprovedBotExtensions
     {
         /// <summary>
-        /// BotExtensions based on UpdateContext and cant work without it.
+        /// BotExtensions based on UpdateContext and can't work without it.
         /// Thats why it here, not in BotContext.
         /// </summary>
         public static BotExt BotExt(this UpdateContext @this)
@@ -44,7 +45,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             }
             catch (Exception ex)
             {
-                throw new Exception(
+                throw new TelegramAspException(
                     "BotExt resolve exception. Maybe middleware ImprovedBot wasn`t registered.", 
                     ex
                     );

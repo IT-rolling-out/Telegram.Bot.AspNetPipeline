@@ -50,7 +50,7 @@ namespace IRO.Tests.Telegram.Controllers
         /// Will process all requests, but only if other command not executing now,
         /// because have priority lower than default (0).
         /// So will not cancel NewBot.
-        /// NOTE: Bigger Order mean lower priority, asp.net naming.
+        /// NOTE: Bigger Order mean lower priority, ASP.NET naming.
         /// </summary>
         [BotRoute(Order = 2, Name = "Default")]
         public async Task Default()

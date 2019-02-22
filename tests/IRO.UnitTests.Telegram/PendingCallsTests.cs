@@ -27,7 +27,7 @@ namespace IRO.UnitTests.Telegram
             var servicesCollection = new ServiceCollection();
             servicesCollection.AddLogging();
             var servicesProvider = servicesCollection.BuildServiceProvider();
-            _pipelineBuilder = new PipelineBuilder(
+            _pipelineBuilder = BotUnitTestsHelpers.CreatePipelineBuilder(
                 servicesProvider
                 );
             var bot = new Mock<ITelegramBotClient>();

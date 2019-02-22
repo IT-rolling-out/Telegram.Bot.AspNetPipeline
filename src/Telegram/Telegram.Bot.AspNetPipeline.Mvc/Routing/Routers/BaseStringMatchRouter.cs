@@ -9,17 +9,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
     public abstract class BaseStringMatchRouter : IRouter
     {
         protected ILogger Logger { get; private set; }
-
-        /// <summary>
-        /// Note, that StringMatchRouter.SetTemplateMatchingStrings must not set any handler in RoutingContext.
-        /// It can only customize routing by TemplateMatchingStrings. It can add|remove|edit
-        /// current list of strings.
-        /// <para></para>
-        /// TemplateMatchingStrings used only for fast searching of [BotRoute(temlate)] in Dictionary.
-        /// <para></para>
-        /// After each IRouter processing mvc middleware will search all TemplateMatchingStrings in dictionary.
-        /// If not find - call next router.
-        /// </summary>
+        
         public async Task RouteAsync(RoutingContext routeContext)
         {
             if (Logger == null)
@@ -72,7 +62,14 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
         }
 
         /// <summary>
-        /// Can only set TemplateMatchingStrings that used in searching of handler.
+        /// Note, that StringMatchRouter.SetTemplateMatchingStrings must not set any handler in RoutingContext.
+        /// It can only customize routing by TemplateMatchingStrings. It can add|remove|edit
+        /// current list of strings.
+        /// <para></para>
+        /// TemplateMatchingStrings used only for fast searching of [BotRoute(temlate)] in Dictionary.
+        /// <para></para>
+        /// After each IRouter processing mvc middleware will search all TemplateMatchingStrings in dictionary.
+        /// If not find - call next router.
         /// </summary>
         protected abstract Task SetTemplateMatchingStrings(RoutingContext routeContext, IList<string> templateMatchingStrings);
     }

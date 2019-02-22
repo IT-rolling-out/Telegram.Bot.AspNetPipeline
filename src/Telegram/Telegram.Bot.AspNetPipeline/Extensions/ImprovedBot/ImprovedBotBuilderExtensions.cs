@@ -10,8 +10,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
     {
         /// <summary>
         /// Note: Current middleware is registered automatically.
-        /// <para></para>
-        /// Invoked automatically in BotHandler.
         /// </summary>
         internal static void UseBotExt(this IPipelineBuilder @this)
         {
@@ -30,8 +28,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         /// <summary>
         /// Note: Current middleware is registered automatically.
-        /// <para></para>
-        /// Invoked automatically in BotHandler.
         /// </summary>
         public static void AddBotExtGlobalValidator(this IPipelineBuilder @this, UpdateValidatorDelegate updateValidator)
         {

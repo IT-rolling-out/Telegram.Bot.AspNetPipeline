@@ -13,7 +13,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
     public static class DevEceptionMessageBuilderExtensions
     {
         /// <summary>
-        /// Invoke before another middleware, but after UseExceptionHandler.
+        /// In old versions must invoke before another middleware, but after UseExceptionHandler.
+        /// <para></para>
+        /// Will send message with exception to chat.
         /// </summary>
         public static void UseDevEceptionMessage(this IPipelineBuilder @this)
         {
@@ -25,7 +27,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
                     //Max for telegram is 4096 UTF8  characters.
                     if (msg.Length > 4080)
                         msg = msg.Remove(4080) + "...";
-                    await UpdateContextExtensions.SendTextMessageAsync(ctx, "```" + msg + "```",
+                    await UpdateContextFrequentlyUsedExtensions.SendTextMessageAsync(ctx, "```" + msg + "```",
                         parseMode: ParseMode.Markdown
                     );
                 }

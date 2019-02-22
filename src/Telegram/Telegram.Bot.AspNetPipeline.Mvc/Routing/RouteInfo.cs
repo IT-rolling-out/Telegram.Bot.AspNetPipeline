@@ -7,7 +7,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
     /// <summary>
     /// Used to describe route.
     /// <para></para>
-    /// Something like AttributeRouteInfo from asp.net.
+    /// Something like AttributeRouteInfo from ASP.NET.
     /// Can be used with controller method or any other route (ActionDescriptor) in mvc.
     /// </summary>
     public class RouteInfo

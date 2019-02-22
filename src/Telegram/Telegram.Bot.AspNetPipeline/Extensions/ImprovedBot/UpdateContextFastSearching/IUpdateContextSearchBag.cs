@@ -1,9 +1,15 @@
-﻿namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching
+﻿using Telegram.Bot.AspNetPipeline.Core;
+
+namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching
 {
+    /// <summary>
+    /// Used for fast searching <see cref="UpdateContext"/> of chat.
+    /// Can be overrided with IOC.
+    /// </summary>
     public interface IUpdateContextSearchBag
     {
         /// <summary>
-        /// If context with current key exists - it will be disposed and overridden by current context.
+        /// If context with current key exists - it will be aborted and overridden by current context.
         /// </summary>
         void Add(UpdateContextSearchData searchData);
 

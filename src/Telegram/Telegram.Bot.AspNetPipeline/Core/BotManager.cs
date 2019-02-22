@@ -7,8 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Args;
 using Telegram.Bot.AspNetPipeline.Builder;
-using Telegram.Bot.AspNetPipeline.Core.Exceptions;
 using Telegram.Bot.AspNetPipeline.Core.Internal;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
@@ -17,7 +17,10 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core
 {
-    public class BotHandler : IDisposable
+    /// <summary>
+    /// Main object,  that control all processes in <see cref="Telegram.Bot.AspNetPipeline"/>.
+    /// </summary>
+    public class BotManager : IDisposable
     {
         #region Private fields
         readonly ITelegramBotClient _bot;
@@ -37,11 +40,14 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         Action<IPipelineBuilder> _pipelineBuilderAction;
 
-        Action<ServiceCollectionWrapper> _servicesConfigureAction;
+        bool _servicesConfigured;
 
         ServiceCollectionWrapper _serviceCollectionWrapper;
         #endregion
 
+        /// <summary>
+        /// Builded from all other delegates, registered in <see cref="IPipelineBuilder"/>.
+        /// </summary>
         UpdateProcessingDelegate _updateProcessingDelegate;
 
         /// <summary>
@@ -64,12 +70,13 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// Private and here too. Resolved from ServiceCollection.
         /// </summary>
+        [Obsolete]
         LoggingAdvancedOptions LoggingAdvancedOptions { get; set; }
 
         /// <summary>
-        /// Check if service pending.
+        /// Check if update context pending.
         /// Default service is <see cref="CreationTimePendingExceededChecker"/> with 30 minutes delay.
-        /// Can set your handler in ConfigureServices().
+        /// Can set your handler in <see cref="BotManager.ConfigureServices"/>.
         /// </summary>
         public IPendingExceededChecker PendingExceededChecker { get; private set; }
 
@@ -81,7 +88,12 @@ namespace Telegram.Bot.AspNetPipeline.Core
         #endregion
         #endregion
 
-        public BotHandler(
+        /// <summary>
+        /// If you want to use same <see cref="IServiceProvider"/> in ASP.NET and <see cref="Telegram.Bot.AspNetPipeline"/>
+        /// you can user ServiceProviderBuilderDelegate. Pass here ASP.NET IServiceCollection (to register there default and yours
+        /// services) and pass builded IServiceProvider to <see cref="BotManager.Setup"/>.
+        /// </summary>
+        public BotManager(
             ITelegramBotClient bot,
             IServiceCollection servicesCollection = null
             )
@@ -94,25 +106,44 @@ namespace Telegram.Bot.AspNetPipeline.Core
         }
 
         /// <summary>
-        /// Recommended to use current method for service registration to register it before any middleware.
+        /// In new version invoked straight away, not in Setup(). Must be invoked once.
+        /// <para></para>.
+        /// Register services and middleware.
+        /// Registration separated from configuring, because all services must be registered before
+        /// service container builded.
         /// </summary>
         /// <param name="servicesConfigureAction"></param>
         public void ConfigureServices(Action<ServiceCollectionWrapper> servicesConfigureAction)
         {
-            _servicesConfigureAction = servicesConfigureAction
-                ?? throw new ArgumentNullException(nameof(servicesConfigureAction));
+            if (_isSetup)
+                throw new TelegramAspException($"Can't configure {nameof(BotManager)} after setup.");
+            if(servicesConfigureAction==null)
+                throw new ArgumentNullException(nameof(servicesConfigureAction));
+            if (_servicesConfigured)
+                throw new TelegramAspException("Services was configured before.");
+
+            //Register mandatory services.
+            AddMandatoryServices(_serviceCollectionWrapper);
+            servicesConfigureAction.Invoke(_serviceCollectionWrapper);
+
+            _servicesConfigured = true;
         }
 
+        /// <summary>
+        /// Configure middleware.
+        /// </summary>
         public void ConfigureBuilder(Action<IPipelineBuilder> pipelineBuilderAction)
         {
+            if (_isSetup)
+                throw new TelegramAspException($"Can't configure {nameof(BotManager)} after setup.");
             _pipelineBuilderAction = pipelineBuilderAction
-               ?? throw new ArgumentNullException(nameof(pipelineBuilderAction));
+                ?? throw new ArgumentNullException(nameof(pipelineBuilderAction));
         }
 
         public void Start()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(BotHandler));
+                throw new ObjectDisposedException(nameof(BotManager));
 
             lock (_runLocker)
             {
@@ -126,6 +157,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         }
 
         /// <summary>
+        /// Call Setup() first to configure IServiceProvider.
         /// </summary>
         /// <param name="waitPendingMS">Time to wait before cancellation.</param>
         /// <param name="waitCancellationMS">Time to wait after cancellation.
@@ -134,7 +166,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public async Task Stop(int waitPendingMS = 0, int waitCancellationMS = 1000)
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(BotHandler));
+                throw new ObjectDisposedException(nameof(BotManager));
 
             try
             {
@@ -170,11 +202,11 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
                 _pendingUpdateContexts.Clear();
                 IsRunning = false;
-                _logger.LogTrace("BotHandler stopped.");
+                _logger.LogTrace("BotManager stopped.");
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error while stopping {nameof(BotHandler)}.");
+                throw new TelegramAspException($"Error while stopping {nameof(BotManager)}.");
             }
 
         }
@@ -182,9 +214,13 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// Execute initialization callbacks and build pipeline.
         /// <para></para>
-        /// Called automatically in Start().
+        /// Called automatically on Start() first call.
         /// </summary>
-        public void Setup()
+        /// <param name="serviceProvider">
+        /// If not null - will use passed provider instead builded from service collection.
+        /// Useful when you wan't to set same container in ASP.NET and here.
+        /// </param>
+        public void Setup(IServiceProvider serviceProvider = null)
         {
             lock (_setupLocker)
             {
@@ -195,26 +231,26 @@ namespace Telegram.Bot.AspNetPipeline.Core
                         return;
                     }
 
-                    var botInfo=_bot.GetMeAsync().Result;
+                    var botInfo = _bot.GetMeAsync().Result;
                     BotContext = new BotClientContext(_bot, botInfo);
 
-                    //Register services.
-                    AddMandatoryServices(_serviceCollectionWrapper);
-                    if (_servicesConfigureAction == null)
+                    //Build service provider.
+                    string providerIndentifierForLog;
+                    if (serviceProvider == null)
                     {
-                        throw new NullReferenceException(
-                            "Can`t init without services configure action. " +
-                            "Probably ConfigureServices wasn't invoked."
-                        );
+                        Services = _serviceCollectionWrapper.Services.BuildServiceProvider();
+                        providerIndentifierForLog = "ServiceProvider builded from ServiceCollection.";
                     }
-                    _servicesConfigureAction.Invoke(_serviceCollectionWrapper);
-                    _servicesConfigureAction = null;
-                    Services = _serviceCollectionWrapper.Services.BuildServiceProvider();
+                    else
+                    {
+                        Services = serviceProvider;
+                        providerIndentifierForLog = "Passed ServiceProvider used.";
+                    }
                     _serviceCollectionWrapper = null;
 
-                    //Resolve services needed for BotHandler.
-                    ResolveBotHandlerServices();
-                    _logger.LogTrace("Services initialized.");
+                    //Resolve services needed for BotManager.
+                    ResolveBotManagerServices();
+                    _logger.LogTrace("Services initialized. " + providerIndentifierForLog);
 
                     //Not implemented.
                     IPipelineBuilder pipelineBuilder = new PipelineBuilder(Services);
@@ -238,7 +274,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 }
                 catch (Exception ex)
                 {
-                    var exception = new Exception("BotHandler setup exception.", ex);
+                    var exception = new TelegramAspException("BotManager setup exception.", ex);
                     _logger.LogError(exception, "");
                     throw exception;
                 }
@@ -258,7 +294,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             _updateProcessingDelegate = null;
             IsDisposed = true;
             GC.Collect();
-            _logger.LogTrace("BotHandler disposed.");
+            _logger.LogTrace(nameof(BotManager) + " disposed.");
         }
         #endregion
 
@@ -292,17 +328,17 @@ namespace Telegram.Bot.AspNetPipeline.Core
             pipelineBuilder.UseBotExt();
         }
 
-        void ResolveBotHandlerServices()
+        void ResolveBotManagerServices()
         {
             _loggerFactory = Services.GetRequiredService<ILoggerFactory>();
             _logger = _loggerFactory.CreateLogger(GetType());
-            _logger.LogTrace("Logger initialized in BotHandler. BOTHANDLER STARTED.");
+            _logger.LogTrace("Logger initialized in BotManager. BotManager STARTED.");
 
             PendingExceededChecker = Services.GetRequiredService<IPendingExceededChecker>();
             ExecutionManager = Services.GetRequiredService<IExecutionManager>();
-            var lao = Services.GetRequiredService<Func<LoggingAdvancedOptions>>().Invoke();
-            lao.LazySerializerFactory = lao.LazySerializerFactory ?? new LazySerializerFactory();
-            LoggingAdvancedOptions = lao;
+            var loggingAdvancedOptions = Services.GetRequiredService<Func<LoggingAdvancedOptions>>().Invoke();
+            loggingAdvancedOptions.LazySerializerFactory = loggingAdvancedOptions.LazySerializerFactory ?? new LazySerializerFactory();
+            LoggingAdvancedOptions = loggingAdvancedOptions;
         }
         #endregion
 
@@ -342,10 +378,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
                         "Exception in executed UpdateProcessingDelegate: '{0}'.",
                         ex
                         );
-                    throw new UpdateProcessingException(
-                        "Exception in executed UpdateProcessingDelegate. Open log to see stacktrace.",
-                        ex
-                        );
+                    throw;
                 }
             };
             ExecutionManager.ProcessUpdate(processingFunc);
@@ -408,10 +441,11 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public TimeSpan CheckPendingDelay = TimeSpan.FromMinutes(1);
 
         /// <summary>
-        /// If pending requests count is more - will start aborting pending requests.
-        /// Default value is 100.
+        /// If pending requests count is more - will start check and aborting pending
+        /// requests (only allowed in <see cref="IPendingExceededChecker"/>.
+        /// Default value is 100 context instances.
         /// </summary>
-        public int MaxPendingContextCount = 0;
+        public int MaxPendingContextCount = 100;
 
         readonly object _checkPendingLocker = new object();
 

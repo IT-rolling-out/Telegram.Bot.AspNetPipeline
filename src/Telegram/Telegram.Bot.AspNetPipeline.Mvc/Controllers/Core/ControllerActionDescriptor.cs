@@ -7,7 +7,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
     /// <summary>
-    /// Static data about registered method or method.
+    /// Static data about registered method.
     /// <para></para>
     /// Controller routes top object with static data.
     /// </summary>

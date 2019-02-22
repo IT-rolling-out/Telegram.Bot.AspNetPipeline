@@ -14,7 +14,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         public ITelegramBotClient Bot { get; }
 
         /// <summary>
-        /// Updated only on <see cref="BotHandler.Setup"/>.
+        /// Updated only on <see cref="BotManager.Setup"/>.
         /// </summary>
         public User BotInfo { get; }
 

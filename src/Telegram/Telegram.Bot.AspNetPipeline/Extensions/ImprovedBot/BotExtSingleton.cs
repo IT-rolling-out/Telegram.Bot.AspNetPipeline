@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Core.Internal;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.Types;
@@ -16,9 +17,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         readonly IUpdateContextSearchBag _searchBag;
 
-        /// <summary>
-        /// Validate all callbacks. All must return true to validate it.
-        /// </summary>
         public IList<UpdateValidatorDelegate> GlobalValidators { get; } = new List<UpdateValidatorDelegate>();
 
         public BotExtSingleton(IUpdateContextSearchBag searchBag, ILoggerFactory loggerFactory)
@@ -107,7 +105,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                         );
                     SetException(
                         searchData.TaskCompletionSource,
-                        new Exception("Exception in update validator delegate.", ex)
+                        new TelegramAspException("Exception in update validator delegate.", ex)
                         );
 
                     return;
@@ -175,46 +173,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         UpdateValidatorResult CheckFromType(UpdateContext newCtx, UpdateContext origCtx, ReadCallbackFromType fromType)
         {
-            var res = CheckFromType_BoolResult(newCtx, origCtx, fromType);
+            var res = ReadCallbackFromDefaultValidator.Check(newCtx, origCtx, fromType);
             return res ? UpdateValidatorResult.Valid : UpdateValidatorResult.ContinueWaiting;
-        }
-
-        bool CheckFromType_BoolResult(UpdateContext newCtx, UpdateContext origCtx, ReadCallbackFromType fromType)
-        {
-            var upd = newCtx.Update;
-            try
-            {
-                _logger.LogTrace("Default CheckFromType for {0}.", fromType);
-                if (fromType == ReadCallbackFromType.CurrentUser)
-                {
-                    return upd.Message.From.Id == origCtx.Message.From.Id;
-                }
-                else if (fromType == ReadCallbackFromType.CurrentUserReply)
-                {
-                    if (upd.Message.From.Id != origCtx.Message.From.Id)
-                        return false;
-                    if (upd.Message.ReplyToMessage?.From.Id != origCtx.Bot.BotId)
-                        return false;
-                    return true;
-                }
-                else if (fromType == ReadCallbackFromType.AnyUserReply)
-                {
-                    if (upd.Message.ReplyToMessage?.From.Id != origCtx.Bot.BotId)
-                        return false;
-                    return true;
-                }
-                else if (fromType == ReadCallbackFromType.AnyUser)
-                {
-                    //I know that current expression can be removed, but it make code more readable.
-                    return true;
-                }
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         void SetCancelled(TaskCompletionSource<Update> taskCompletionSource)

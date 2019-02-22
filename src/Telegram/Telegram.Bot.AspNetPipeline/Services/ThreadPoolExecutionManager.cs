@@ -1,10 +1,8 @@
-﻿using System;
-using System.Runtime.ExceptionServices;
-using System.Threading;
-using System.Threading.Tasks;
-using ConcurrentCollections;
+﻿using ConcurrentCollections;
 using IRO.Common.Services;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace Telegram.Bot.AspNetPipeline.Services
 {

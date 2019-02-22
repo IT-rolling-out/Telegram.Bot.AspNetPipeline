@@ -10,18 +10,18 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders
     /// </summary>
     public class MainModelBinder:IModelBinder
     {
-        readonly IEnumerable<IModelBinder> _biders;
+        readonly IEnumerable<IModelBinder> _binders;
 
-        public MainModelBinder(IEnumerable<IModelBinder> biders)
+        public MainModelBinder(IEnumerable<IModelBinder> binders)
         {
-            if (biders == null)
-                throw new ArgumentNullException(nameof(biders));
-            _biders = biders.ToList();
+            if (binders == null)
+                throw new ArgumentNullException(nameof(binders));
+            _binders = binders.ToList();
         }
     
         public async Task Bind(ModelBindingContext modelBinderContext)
         {
-            foreach (var binder in _biders)
+            foreach (var binder in _binders)
             {
                 if (modelBinderContext.IsAllBinded())
                     return;

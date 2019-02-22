@@ -1,15 +1,16 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
 {
     public static class ExceptionHandlingBuilderExtensions
     {
         /// <summary>
-        /// Invoke before all another middleware.
+        /// In old versions must invoke before all other middleware.
         /// <para></para>
-        /// Return false from delegate if want to throw exception.
+        /// Return false from delegate if you want to throw exception (if not processed).
         /// </summary>
         public static void UseExceptionHandler(
             this IPipelineBuilder @this,
@@ -23,7 +24,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
         }
 
         /// <summary>
-        /// Mandatory used.
+        /// Mandatory used in <see cref="BotManager"/>.
         /// </summary>
         internal static void UseExceptionHandling(this IPipelineBuilder @this)
         {
@@ -32,7 +33,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling
         }
 
         /// <summary>
-        /// Mandatory used.
+        /// Mandatory used in <see cref="BotManager"/>.
         /// </summary>
         internal static void AddExceptionHandling(this ServiceCollectionWrapper @this)
         {

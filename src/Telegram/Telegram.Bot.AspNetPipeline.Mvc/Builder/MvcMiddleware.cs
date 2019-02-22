@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services;
@@ -100,7 +101,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         {
             var max = _mvcOptions.StartAnotherActionMaxStackLevel;
             if (invokesCount > max)
-                throw new Exception($"StartAnotherAction invoked recursive more than {max} times. " +
+                throw new TelegramAspException($"StartAnotherAction invoked recursive more than {max} times. " +
                                     $"You can change max value in MvcOptions.");
 
             var startAnotherActionData = MvcFeatures.GetData(prevActionContext);
@@ -112,7 +113,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var actDesc = _globalSearchBag.FindByName(actName);
             if (actDesc == null)
             {
-                throw new Exception($"Can't find action with name '{actName}'.");
+                throw new TelegramAspException($"Can't find action with name '{actName}'.");
             }
 
             var actionContext = _contextPreparer.CreateContext(ctx, actDesc);
@@ -132,7 +133,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             //Init routes (ActionDescriptors) search bag.
 
             //Smallest controllers code in MvcMiddleware class that i can write.
-            var controllersInspector = serv.GetRequiredService<IControllerInpector>();
+            var controllersInspector = serv.GetRequiredService<IControllerInspector>();
             var controllersRoutes = new List<ActionDescriptor>();
             foreach (var controllerType in controllers)
             {

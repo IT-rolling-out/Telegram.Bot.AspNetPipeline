@@ -7,7 +7,10 @@ using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
-    public class FullMatchRouter : BaseStringMatchRouter
+    /// <summary>
+    /// String match routing, compatible with commands with bot name (in group chats).
+    /// </summary>
+    public class DefaultRouter : BaseStringMatchRouter
     {
         protected override async Task SetTemplateMatchingStrings(RoutingContext routeContext, IList<string> templateMatchingStrings)
         {

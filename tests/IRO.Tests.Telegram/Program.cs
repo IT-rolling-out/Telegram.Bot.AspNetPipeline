@@ -8,12 +8,12 @@ namespace IRO.Tests.Telegram
     {
         static void Main(string[] args)
         {
-            var token = BotStaticTestsHelpers.GetToken();
+            var token = BotTokenResolver.GetToken();
             var bot = new TelegramBotClient(token);
-            var botHandler = new BotHandler(bot);
+            var botManager = new BotManager(bot);
 
             var botTest = new BotTests_Mvc();
-            botTest.Run(botHandler, true);
+            botTest.Run(botManager, true);
 
             while (true)
             {

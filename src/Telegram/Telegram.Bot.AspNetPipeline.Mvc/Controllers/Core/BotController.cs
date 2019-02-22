@@ -19,13 +19,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 
         public Update Update => ControllerContext.UpdateContext.Update;
 
-        public Message Message => Update.Message;
+        public Message Message => UpdateContext.Message;
 
-        public Chat Chat => Update.Message.Chat;
+        public Chat Chat => UpdateContext.Chat;
 
         public BotClientContext BotContext => UpdateContext.BotContext;
 
-        public ITelegramBotClient Bot => UpdateContext.BotContext.Bot;
+        public ITelegramBotClient Bot => BotContext.Bot;
 
         /// <summary>
         /// Just proxy to UpdateContext.BotExt().

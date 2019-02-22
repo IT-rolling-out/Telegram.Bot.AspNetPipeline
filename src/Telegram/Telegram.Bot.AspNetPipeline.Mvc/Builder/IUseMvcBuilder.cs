@@ -22,10 +22,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         IList<IRouter> Routers { get; set; }
 
         /// <summary>
-        /// Types must implement <see cref="IModelBinder"/>. Register type to resolve it with ioc.
-        /// <para></para>
-        /// Without ModelBinderProvider and more simpler, like it was in asp.net.
+        /// Without ModelBinderProvider and more simpler, like it was in ASP.NET.
         /// But you can build your own asp-like model binding middleware, if needed.
+        /// <para></para>
+        /// Default binder can resolve paramters separated by spaces.
         /// </summary>
         IList<IModelBinder> ModelBinders { get; set; }
 

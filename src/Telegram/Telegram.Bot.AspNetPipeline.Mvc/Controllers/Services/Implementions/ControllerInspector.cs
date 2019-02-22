@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
@@ -10,11 +11,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
     /// <summary>
     /// Main object to create controller actions.
     /// </summary>
-    public class ControllerInpector : IControllerInpector
+    public class ControllerInspector : IControllerInspector
     {
         readonly IControllerActionPreparer _controllerActionPreparer;
 
-        public ControllerInpector(IControllerActionPreparer controllerActionPreparer)
+        public ControllerInspector(IControllerActionPreparer controllerActionPreparer)
         {
             _controllerActionPreparer = controllerActionPreparer;
         }
@@ -31,15 +32,15 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
         {
             if (!typeof(BotController).IsAssignableFrom(controllerType))
             {
-                throw new Exception($"Type '{controllerType}' is not instance of type '{typeof(BotController)}'");
+                throw new TelegramAspException($"Type '{controllerType}' is not instance of type '{typeof(BotController)}'");
             }
             if (controllerType.IsAbstract)
             {
-                throw new Exception($"Controller type '{controllerType}' can't be abstract.");
+                throw new TelegramAspException($"Controller type '{controllerType}' can't be abstract.");
             }
             if (controllerType.IsGenericTypeDefinition)
             {
-                throw new Exception($"Controller type '{controllerType}' can't be Generic definitions.");
+                throw new TelegramAspException($"Controller type '{controllerType}' can't be Generic definitions.");
             }
 
             var resList = new List<ControllerActionDescriptor>();
@@ -48,7 +49,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
                 var arr = method.GetCustomAttributes(typeof(BotRouteAttribute), true);
                 if (arr.Length > 1)
                 {
-                    throw new Exception($"Method '{controllerType.Name}.{method.Name}' has multiple BotRouteAttributes.");
+                    throw new TelegramAspException($"Method '{controllerType.Name}.{method.Name}' has multiple BotRouteAttributes.");
                 }
 
                 if (arr.Length == 1)

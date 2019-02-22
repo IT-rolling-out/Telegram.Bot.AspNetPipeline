@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
 {
-    public class OuterMiddlewaresInformer:IOuterMiddlewaresInformer
+    internal class OuterMiddlewaresInformer:IOuterMiddlewaresInformer
     {
         readonly MainRouter _mainRouter;
 

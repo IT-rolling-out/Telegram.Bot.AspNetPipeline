@@ -9,9 +9,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
     internal class AddMvcBuilder : IAddMvcBuilder
     {
-        /// <summary>
-        /// All will be registered as services.
-        /// </summary>
         public IList<Type> Controllers  { get; set; } = new List<Type>();
 
         public IServiceCollection ServiceCollection { get; }

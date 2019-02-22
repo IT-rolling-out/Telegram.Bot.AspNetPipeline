@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
@@ -27,7 +28,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
         {
             if (!typeof(Task).IsAssignableFrom(methodInfo.ReturnType))
             {
-                throw new Exception($"Exception with '{methodInfo}' in '{controllerType.Name}'. " +
+                throw new TelegramAspException($"Exception with '{methodInfo}' in '{controllerType.Name}'. " +
                                     $"Controller method must return Task.");
             }
 
@@ -38,13 +39,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
                  {
                      if (controllerActionContext.ActionDescriptor.MethodInfo != methodInfo)
                      {
-                         throw new Exception("Predefined MethodInfo and context MethodInfo is different.");
+                         throw new TelegramAspException("Predefined MethodInfo and context MethodInfo is different.");
                      }
                  }
 #endif
                  if (!(actionContext is ControllerActionContext))
                  {
-                     throw new Exception(
+                     throw new TelegramAspException(
                          $"Controller actions can be invoked only with {typeof(ControllerActionContext).Name}.\n" +
                          $"Please, contact library author if exception throwed in default pipeline."
                      );

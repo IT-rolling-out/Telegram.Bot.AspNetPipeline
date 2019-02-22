@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
-using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
@@ -39,10 +37,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             @this.UseMiddlware(md);
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="mvcOptions">AddMvcOptions.Default if null.</param>
-        /// <returns></returns>
         public static void AddMvc(
             this ServiceCollectionWrapper serviceCollectionWrapper,
             MvcOptions mvcOptions = null,

@@ -16,6 +16,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 
         public RouteInfo RouteInfo { get; }
 
+        /// <summary>
+        /// In current library it is not hidden from user.
+        /// </summary>
         public RouteActionDelegate Handler { get; }
 
         /// <summary>

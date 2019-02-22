@@ -10,9 +10,9 @@ namespace IRO.Tests.Telegram
 {
     class BotTests_Mvc
     {
-        public void Run(BotHandler botHandler, bool isDebug)
+        public void Run(BotManager botManager, bool isDebug)
         {
-            botHandler.ConfigureServices((servicesWrap) =>
+            botManager.ConfigureServices((servicesWrap) =>
             {
                 LoggerStarter.InitLogger(servicesWrap);
                 servicesWrap.AddMvc(new MvcOptions()
@@ -21,7 +21,7 @@ namespace IRO.Tests.Telegram
                 });
             });
 
-            botHandler.ConfigureBuilder((builder) =>
+            botManager.ConfigureBuilder((builder) =>
             {
                 if (isDebug)
                     builder.UseDevEceptionMessage();
@@ -39,7 +39,7 @@ namespace IRO.Tests.Telegram
                     }, template: "/mvc");
                 });
             });
-            botHandler.Start();
+            botManager.Start();
         }
     }
 }

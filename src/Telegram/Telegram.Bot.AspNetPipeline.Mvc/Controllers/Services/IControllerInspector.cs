@@ -6,8 +6,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services
 {
     /// <summary>
     /// Main object to create controller actions.
+    /// <para></para>
+    /// Can be overrided with IOC.
     /// </summary>
-    public interface IControllerInpector
+    public interface IControllerInspector
     {
         IEnumerable<ControllerActionDescriptor> Inspect(Type controllerType);
     }

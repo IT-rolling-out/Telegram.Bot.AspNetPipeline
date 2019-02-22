@@ -6,6 +6,9 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
+    /// <summary>
+    /// Just proxing to singleton and pass context to methods.
+    /// </summary>
     public class BotExt
     {
         public IBotExtSingleton BotExtSingleton { get; }

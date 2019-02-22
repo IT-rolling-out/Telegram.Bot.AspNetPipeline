@@ -6,7 +6,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Internal
 {
     /// <summary>
     /// Some data and services for main (mandatory) middleware.
-    /// You can get it from UpdateContext.Properties["HiddenUpdateContext"].
+    /// You can get it from UpdateContext.HiddenContext().
     /// <para></para>
     /// Please, dont use it without important reason.
     /// <para></para>

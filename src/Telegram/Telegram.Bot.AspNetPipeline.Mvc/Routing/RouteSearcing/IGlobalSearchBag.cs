@@ -13,6 +13,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing
         /// </summary>
         IOrderScopeSearchBag FindOrderScope(int order);
 
+        /// <summary>
+        /// Search by name from [BotRoute].
+        /// </summary>
         ActionDescriptor FindByName(string routeActionName);
 
         /// <summary>

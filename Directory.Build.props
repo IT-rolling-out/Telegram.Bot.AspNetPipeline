@@ -16,7 +16,7 @@
   <PropertyGroup Condition="$(IsNuPackage)">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageProjectUrl>https://github.com/IT-rolling-out/IRO.Telegram</PackageProjectUrl>
+	<PackageProjectUrl>https://github.com/IT-rolling-out/Telegram.Bot.AspNetPipeline</PackageProjectUrl>
   </PropertyGroup>
 
   <!-- Category versions list. Use it in target projects and to set nuget dependencies. -->

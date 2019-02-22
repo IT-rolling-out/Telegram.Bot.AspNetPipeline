@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Builder
 {
-    public class PipelineBuilder : IPipelineBuilder
+    internal class PipelineBuilder : IPipelineBuilder
     {
         readonly Stack<UpdateProcessingDelegate> _updateProcessingDelegates = new Stack<UpdateProcessingDelegate>();
 

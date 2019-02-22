@@ -9,20 +9,20 @@ namespace IRO.Tests.Telegram
 {
     class BotTests_SimplestMvcApp
     {
-        public void Run(BotHandler botHandler, bool isDebug)
+        public void Run(BotManager botManager, bool isDebug)
         {
-            botHandler.ConfigureServices((services) =>
+            botManager.ConfigureServices((services) =>
             {
                 services.AddMvc();
             });
 
-            botHandler.ConfigureBuilder((builder) =>
+            botManager.ConfigureBuilder((builder) =>
             {
                 if (isDebug)
                     builder.UseDevEceptionMessage();
                 builder.UseMvc();
             });
-            botHandler.Start();
+            botManager.Start();
         }
     }
 }

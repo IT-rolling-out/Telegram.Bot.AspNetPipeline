@@ -17,7 +17,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures
 
         /// <summary>
         /// Started another controller action when current action execution finished.
-        /// Just pass current <see cref="UpdateContext"/> (not <see cref="ActionContext"/>, it will be created for new action) to another action.
+        /// Just pass current <see cref="UpdateContext"/> (not <see cref="ActionContext"/>, it will be created again for new action) to another action.
         /// <para></para>
         /// Will not be executed if <see cref="UpdateContext.ForceExit"/> was invoked.
         /// </summary>

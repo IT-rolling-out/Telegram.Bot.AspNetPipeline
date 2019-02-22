@@ -1,4 +1,5 @@
 ﻿using System;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata
@@ -35,6 +36,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata
         /// </summary>
         public int Order { get; set; }
 
+        /// <summary>
+        /// Can be used to find action. Used in <see cref="IMvcFeatures.StartAnotherAction"/>.
+        /// </summary>
         public string Name { get; set; }
 
         public RouteInfo GetRouteInfo()

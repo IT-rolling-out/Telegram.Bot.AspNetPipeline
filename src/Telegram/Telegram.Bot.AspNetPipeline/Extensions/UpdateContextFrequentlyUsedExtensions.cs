@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions
 {
-    public static class UpdateContextExtensions
+    public static class UpdateContextFrequentlyUsedExtensions
     {
         /// <summary>
         /// Send text message to current chat.

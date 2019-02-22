@@ -19,15 +19,15 @@ namespace IRO.Tests.Telegram
 {
     class BotTests_ReadMiddleware
     {
-        public void Run(BotHandler botHandler, bool isDebug)
+        public void Run(BotManager botManager, bool isDebug)
         {
 
-            botHandler.ConfigureServices((servicesWrap) =>
+            botManager.ConfigureServices((servicesWrap) =>
             {
                 LoggerStarter.InitLogger(servicesWrap);
             });
 
-            botHandler.ConfigureBuilder((builder) =>
+            botManager.ConfigureBuilder((builder) =>
             {
                 builder.AddBotExtGlobalValidator(async (upd, origCtx) =>
                 {
@@ -101,7 +101,7 @@ namespace IRO.Tests.Telegram
                 builder.UseDevEceptionMessage();
             });
 
-            botHandler.Start();
+            botManager.Start();
 
         }
     }

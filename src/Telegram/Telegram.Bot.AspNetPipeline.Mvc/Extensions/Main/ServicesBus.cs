@@ -12,7 +12,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main
     /// <para></para>
     /// Used to inject services, that created after service container builded.
     /// </summary>
-    public class ServicesBus : 
+    internal class ServicesBus : 
         IMainRouterProvider, 
         IOuterMiddlewaresInformerProvider,
         IMvcFeaturesProvider,

@@ -7,6 +7,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 {
     /// <summary>
     /// Something like ControllerContext, but more abstract.
+    /// Used in MapRouteAction().
     /// <para></para>
     /// Created on each request.
     /// </summary>

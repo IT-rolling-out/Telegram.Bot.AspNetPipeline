@@ -13,7 +13,7 @@ using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 namespace Telegram.Bot.AspNetPipeline.Core
 {
     /// <summary>
-    /// Just like http context in asp.net mvc.
+    /// Just like http context in ASP.NET MVC.
     /// </summary>
     [DataContract]
     public class UpdateContext : IDisposable
@@ -66,7 +66,10 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         public Message Message => Update.Message;
 
-        public Chat Chat => Update.Message.Chat;
+        /// <summary>
+        /// Null if message is null.
+        /// </summary>
+        public Chat Chat => Update.Message?.Chat;
         #endregion
 
         #region Properties bag.
@@ -156,6 +159,9 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         public event Action<UpdateContext> Disposing;
 
+        /// <summary>
+        /// Don't use it in controllers to abort processing. Use <see cref="ForceExit"/>.
+        /// </summary>
         public void Dispose()
         {
             if (IsDisposed)

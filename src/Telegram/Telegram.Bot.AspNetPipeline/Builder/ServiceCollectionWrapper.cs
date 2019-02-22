@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Telegram.Bot.AspNetPipeline.Builder
 {
     /// <summary>
-    /// Just wrapper used to separate ASP.NET extensions and extensions in current library.
+    /// Just wrapper used to separate ASP.NET extensions and extensions in Telegram.Bot.AspNetPipeline library.
     /// </summary>
     public class ServiceCollectionWrapper
     {

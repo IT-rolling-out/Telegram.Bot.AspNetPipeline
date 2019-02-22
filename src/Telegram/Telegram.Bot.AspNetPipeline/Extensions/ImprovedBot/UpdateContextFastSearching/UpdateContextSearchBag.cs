@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Telegram.Bot.AspNetPipeline.Core.Internal;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSearching
 {
     /// <summary>
     /// Specialized only for "ImprovedBot".
     /// </summary>
-    class UpdateContextSearchBag : IUpdateContextSearchBag
+    public class UpdateContextSearchBag : IUpdateContextSearchBag
     {
         readonly ConcurrentDictionary<string, UpdateContextSearchData> _dict = new ConcurrentDictionary<string, UpdateContextSearchData>();
 
@@ -50,11 +51,13 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot.UpdateContextFastSe
             return _dict.ContainsKey(key);
         }
 
-        /// <summary>
-        /// If context with current key exists - it will be disposed and overridden by current context.
-        /// </summary>
         public void Add(UpdateContextSearchData searchData)
         {
+            var key = searchData.Key;
+            if (_dict.TryRemove(key, out var prevData))
+            {
+                prevData.CurrentUpdateContext.HiddenContext().UpdateProcessingAbortedSource.Cancel();
+            }
             _dict[searchData.Key] = searchData;
         }
 

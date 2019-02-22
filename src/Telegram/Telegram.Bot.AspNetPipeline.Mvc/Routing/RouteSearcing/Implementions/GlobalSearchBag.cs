@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
 {
-    internal class GlobalSearchBag : IGlobalSearchBag
+    public class GlobalSearchBag : IGlobalSearchBag
     {
         readonly IReadOnlyDictionary<int, IOrderScopeSearchBag> _orderScopeSearchBags;
 

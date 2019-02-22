@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding
 {
-
     public class ModelBindingContext
     {
         IDictionary<string, ModelBindingParameterData> _dataByParamName = new Dictionary<string, ModelBindingParameterData>();
@@ -39,7 +39,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding
             var data = _dataByParamName[parameterName];
 
             var t = data.Info.ParameterType;
-            var castException = new Exception($"Model binding exception. Object '{value}' can't be used as '{t}'.");
+            var castException = new TelegramAspException($"Model binding exception. Object '{value}' can't be used as '{t}'.");
 
             if ((value != null) && !t.IsAssignableFrom(value.GetType()))
                 throw castException;

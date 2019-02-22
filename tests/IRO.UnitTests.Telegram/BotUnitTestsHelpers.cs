@@ -13,8 +13,17 @@ using File = System.IO.File;
 
 namespace IRO.UnitTests.Telegram
 {
-    public static class BotStaticTestsHelpers
+    public static class BotUnitTestsHelpers
     {
+        public static IPipelineBuilder CreatePipelineBuilder(IServiceProvider serv)
+        {
+            var fullTypeName = typeof(IPipelineBuilder).Namespace + ".PipelineBuilder";
+            var t = typeof(IPipelineBuilder).Assembly.GetType(fullTypeName);
+            var res = (IPipelineBuilder)Activator.CreateInstance(t, serv);
+            return res;
+        }
+
+
         public static string GetToken()
         {
             try
@@ -33,12 +42,12 @@ namespace IRO.UnitTests.Telegram
             }
         }
 
-        public static BotHandler BotHandler()
+        public static BotManager BotManager()
         {
             var token = GetToken();
             var bot = new TelegramBotClient(token);
-            var botHandler = new BotHandler(bot);
-            return botHandler;
+            var botManager = new BotManager(bot);
+            return botManager;
         }
 
         public static UpdateContext CreateUpdateContextMock(IServiceProvider services)

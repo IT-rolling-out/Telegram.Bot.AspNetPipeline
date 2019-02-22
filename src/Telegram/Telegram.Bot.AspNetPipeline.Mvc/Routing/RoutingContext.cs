@@ -17,7 +17,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         public UpdateContext UpdateContext { get; }
 
         /// <summary>
-        /// Set it if route match.
+        /// Set it if route match. 
         /// </summary>
         public ActionDescriptor ActionDescriptor { get; set; } 
 

@@ -11,13 +11,13 @@ using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
 {
-    public static class ControllersMiddlewareExtensions
+    internal static class ControllersMiddlewareExtensions
     {
         public static void AddControllersServices(IAddMvcBuilder builder)
         {
             var serv = builder.ServiceCollection;
             serv.AddSingleton<IControllersFactory, ControllersFactory>();
-            serv.AddSingleton<IControllerInpector, ControllerInpector>();
+            serv.AddSingleton<IControllerInspector, ControllerInspector>();
             serv.AddSingleton<IControllerActionPreparer, ControllerActionPreparer>();
             serv.AddSingleton<IControllersFactory, ControllersFactory>();
 
@@ -44,9 +44,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers
             {
                 new SpacingModelBinder()
             };
-
-
-
         }
 
         

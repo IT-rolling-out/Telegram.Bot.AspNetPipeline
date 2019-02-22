@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.AspNetPipeline.Builder;
 using File = System.IO.File;
 
 namespace IRO.Tests.Telegram
 {
-    public static class BotStaticTestsHelpers
+    public static class BotTokenResolver
     {
         public static string GetToken()
         {
@@ -18,7 +20,7 @@ namespace IRO.Tests.Telegram
                     throw new Exception();
                 return token;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("Wrong token. Please, check 'test_token.txt' exists in solution folder.", ex);
             }
