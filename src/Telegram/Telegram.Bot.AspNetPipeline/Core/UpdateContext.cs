@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading;
+using IRO.Common.Abstractions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core.Internal;
+using Telegram.Bot.AspNetPipeline.Core.Services;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -16,7 +18,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
     /// Just like http context in ASP.NET MVC.
     /// </summary>
     [DataContract]
-    public class UpdateContext : IDisposable
+    public class UpdateContext : IInformativeDisposable
     {
 
         #region Chatting with bot
@@ -151,7 +153,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             return Id.GetHashCode() + 279;
         }
 
-        #region Dispose region
+        #region Dispose region.
         [DataMember]
         public bool IsDisposed { get; private set; }
 

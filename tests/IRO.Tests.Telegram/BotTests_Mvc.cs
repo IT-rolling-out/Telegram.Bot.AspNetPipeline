@@ -1,4 +1,5 @@
 ﻿using IRO.Tests.Telegram.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
@@ -19,6 +20,8 @@ namespace IRO.Tests.Telegram
                 {
                     //ConfigureBotExtWithMvc = false
                 });
+
+                servicesWrap.Services.AddScoped<ISomeScopedService, SomeScopedService>();
             });
 
             botManager.ConfigureBuilder((builder) =>

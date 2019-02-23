@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
@@ -8,11 +9,11 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.Args;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core.Internal;
+using Telegram.Bot.AspNetPipeline.Core.Services;
 using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
-using Telegram.Bot.AspNetPipeline.Services;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -23,6 +24,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
     public class BotManager : IDisposable
     {
         #region Private fields
+        IUpdatesReceiver _updatesReceiver;
+
         readonly ITelegramBotClient _bot;
 
         #region Resolved serviced.
@@ -91,7 +94,10 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// If you want to use same <see cref="IServiceProvider"/> in ASP.NET and <see cref="Telegram.Bot.AspNetPipeline"/>
         /// you can user ServiceProviderBuilderDelegate. Pass here ASP.NET IServiceCollection (to register there default and yours
-        /// services) and pass builded IServiceProvider to <see cref="BotManager.Setup"/>.
+        /// services) and pass builded <see cref="IServiceProvider"/> to <see cref="BotManager.Setup"/>.
+        /// <para></para>
+        /// If you will use same <see cref="IServiceCollection"/> for two or more <see cref="BotManager"/>s it probably will broke
+        /// half of middleware.
         /// </summary>
         public BotManager(
             ITelegramBotClient bot,
@@ -117,7 +123,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         {
             if (_isSetup)
                 throw new TelegramAspException($"Can't configure {nameof(BotManager)} after setup.");
-            if(servicesConfigureAction==null)
+            if (servicesConfigureAction == null)
                 throw new ArgumentNullException(nameof(servicesConfigureAction));
             if (_servicesConfigured)
                 throw new TelegramAspException("Services was configured before.");
@@ -131,6 +137,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
 
         /// <summary>
         /// Configure middleware.
+        /// <para></para>
+        /// Can call bot.StartReceiving() before to configure bot.
         /// </summary>
         public void ConfigureBuilder(Action<IPipelineBuilder> pipelineBuilderAction)
         {
@@ -140,24 +148,26 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 ?? throw new ArgumentNullException(nameof(pipelineBuilderAction));
         }
 
+        /// <summary>
+        /// Call Setup() first to configure IServiceProvider or it will be called automatically.
+        /// Subscribe on update events and start receiving.
+        /// </summary>
         public void Start()
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(BotManager));
-
+            
             lock (_runLocker)
             {
                 if (IsRunning)
                     return;
                 Setup();
-                _bot.StartReceiving();
-                SubscribeBotEvents();
+                StartReceivingEvents();
                 IsRunning = true;
             }
         }
 
         /// <summary>
-        /// Call Setup() first to configure IServiceProvider.
         /// </summary>
         /// <param name="waitPendingMS">Time to wait before cancellation.</param>
         /// <param name="waitCancellationMS">Time to wait after cancellation.
@@ -173,7 +183,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 if (!IsRunning)
                     return;
 
-                UnsubscribeBotEvents();
+                StopReceivingEvents();
+
                 //Wait before cancel.
                 if (waitPendingMS > 0)
                 {
@@ -220,8 +231,16 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// If not null - will use passed provider instead builded from service collection.
         /// Useful when you wan't to set same container in ASP.NET and here.
         /// </param>
-        public void Setup(IServiceProvider serviceProvider = null)
+        /// <param name="updatesReceiver">
+        /// Use it to customize how bot receiving updates.
+        /// Default is <see cref="PollingUpdatesReceiver"/> and subscribe on <see cref="ITelegramBotClient.OnUpdate"/>.
+        /// It will set webhook string empty, to enable polling.
+        /// </param>
+        public void Setup(IServiceProvider serviceProvider = null, IUpdatesReceiver updatesReceiver = null)
         {
+            //?Why use IUpdatesReceiver? Why not just make ProcessUpdate method public?
+            //Was decided to use interface with event to wrote more "infrastructure" code in BotManager.
+
             lock (_setupLocker)
             {
                 try
@@ -231,8 +250,13 @@ namespace Telegram.Bot.AspNetPipeline.Core
                         return;
                     }
 
+                    //Init bot context.
                     var botInfo = _bot.GetMeAsync().Result;
                     BotContext = new BotClientContext(_bot, botInfo);
+
+                    //Set UpdateReceiver.
+                    _updatesReceiver = updatesReceiver ?? new PollingUpdatesReceiver();
+                    _updatesReceiver.Init(this);
 
                     //Build service provider.
                     string providerIndentifierForLog;
@@ -275,7 +299,14 @@ namespace Telegram.Bot.AspNetPipeline.Core
                 catch (Exception ex)
                 {
                     var exception = new TelegramAspException("BotManager setup exception.", ex);
-                    _logger.LogError(exception, "");
+                    if (_logger == null)
+                    {
+                        Debug.WriteLine(exception.ToString());
+                    }
+                    else
+                    {
+                        _logger.LogError(exception, "");
+                    }
                     throw exception;
                 }
             }
@@ -293,6 +324,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             BotContext = null;
             _updateProcessingDelegate = null;
             IsDisposed = true;
+            _updatesReceiver.BotManagerDisposed();
             GC.Collect();
             _logger.LogTrace(nameof(BotManager) + " disposed.");
         }
@@ -343,17 +375,19 @@ namespace Telegram.Bot.AspNetPipeline.Core
         #endregion
 
         #region Bot events region
-        void SubscribeBotEvents()
+        void StartReceivingEvents()
         {
-            BotContext.Bot.OnUpdate += OnUpdateEventHandler;
+            _updatesReceiver.UpdateReceived += OnUpdateEventHandler;
+            _updatesReceiver.StartReceiving();
         }
 
-        void UnsubscribeBotEvents()
+        void StopReceivingEvents()
         {
-            BotContext.Bot.OnUpdate -= OnUpdateEventHandler;
+            _updatesReceiver.StopReceiving();
+            _updatesReceiver.UpdateReceived -= OnUpdateEventHandler;
         }
 
-        void OnUpdateEventHandler(object sender, UpdateEventArgs updateEventArgs)
+        void OnUpdateEventHandler(object sender, UpdateReceivedEventArgs updateEventArgs)
         {
             //Launch pending updates checker.
             AbortPendingExceeded();

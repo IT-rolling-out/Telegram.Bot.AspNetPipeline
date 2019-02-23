@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Telegram.Bot.AspNetPipeline.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Core.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Core

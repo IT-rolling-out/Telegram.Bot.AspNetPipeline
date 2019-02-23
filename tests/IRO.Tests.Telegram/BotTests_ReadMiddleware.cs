@@ -12,7 +12,6 @@ using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
 using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
-using Telegram.Bot.AspNetPipeline.Services;
 using Telegram.Bot.Types;
 
 namespace IRO.Tests.Telegram

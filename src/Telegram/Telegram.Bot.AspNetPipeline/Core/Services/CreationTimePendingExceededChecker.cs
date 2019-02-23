@@ -1,8 +1,7 @@
 ﻿using System;
-using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Core.Internal;
 
-namespace Telegram.Bot.AspNetPipeline.Services
+namespace Telegram.Bot.AspNetPipeline.Core.Services
 {
     public class CreationTimePendingExceededChecker : IPendingExceededChecker
     {

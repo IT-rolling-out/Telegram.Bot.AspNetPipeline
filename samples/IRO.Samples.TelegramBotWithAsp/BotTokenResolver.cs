@@ -8,11 +8,11 @@ namespace IRO.Samples.TelegramBotWithAsp
     {
         public static string GetToken()
         {
+            //Just crunch to read token from test_token.txt (gitignored) file in solution root directory.
             try
             {
                 try
                 {
-                    //Read token from gitignored file.
                     var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\",
                         "test_token.txt"));
                     var token = File.ReadAllText(path).Trim();

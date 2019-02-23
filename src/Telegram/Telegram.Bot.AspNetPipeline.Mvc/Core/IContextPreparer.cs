@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Core.Services
+namespace Telegram.Bot.AspNetPipeline.Mvc.Core
 {
     public interface IContextPreparer
     {

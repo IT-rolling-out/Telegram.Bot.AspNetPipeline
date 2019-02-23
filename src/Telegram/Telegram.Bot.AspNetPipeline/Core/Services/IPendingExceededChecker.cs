@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.AspNetPipeline.Core;
-
-namespace Telegram.Bot.AspNetPipeline.Services
+﻿namespace Telegram.Bot.AspNetPipeline.Core.Services
 {
     public interface IPendingExceededChecker
     {

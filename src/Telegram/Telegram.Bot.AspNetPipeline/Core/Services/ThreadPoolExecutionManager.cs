@@ -1,10 +1,10 @@
-﻿using ConcurrentCollections;
+﻿using System;
+using System.Threading.Tasks;
+using ConcurrentCollections;
 using IRO.Common.Services;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
-namespace Telegram.Bot.AspNetPipeline.Services
+namespace Telegram.Bot.AspNetPipeline.Core.Services
 {
     public class ThreadPoolExecutionManager : IExecutionManager
     {
