@@ -67,9 +67,7 @@ namespace IRO.UnitTests.Telegram
                     new RouteInfo(template: "t3", order: 1, updateTypes: new UpdateType[] { UpdateType.ChannelPost })
                ));
 
-            var provider = new GlobalSearchBagProvider();
-            provider.Init(_routes);
-            _sb = provider.Resolve();
+            _sb = new GlobalSearchBag(_routes, true);
 
         }
 

@@ -41,8 +41,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         public MvcMiddleware(
             IAddMvcBuilder addMvcBuilder, 
-            IUseMvcBuilder useMvcBuilder,
-            Action<IUseMvcBuilder> configureUseMvcBuilder
+            IUseMvcBuilder useMvcBuilder
             )
         {
             addMvcBuilder.Controllers = addMvcBuilder.Controllers ?? new List<Type>();
@@ -70,11 +69,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
                 outerMiddlewaresInformer,
                 mvcFeatures,
                 mainModelBinder
-                );
-
-            //Custom settings.
-            //!Here, because some middleware require service bus.
-            configureUseMvcBuilder?.Invoke(useMvcBuilder);
+                );            
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)

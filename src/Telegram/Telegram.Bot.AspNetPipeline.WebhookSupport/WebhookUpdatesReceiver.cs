@@ -73,7 +73,7 @@ namespace Telegram.Bot.AspNetPipeline.WebhookSupport
         /// <summary>
         /// You must set webhook url for <see cref="ITelegramBotClient"/> yourself.
         /// </summary>
-        /// <param name="pathWithBotname">Not all url, just part after domain (HttpContext.Path in ASP.NET).</param>
+        /// <param name="pathTemplate">Not all url, just part after domain (HttpContext.Path in ASP.NET).</param>
         /// <param name="setWebhookAutomatically">
         /// If true - will call SetWebhook after initialization.
         /// <para></para>

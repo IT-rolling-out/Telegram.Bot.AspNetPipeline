@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using IRO.Common.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +11,7 @@ using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
 using Telegram.Bot.AspNetPipeline.Extensions.OldUpdatesIgnoring;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.DebugExt;
 using Telegram.Bot.AspNetPipeline.WebhookSupport;
 
 namespace IRO.Samples.TelegramBotWithAsp
@@ -50,7 +46,7 @@ namespace IRO.Samples.TelegramBotWithAsp
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             var token = BotTokenResolver.GetToken();
-            var bot = new Telegram.Bot.TelegramBotClient(token, new TimeoutedHttpClient(TimeSpan.FromSeconds(2)));
+            var bot = new Telegram.Bot.TelegramBotClient(token, new QueuedHttpClient(TimeSpan.FromSeconds(1)));
             _botManager = new BotManager(bot, services);
 
             //Invoked synchronous.
@@ -61,6 +57,8 @@ namespace IRO.Samples.TelegramBotWithAsp
                     //Useful for debugging.
                     CheckEqualsRouteInfo = true
                 });
+
+                //Logging service example with NLog you can see in IRO.Tests.Telegram.
             });
 
 
@@ -86,22 +84,12 @@ namespace IRO.Samples.TelegramBotWithAsp
             //Invoked on setup.
             _botManager.ConfigureBuilder(builder =>
             {
-                //Test partial messages.
-                builder.Use(async (ctx, next) =>
-                {
-                    string text = "";
-                    int i = 0;
-                    while (text.Length < 12000)
-                    {
-                        i++;
-                        text += i.ToString() + "++";
-                    }
-                    throw new System.Exception(text);
-                });
-
                 builder.UseDevEceptionMessage();
                 builder.UseOldUpdatesIgnoring();
-                builder.UseMvc();
+                builder.UseMvc(mvcBuilder =>
+                {
+                    mvcBuilder.UseDebugInfo();
+                });
             });
 
             //Note: update your pathTemplate and add there some string, that will identify telegram webhooks.
@@ -124,68 +112,6 @@ namespace IRO.Samples.TelegramBotWithAsp
                 allowedUpdates: UpdateTypeExtensions.All
                 ).Wait();
             _botManager.Start();
-        }
-    }
-
-    public class TimeoutedHttpClient : HttpClient, IInformativeDisposable
-    {
-        readonly TimeSpan _timeout;
-
-        readonly ConcurrentQueue<Action> _queue = new ConcurrentQueue<Action>();
-
-        DateTime _lastDequeueTime = DateTime.MinValue;
-
-        public bool IsDisposed { get; private set; }
-
-        public TimeoutedHttpClient(TimeSpan timeout)
-        {
-            _timeout = timeout;
-
-            var thread = new Thread(async () =>
-            {
-                while (!IsDisposed)
-                {
-                    try
-                    {
-                        await Task.Delay(_timeout);
-                        DequeueNextIfNeeded();
-                    }
-                    catch { }
-                }
-            });
-            thread.Start();
-        }
-
-        public override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            TaskCompletionSource<bool> taskCompletionSource = null;
-            taskCompletionSource = new TaskCompletionSource<bool>(
-                TaskCreationOptions.RunContinuationsAsynchronously
-            );
-            Action act = () => { taskCompletionSource?.TrySetResult(true); };
-            _queue.Enqueue(act);
-            cancellationToken.Register(() => { taskCompletionSource?.TrySetCanceled(); });
-            await taskCompletionSource.Task;
-            taskCompletionSource = null;
-            return await base.SendAsync(request, cancellationToken);
-
-        }
-
-        void DequeueNextIfNeeded()
-        {
-            if (DateTime.Now - _lastDequeueTime > _timeout)
-            {
-                if (_queue.TryDequeue(out var act))
-                {
-                    act();
-                    _lastDequeueTime = DateTime.Now;
-                }
-            }
-        }
-
-        public new void Dispose()
-        {
-            IsDisposed = true;
         }
     }
 }

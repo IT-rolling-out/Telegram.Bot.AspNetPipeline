@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{762D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Samples.TelegramBotWithAsp", "samples\IRO.Samples.TelegramBotWithAsp\IRO.Samples.TelegramBotWithAsp.csproj", "{B1901EEB-02FA-4360-8EA1-AF1E40CD9E20}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.WebhookSupport", "src\Telegram.Bot.AspNetPipeline.WebhookSupport\Telegram.Bot.AspNetPipeline.WebhookSupport.csproj", "{0552F165-A1B0-4248-A146-35718532748D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.WebhookSupport", "src\Telegram\Telegram.Bot.AspNetPipeline.WebhookSupport\Telegram.Bot.AspNetPipeline.WebhookSupport.csproj", "{0552F165-A1B0-4248-A146-35718532748D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

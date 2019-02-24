@@ -27,30 +27,13 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage
 
                     //Send messages.
                     var utfText = exceptionText.ToUTF8();
-                    var maxLength = FrequentlyUsedExtensions.MaxTelegramMessageLength - 6;
-                    while (true)
-                    {
-                        if (utfText.Length > maxLength)
-                        {
-                            string currentMessage = utfText.Remove(maxLength);
-                            utfText = utfText.Substring(maxLength);
-                            await ctx.SendTextMessageAsync(
-                                "```" + currentMessage + "```",
-                                parseMode: ParseMode.Markdown
-                                );
-                        }
-                        else
-                        {
-                            await ctx.SendTextMessageAsync(
-                                "```" + utfText + "```",
-                                parseMode: ParseMode.Markdown
-                                );
-                            await ctx.SendTextMessageAsync(
-                               "====================",
-                               parseMode: ParseMode.Markdown
-                               );
-                        }
-                    }
+                    //Max for telegram is 4096 UTF8  characters.
+                    if (utfText.Length > 4080)
+                        utfText = utfText.Remove(4080) + "...";
+                    await ctx.SendTextMessageAsync( 
+                        "```\n" + utfText + " ```",
+                        parseMode: ParseMode.Markdown
+                    );
                 }
                 return false;
             });

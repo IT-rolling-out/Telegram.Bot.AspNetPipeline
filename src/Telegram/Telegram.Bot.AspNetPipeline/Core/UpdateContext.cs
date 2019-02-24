@@ -71,7 +71,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// Null if message is null.
         /// </summary>
-        public Chat Chat => Update.Message?.Chat;
+        public Chat Chat => Message?.Chat;
         #endregion
 
         #region Properties bag.
