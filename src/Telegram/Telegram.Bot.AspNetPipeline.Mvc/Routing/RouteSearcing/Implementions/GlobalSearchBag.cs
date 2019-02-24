@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using IRO.Common.Collections;
+using Telegram.Bot.AspNetPipeline.Exceptions;
+using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
 {
@@ -15,13 +19,32 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
 
         readonly IOrderedEnumerable<IOrderScopeSearchBag> _allSorted;
 
-        public GlobalSearchBag(IEnumerable<ActionDescriptor> routeDescriptions)
+        public GlobalSearchBag(IEnumerable<ActionDescriptor> routeDescriptions, bool checkEqualsRouteInfo)
         {
-            if(routeDescriptions==null)
+            if (routeDescriptions == null)
                 throw new ArgumentNullException(nameof(routeDescriptions));
-            _routes=routeDescriptions
+            _routes = routeDescriptions
                 .Where(x => x.RouteInfo != null)
                 .ToList();
+
+            if (checkEqualsRouteInfo)
+            {
+                var routeInfoCollection = _routes.Select(r => r.RouteInfo).ToList();
+                foreach (var routeInfo in routeInfoCollection)
+                {
+                    if (routeInfo == null)
+                        continue;
+                    if (ContainsEqualRouteInfo(routeInfoCollection, routeInfo, true))
+                    {
+                        throw new TelegramAspException(
+                            $"Found completely identical RouteInfo '{routeInfo}'.\n" +
+                            $"Set Name property or disable RouteInfo check (in MvcOptions) " +
+                            $"if you did it intentionally."
+                        );
+                    }
+                }
+            }
+
             _routesByName = _routes
                 .Where(x => x.RouteInfo?.Name != null)
                 .ToDictionary(x => x.RouteInfo.Name);
@@ -100,5 +123,52 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing.Implementions
             }
             return res;
         }
+
+        bool ContainsEqualRouteInfo(ICollection<RouteInfo> routeInfoCollection, RouteInfo routeInfo, bool ignoreSelf)
+        {
+            foreach (var item in routeInfoCollection)
+            {
+                bool valuesEqual = item.Name == routeInfo.Name && item.Order == routeInfo.Order && item.Template == routeInfo.Template;
+                bool updateTypesEqual = UpdateTypeCollectionsEqual(item.UpdateTypes, routeInfo.UpdateTypes);
+                bool isEqual = valuesEqual && updateTypesEqual;
+                if (isEqual)
+                {
+                    bool isSelf = item == routeInfo;
+                    if (!(ignoreSelf && isSelf))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        #region UpdateType equals region.
+        HashSet<UpdateType> _allUpdateTypesHashSet;
+
+        bool UpdateTypeCollectionsEqual(ICollection<UpdateType> colection1, ICollection<UpdateType> colection2)
+        {
+            if (colection1 == null && colection2 == null)
+                return true;
+
+            if (_allUpdateTypesHashSet == null)
+                _allUpdateTypesHashSet = EnumerableExtensions.ToHashSet(UpdateTypeExtensions.All);
+            //Set all, because null equals to all templates allowed.
+            colection1 = colection1 ?? _allUpdateTypesHashSet;
+            colection2 = colection2 ?? _allUpdateTypesHashSet;
+
+            foreach (var updateType in colection1)
+            {
+                if (!colection2.Contains(updateType))
+                    return false;
+            }
+            foreach (var updateType in colection2)
+            {
+                if (!colection1.Contains(updateType))
+                    return false;
+            }
+            return true;
+        }
+        #endregion
     }
 }

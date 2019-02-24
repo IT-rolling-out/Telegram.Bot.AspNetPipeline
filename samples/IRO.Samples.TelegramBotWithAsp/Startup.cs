@@ -1,4 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using IRO.Common.Abstractions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
+using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
 using Telegram.Bot.AspNetPipeline.Extensions.OldUpdatesIgnoring;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
 using Telegram.Bot.AspNetPipeline.WebhookSupport;
@@ -18,7 +26,7 @@ namespace IRO.Samples.TelegramBotWithAsp
         /// <summary>
         /// Launch ngrok and copy domain string to test it.
         /// </summary>
-        const string _domain = "https://8b6e28a9.ngrok.io";
+        const string _domain = "https://fa4f04a3.ngrok.io";
 
         BotManager _botManager;
 
@@ -42,12 +50,17 @@ namespace IRO.Samples.TelegramBotWithAsp
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             var token = BotTokenResolver.GetToken();
-            var bot = new Telegram.Bot.TelegramBotClient(token);
+            var bot = new Telegram.Bot.TelegramBotClient(token, new TimeoutedHttpClient(TimeSpan.FromSeconds(2)));
             _botManager = new BotManager(bot, services);
-            _botManager.ConfigureServices((servWrapper) =>
+
+            //Invoked synchronous.
+            _botManager.ConfigureServices((servicesWrap) =>
             {
-                //Invoked synchronous.
-                servWrapper.AddMvc();
+                servicesWrap.AddMvc(new Telegram.Bot.AspNetPipeline.Mvc.Builder.MvcOptions()
+                {
+                    //Useful for debugging.
+                    CheckEqualsRouteInfo = true
+                });
             });
 
 
@@ -55,22 +68,11 @@ namespace IRO.Samples.TelegramBotWithAsp
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.Use(async (ctx, next) =>
-            {
-                string url = ctx.Request.Path.ToString();
-                if (url.Contains("telegram"))
-                {
-                    //ctx.Response.StatusCode = 200;
-                }
-                await next();
-
-            });
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseMvc();
             app.Use(async (ctx, next) =>
             {
@@ -80,13 +82,28 @@ namespace IRO.Samples.TelegramBotWithAsp
                 await next();
             });
 
+            //Telegram here.
+            //Invoked on setup.
             _botManager.ConfigureBuilder(builder =>
             {
-                //Invoked on setup.
+                //Test partial messages.
+                builder.Use(async (ctx, next) =>
+                {
+                    string text = "";
+                    int i = 0;
+                    while (text.Length < 12000)
+                    {
+                        i++;
+                        text += i.ToString() + "++";
+                    }
+                    throw new System.Exception(text);
+                });
+
+                builder.UseDevEceptionMessage();
                 builder.UseOldUpdatesIgnoring();
                 builder.UseMvc();
             });
-           
+
             //Note: update your pathTemplate and add there some string, that will identify telegram webhooks.
             //Something like: "wad5kK2PVL0SAEPq43q5cR2qwFWF4434/{0}". It must be same for all server processes.
             //=========
@@ -94,7 +111,7 @@ namespace IRO.Samples.TelegramBotWithAsp
             var webhookReceiver = WebhookUpdatesReceiver.Create(
                 app,
                 _domain,
-                pathTemplate: "111telegram/update/{0}",
+                pathTemplate: "telegram/update/{0}",
                 setWebhookAutomatically: false
                 );
 
@@ -107,6 +124,68 @@ namespace IRO.Samples.TelegramBotWithAsp
                 allowedUpdates: UpdateTypeExtensions.All
                 ).Wait();
             _botManager.Start();
+        }
+    }
+
+    public class TimeoutedHttpClient : HttpClient, IInformativeDisposable
+    {
+        readonly TimeSpan _timeout;
+
+        readonly ConcurrentQueue<Action> _queue = new ConcurrentQueue<Action>();
+
+        DateTime _lastDequeueTime = DateTime.MinValue;
+
+        public bool IsDisposed { get; private set; }
+
+        public TimeoutedHttpClient(TimeSpan timeout)
+        {
+            _timeout = timeout;
+
+            var thread = new Thread(async () =>
+            {
+                while (!IsDisposed)
+                {
+                    try
+                    {
+                        await Task.Delay(_timeout);
+                        DequeueNextIfNeeded();
+                    }
+                    catch { }
+                }
+            });
+            thread.Start();
+        }
+
+        public override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            TaskCompletionSource<bool> taskCompletionSource = null;
+            taskCompletionSource = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            );
+            Action act = () => { taskCompletionSource?.TrySetResult(true); };
+            _queue.Enqueue(act);
+            cancellationToken.Register(() => { taskCompletionSource?.TrySetCanceled(); });
+            await taskCompletionSource.Task;
+            taskCompletionSource = null;
+            return await base.SendAsync(request, cancellationToken);
+
+        }
+
+        void DequeueNextIfNeeded()
+        {
+            if (DateTime.Now - _lastDequeueTime > _timeout)
+            {
+                if (_queue.TryDequeue(out var act))
+                {
+                    act();
+                    _lastDequeueTime = DateTime.Now;
+                }
+            }
+        }
+
+        public new void Dispose()
+        {
+            IsDisposed = true;
         }
     }
 }

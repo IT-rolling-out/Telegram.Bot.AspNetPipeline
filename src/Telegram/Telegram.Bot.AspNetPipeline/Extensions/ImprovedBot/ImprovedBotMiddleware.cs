@@ -5,7 +5,7 @@ using Telegram.Bot.AspNetPipeline.Core;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
-    public class ImprovedBotMiddleware : IMiddleware
+    internal class ImprovedBotMiddleware : IMiddleware
     {
         readonly IBotExtSingleton _botExtSingleton;
 

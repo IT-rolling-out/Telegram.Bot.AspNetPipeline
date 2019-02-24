@@ -39,7 +39,11 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// <summary>
         /// All other services will be resolved from ServiceProvider.
         /// </summary>
-        public MvcMiddleware(IAddMvcBuilder addMvcBuilder, IUseMvcBuilder useMvcBuilder)
+        public MvcMiddleware(
+            IAddMvcBuilder addMvcBuilder, 
+            IUseMvcBuilder useMvcBuilder,
+            Action<IUseMvcBuilder> configureUseMvcBuilder
+            )
         {
             addMvcBuilder.Controllers = addMvcBuilder.Controllers ?? new List<Type>();
             useMvcBuilder.Routers = useMvcBuilder.Routers ?? new List<IRouter>();
@@ -68,6 +72,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
                 mainModelBinder
                 );
 
+            //Custom settings.
+            //!Here, because some middleware require service bus.
+            configureUseMvcBuilder?.Invoke(useMvcBuilder);
         }
 
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
@@ -143,7 +150,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var allRoutes = controllersRoutes.ToList();
             allRoutes.AddRange(startupRoutes);
             var globalSearchBagProvider = serv.GetRequiredService<GlobalSearchBagProvider>();
-            globalSearchBagProvider.Init(allRoutes);
+            globalSearchBagProvider.Init(allRoutes, _mvcOptions.CheckEqualsRouteInfo);
             //Search bag initialized. 
             //All routes you can get only with IGlobalSearchBag.
 

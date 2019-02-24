@@ -6,14 +6,15 @@ using IRO.Tests.Telegram.Services;
 using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
+using Telegram.Bot.Types.Enums;
 
 namespace IRO.Tests.Telegram.Controllers
 {
-    public class TestController:BotController
+    public class TestController : BotController
     {
         public TestController(ISomeScopedService someScopedService)
         {
-            
+            //DI test.
         }
 
         [BotRoute("/param")]
@@ -28,6 +29,12 @@ namespace IRO.Tests.Telegram.Controllers
         {
             await UpdateContext.SendTextMessageAsync($"num: {num}\nboolean: {boolean}\nstr: '{str}'" +
                                                       $"\n\nall valid: {IsModelStateValid}");
+        }
+
+        [BotRoute("/ex")]
+        public async Task ExceptionsTest()
+        {
+            throw new Exception("Some exception message.");
         }
     }
 }

@@ -18,7 +18,7 @@ namespace IRO.Tests.Telegram
                 LoggerStarter.InitLogger(servicesWrap);
                 servicesWrap.AddMvc(new MvcOptions()
                 {
-                    //ConfigureBotExtWithMvc = false
+                    CheckEqualsRouteInfo = true
                 });
 
                 servicesWrap.Services.AddScoped<ISomeScopedService, SomeScopedService>();

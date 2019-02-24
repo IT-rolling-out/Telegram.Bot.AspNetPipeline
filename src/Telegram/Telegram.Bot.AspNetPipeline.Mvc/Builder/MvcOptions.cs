@@ -1,6 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Routing;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 {
@@ -36,6 +37,14 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// Default is 5.
         /// </summary>
         public int StartAnotherActionMaxStackLevel { get; set; } = 5;
+
+        /// <summary>
+        /// Throw exceptions if found completly equals <see cref="RouteInfo"/>s.
+        /// Recommended only in debug, because it's make app startup slower.
+        /// <para></para>
+        /// Default is false.
+        /// </summary>
+        public bool CheckEqualsRouteInfo { get; set; }
 
         public object Clone()
         {

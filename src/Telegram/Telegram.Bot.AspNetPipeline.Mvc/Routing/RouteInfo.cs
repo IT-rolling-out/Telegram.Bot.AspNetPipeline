@@ -55,5 +55,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing
         /// Can be null. Null mean all update types.
         /// </summary>
         public HashSet<UpdateType> UpdateTypes { get; }
+
+        public override string ToString()
+        {
+            return nameof(RouteInfo) + $"(Name=\"{Name}\", Template=\"{Template}\", Order={Order})";
+        }
     }
 }

@@ -30,9 +30,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             //Controllers settiongs.
             ControllersMiddlewareExtensions.InitUseMvcBuilder(useMvcBuilder);
 
-            //Custom settings.
-            configureUseMvcBuilder?.Invoke(useMvcBuilder);
-            var md = new MvcMiddleware(addMvcBuilder, useMvcBuilder);
+            var md = new MvcMiddleware(addMvcBuilder, useMvcBuilder, configureUseMvcBuilder);
             @this.UseMiddlware(md);
         }
 

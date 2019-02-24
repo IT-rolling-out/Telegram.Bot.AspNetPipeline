@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Telegram.Bot.AspNetPipeline.Mvc;
-using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
+﻿using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace IRO.Tests.Telegram.Controllers
+namespace IRO.Samples.TelegramBotWithAsp.TelegramControllers
 {
     public class BotFatherSampleController : BotController
     {
@@ -52,7 +47,7 @@ namespace IRO.Tests.Telegram.Controllers
         /// So will not cancel NewBot.
         /// NOTE: Bigger Order mean lower priority, ASP.NET naming.
         /// </summary>
-        [BotRoute(Order = 2, Name = "Default")]
+        [BotRoute(Order = 1, Name = "Default")]
         public async Task Default()
         {
             await Bot.SendTextMessageAsync(Chat.Id, "Hi, i am BotFather.");
