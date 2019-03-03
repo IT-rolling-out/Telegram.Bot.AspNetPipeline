@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,13 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
-using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
-using Telegram.Bot.AspNetPipeline.Extensions.OldUpdatesIgnoring;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
-using Telegram.Bot.AspNetPipeline.Mvc.Extensions.DebugExt;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.WebhookSupport;
 
-namespace IRO.Samples.TelegramBotWithAsp
+namespace IRO.Samples.AspWebhooks
 {
     //!Example how to use same service collection in asp.net and bot.
     public class Startup

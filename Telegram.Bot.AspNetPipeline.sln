@@ -15,9 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.UnitTests.Telegram", "t
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{762DC31F-16D5-43B9-AFFD-9150F39E38F0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Samples.TelegramBotWithAsp", "samples\IRO.Samples.TelegramBotWithAsp\IRO.Samples.TelegramBotWithAsp.csproj", "{B1901EEB-02FA-4360-8EA1-AF1E40CD9E20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Samples.AspWebhooks", "samples\IRO.Samples.AspWebhooks\IRO.Samples.AspWebhooks.csproj", "{B1901EEB-02FA-4360-8EA1-AF1E40CD9E20}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.WebhookSupport", "src\Telegram\Telegram.Bot.AspNetPipeline.WebhookSupport\Telegram.Bot.AspNetPipeline.WebhookSupport.csproj", "{0552F165-A1B0-4248-A146-35718532748D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRO.Samples.Standalone", "samples\IRO.Samples.Standalone\IRO.Samples.Standalone.csproj", "{00AF7862-96FC-4EDF-A205-87448A17D458}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,14 @@ Global
 		{0552F165-A1B0-4248-A146-35718532748D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0552F165-A1B0-4248-A146-35718532748D}.Release|x64.ActiveCfg = Release|Any CPU
 		{0552F165-A1B0-4248-A146-35718532748D}.Release|x64.Build.0 = Release|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Debug|x64.Build.0 = Debug|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Release|x64.ActiveCfg = Release|Any CPU
+		{00AF7862-96FC-4EDF-A205-87448A17D458}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +93,7 @@ Global
 		{996FAD68-5D0F-41CB-AB5B-A61A84227E18} = {A9CAF669-789B-4705-ADDD-2D700148C187}
 		{0F84B44F-4834-4487-9FC5-2F4AB295E452} = {A9CAF669-789B-4705-ADDD-2D700148C187}
 		{B1901EEB-02FA-4360-8EA1-AF1E40CD9E20} = {762DC31F-16D5-43B9-AFFD-9150F39E38F0}
+		{00AF7862-96FC-4EDF-A205-87448A17D458} = {762DC31F-16D5-43B9-AFFD-9150F39E38F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C232FA4E-FED2-40B5-B4A3-1458678B1AED}

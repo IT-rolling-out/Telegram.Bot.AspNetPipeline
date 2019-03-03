@@ -1,17 +1,7 @@
-﻿using System;
-using System.Runtime.ExceptionServices;
-using IRO.Tests.Telegram.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog;
-using NLog.Extensions.Logging;
-using Telegram.Bot.AspNetPipeline.Builder;
+﻿using IRO.Tests.Telegram.Services;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
-using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
-using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
-using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.Types;
 
 namespace IRO.Tests.Telegram

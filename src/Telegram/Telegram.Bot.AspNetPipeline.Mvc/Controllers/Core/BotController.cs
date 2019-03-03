@@ -3,8 +3,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
-using Telegram.Bot.AspNetPipeline.Mvc.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.Types;
 

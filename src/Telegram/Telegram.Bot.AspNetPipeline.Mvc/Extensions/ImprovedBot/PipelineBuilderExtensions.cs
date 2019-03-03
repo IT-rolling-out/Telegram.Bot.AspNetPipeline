@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.ImprovedBot
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions
 {
     internal static class PipelineBuilderExtensions
     {

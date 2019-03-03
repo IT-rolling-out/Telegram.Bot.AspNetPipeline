@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 
-namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures
-{
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions
+{ 
     public static class MvcFeaturesExtensions
     {
         public static ContextMvcFeatures Features(this ActionContext @this)

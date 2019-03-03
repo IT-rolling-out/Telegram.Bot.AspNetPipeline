@@ -1,10 +1,7 @@
 ﻿using IRO.Tests.Telegram.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
-using Telegram.Bot.AspNetPipeline.Extensions.DevExceptionMessage;
-using Telegram.Bot.AspNetPipeline.Extensions.ExceptionHandling;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
 
 namespace IRO.Tests.Telegram

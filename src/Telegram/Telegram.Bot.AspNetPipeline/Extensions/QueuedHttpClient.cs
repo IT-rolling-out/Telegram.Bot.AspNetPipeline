@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IRO.Common.Abstractions;
 
-namespace IRO.Samples.TelegramBotWithAsp
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     /// <summary>
     /// Http client with simple queue of requests.

@@ -1,9 +1,11 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Builder;
+using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
-{
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Extensions
+{ 
     public static class LoggingPipelineBuilderExtensions
     {
         /// <summary>

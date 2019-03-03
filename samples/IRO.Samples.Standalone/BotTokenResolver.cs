@@ -2,7 +2,7 @@
 using System.IO;
 using File = System.IO.File;
 
-namespace IRO.Samples.TelegramBotWithAsp
+namespace IRO.Samples.Standalone
 {
     public static class BotTokenResolver
     {

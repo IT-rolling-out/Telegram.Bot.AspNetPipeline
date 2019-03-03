@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Telegram.Bot.AspNetPipeline.Builder;
-using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.OldUpdatesIgnoring
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     public static class PipelineBuilderExtensions
     {
@@ -14,6 +12,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.OldUpdatesIgnoring
         /// Default is <see cref="DateTime.UtcNow"/>.
         /// <para></para>
         /// Invoke before middleware you want ignore.
+        /// <para></para>
+        /// Useful when you want to ignore messages sended when bot was disabled.
         /// </summary>
         public static void UseOldUpdatesIgnoring(this IPipelineBuilder @this, DateTime? dateTime=null)
         {

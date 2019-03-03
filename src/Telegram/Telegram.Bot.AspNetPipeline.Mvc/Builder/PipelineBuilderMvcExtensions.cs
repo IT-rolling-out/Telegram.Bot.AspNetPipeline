@@ -4,7 +4,7 @@ using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
-using Telegram.Bot.AspNetPipeline.Mvc.Extensions.ImprovedBot;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;

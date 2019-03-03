@@ -11,13 +11,13 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
     /// </summary>
     public class BotExt
     {
-        public IBotExtSingleton BotExtSingleton { get; }
+        readonly IBotExtSingleton _botExtSingleton;
 
         readonly UpdateContext _updateContext;
 
         public BotExt(IBotExtSingleton botExtSingleton, UpdateContext updateContext)
         {
-            BotExtSingleton = botExtSingleton;
+            _botExtSingleton = botExtSingleton;
             _updateContext = updateContext;
         }
 
@@ -26,7 +26,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <param name="fromType">Used to set which members messages must be processed.</param>
         public Task<Message> ReadMessageAsync(ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
         {
-            return BotExtSingleton.ReadMessageAsync(_updateContext, fromType);
+            return _botExtSingleton.ReadMessageAsync(_updateContext, fromType);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
         public Task<Message> ReadMessageAsync(UpdateValidatorDelegate updateValidator)
         {
-            return BotExtSingleton.ReadMessageAsync(_updateContext, updateValidator);
+            return _botExtSingleton.ReadMessageAsync(_updateContext, updateValidator);
         }
     }
 }
