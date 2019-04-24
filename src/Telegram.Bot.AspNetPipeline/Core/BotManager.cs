@@ -12,6 +12,7 @@ using Telegram.Bot.AspNetPipeline.Core.Services;
 using Telegram.Bot.AspNetPipeline.Exceptions;
 using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Extensions.Session;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Core
@@ -344,6 +345,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
             serviceCollectionWrapper.Services.AddLogging();
             serviceCollectionWrapper.AddExceptionHandling();
             serviceCollectionWrapper.LoggingAdvancedConfigure(new LoggingAdvancedOptions());
+            serviceCollectionWrapper.AddRamSessionStorage();
         }
 
         /// <summary>

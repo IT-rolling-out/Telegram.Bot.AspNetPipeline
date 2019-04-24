@@ -2,7 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     public static class LoggingUpdateContextExtensions
     {

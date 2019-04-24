@@ -10,7 +10,7 @@ using Telegram.Bot.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core.Internal;
 using Telegram.Bot.AspNetPipeline.Core.Services;
-using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Extensions;
 
 namespace Telegram.Bot.AspNetPipeline.Core
 {

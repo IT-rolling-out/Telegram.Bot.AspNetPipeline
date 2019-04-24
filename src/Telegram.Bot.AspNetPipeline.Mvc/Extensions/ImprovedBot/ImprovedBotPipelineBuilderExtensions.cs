@@ -7,7 +7,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 //ReSharper disable CheckNamespace
 namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions
 {
-    internal static class PipelineBuilderExtensions
+    internal static class ImprovedBotPipelineBuilderExtensions
     {
         /// <summary>
         /// Invoked automatically in mvc middleware.

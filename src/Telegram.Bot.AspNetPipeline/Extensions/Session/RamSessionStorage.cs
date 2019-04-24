@@ -12,11 +12,13 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
     {
         readonly IDictionary<string, string> _dict = new ConcurrentDictionary<string, string>();
 
-        public string ChatUsername { get; }
+        public long ChatId { get; }
 
-        public RamSessionStorage(string chatUsername)
+        public IEnumerable<string> Keys => _dict.Keys;
+
+        public RamSessionStorage(long chatId)
         {
-            ChatUsername = chatUsername;
+            ChatId = chatId;
         }
 
         /// <summary>

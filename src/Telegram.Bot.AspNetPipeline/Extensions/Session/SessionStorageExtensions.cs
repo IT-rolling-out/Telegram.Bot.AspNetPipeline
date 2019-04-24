@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
+using Telegram.Bot.AspNetPipeline.Extensions.Session;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.Session
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     public static class SessionStorageExtensions
     {

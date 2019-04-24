@@ -1,11 +1,15 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Extensions.Session;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
@@ -45,6 +49,14 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         public ILogger Logger => UpdateContext.Logger();
 
         public bool IsModelStateValid => ControllerContext.IsModelStateValid;
+
+        /// <summary>
+        /// Session of current chat. Include it's namespace to use extensions.
+        /// </summary>
+        public ISessionStorage Session => UpdateContext.Session();
+
+        public Task<Message> SendTextMessageAsync(string text, ParseMode parseMode = ParseMode.Default) => 
+            UpdateContext.SendTextMessageAsync(text, parseMode);
         #endregion
 
         bool _isInit;

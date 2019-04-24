@@ -4,7 +4,7 @@ using Telegram.Bot.AspNetPipeline.Builder;
 //ReSharper disable CheckNamespace
 namespace Telegram.Bot.AspNetPipeline.Extensions
 {
-    public static class PipelineBuilderExtensions
+    public static class OldTemplatesPipelineBuilderExtensions
     {
         /// <summary>
         /// Ignore updates, that older than passed datetime.

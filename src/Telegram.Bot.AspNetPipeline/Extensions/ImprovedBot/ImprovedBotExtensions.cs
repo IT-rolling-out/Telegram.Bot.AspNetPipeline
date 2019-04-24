@@ -2,8 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Exceptions;
+using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 
-namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
+//ReSharper disable CheckNamespace
+namespace Telegram.Bot.AspNetPipeline.Extensions
 {
     public static class ImprovedBotExtensions
     {
