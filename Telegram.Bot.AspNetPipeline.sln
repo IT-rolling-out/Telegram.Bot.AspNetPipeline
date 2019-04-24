@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline", "src\Telegram\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj", "{B786F91B-049F-4F12-A945-FDAE97345A40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline", "src\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj", "{B786F91B-049F-4F12-A945-FDAE97345A40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A9CAF669-789B-4705-ADDD-2D700148C187}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Tests.Telegram", "tests\IRO.Tests.Telegram\IRO.Tests.Telegram.csproj", "{996FAD68-5D0F-41CB-AB5B-A61A84227E18}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.Mvc", "src\Telegram\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj", "{E51650C1-5867-4FFF-9A1F-47261ADC0431}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.Mvc", "src\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj", "{E51650C1-5867-4FFF-9A1F-47261ADC0431}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.UnitTests.Telegram", "tests\IRO.UnitTests.Telegram\IRO.UnitTests.Telegram.csproj", "{0F84B44F-4834-4487-9FC5-2F4AB295E452}"
 EndProject
@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{762D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Samples.AspWebhooks", "samples\IRO.Samples.AspWebhooks\IRO.Samples.AspWebhooks.csproj", "{B1901EEB-02FA-4360-8EA1-AF1E40CD9E20}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.WebhookSupport", "src\Telegram\Telegram.Bot.AspNetPipeline.WebhookSupport\Telegram.Bot.AspNetPipeline.WebhookSupport.csproj", "{0552F165-A1B0-4248-A146-35718532748D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline.WebhookSupport", "src\Telegram.Bot.AspNetPipeline.WebhookSupport\Telegram.Bot.AspNetPipeline.WebhookSupport.csproj", "{0552F165-A1B0-4248-A146-35718532748D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRO.Samples.Standalone", "samples\IRO.Samples.Standalone\IRO.Samples.Standalone.csproj", "{00AF7862-96FC-4EDF-A205-87448A17D458}"
 EndProject

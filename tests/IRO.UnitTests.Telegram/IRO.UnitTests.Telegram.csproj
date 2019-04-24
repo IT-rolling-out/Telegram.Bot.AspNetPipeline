@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Telegram\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
-    <ProjectReference Include="..\..\src\Telegram\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
+    <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
   </ItemGroup>
 
 </Project>

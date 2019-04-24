@@ -92,7 +92,7 @@ namespace IRO.Samples.AspWebhooks
             //Note: update your pathTemplate and add there some string, that will identify telegram webhooks.
             //Something like: "wad5kK2PVL0SAEPq43q5cR2qwFWF4434/{0}". It must be same for all server processes.
             //=========
-            //Use setWebhookAutomatically:false to configure how telegram webhook will work.
+            //Use setWebhookAutomatically:false to manually configure how telegram webhook will work.
             var webhookReceiver = WebhookUpdatesReceiver.Create(
                 app,
                 _domain,

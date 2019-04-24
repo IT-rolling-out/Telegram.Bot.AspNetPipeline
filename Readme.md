@@ -5,7 +5,7 @@ Telegram.Bot.AspNetPipeline is library, based on popular [Telegram.Bot](https://
 
 Which features added:
 - Message processing pipeline based on same UpdateContext.
-- IOC just like in ASP.NET. Using it you can replace almost any default service with your's implemention. 
+- IOC just like in ASP.NET. Using it you can replace almost any default service with yours implemention. 
 - Controllers and routing with templates, order, UpdateType and custom routers.
 - Model binding.
 - Async requests processing.
@@ -38,12 +38,12 @@ Write some method and mark it with BotRouteAttribute.
 NOTE: All used in routing methods must return Task.
 
 ```csharp
-	public class BotFatherController : BotController
+    public class BotFatherController : BotController
     {
-	    [BotRoute("/newbot", UpdateType.Message)]
+        [BotRoute("/newbot", UpdateType.Message)]
         public async Task NewBot()
         {
-		}
+        }
     }
 ```
 
@@ -69,12 +69,12 @@ Here you can see how would look telegram @BotFather command ```/newbot``` using 
 
             await Bot.SendTextMessageAsync(Chat.Id, "Bot created.");
         }
-	}
+    }
 ```
 
 Full code and more examples you can see in samples folder. I really recommend to do it, in quick start was shown small part of the functionality.
 
-See also my other [libraries](https://github.com/IT-rolling-out)
+See also my other [libraries](https://github.com/IT-rolling-out).
 
 ## Contributing
 

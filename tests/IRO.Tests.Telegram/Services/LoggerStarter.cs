@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
+using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 
 namespace IRO.Tests.Telegram.Services

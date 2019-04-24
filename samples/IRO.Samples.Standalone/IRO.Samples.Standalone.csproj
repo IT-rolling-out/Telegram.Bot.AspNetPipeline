@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Telegram\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
-    <ProjectReference Include="..\..\src\Telegram\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
+    <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
   </ItemGroup>
 
 </Project>
