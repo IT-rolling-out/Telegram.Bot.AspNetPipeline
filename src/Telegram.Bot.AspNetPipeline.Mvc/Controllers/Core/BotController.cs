@@ -10,6 +10,7 @@ using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 {
@@ -55,8 +56,30 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         /// </summary>
         public ISessionStorage Session => UpdateContext.Session();
 
-        public Task<Message> SendTextMessageAsync(string text, ParseMode parseMode = ParseMode.Default) => 
-            UpdateContext.SendTextMessageAsync(text, parseMode);
+        /// <summary>
+        /// Send text message to current chat.
+        /// <para>Proxy to <see cref="UpdateContext"/> extension method.</para>
+        /// </summary>
+        public async Task<Message> SendTextMessageAsync(
+            string text,
+            ParseMode parseMode = ParseMode.Default,
+            bool disableWebPagePreview = false,
+            bool disableNotification = false,
+            int replyToMessageId = 0,
+            IReplyMarkup replyMarkup = null,
+            CancellationToken cancellationToken = default(CancellationToken)
+            )
+        {
+            return await UpdateContext.SendTextMessageAsync(
+                text,
+                parseMode,
+                disableWebPagePreview,
+                disableNotification,
+                replyToMessageId,
+                replyMarkup,
+                cancellationToken
+                );
+        }
         #endregion
 
         bool _isInit;

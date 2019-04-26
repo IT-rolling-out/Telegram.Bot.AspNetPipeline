@@ -7,6 +7,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata
     [AttributeUsage(AttributeTargets.Method)]
     public class BotRouteAttribute : Attribute
     {
+        /// <summary>
+        /// </summary>
+        /// <param name="updateTypes">Null or empty mean all update types..</param>
         public BotRouteAttribute(string template, params UpdateType[] updateTypes)
         {
             Template = template;
@@ -16,6 +19,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata
         /// <summary>
         /// Recommend to set order 1 or more for routes witout template.
         /// </summary>
+        /// <param name="updateTypes">Null or empty mean all update types.</param>
         public BotRouteAttribute(params UpdateType[] updateTypes) : this(null, updateTypes)
         {
         }
@@ -25,6 +29,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata
         /// </summary>
         public string Template { get; }
 
+        /// <summary>
+        /// Null or empty mean all update types.
+        /// </summary>
         public UpdateType[] UpdateTypes { get; }
 
         /// <summary>

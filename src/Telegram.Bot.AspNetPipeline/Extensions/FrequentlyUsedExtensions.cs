@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions
 {
@@ -17,12 +19,26 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
         /// <summary>
         /// Send text message to current chat.
         /// </summary>
-        public static async Task<Message> SendTextMessageAsync(this UpdateContext @this, string text, ParseMode parseMode = ParseMode.Default)
+        public static async Task<Message> SendTextMessageAsync(
+            this UpdateContext @this,
+            string text, 
+            ParseMode parseMode = ParseMode.Default, 
+            bool disableWebPagePreview = false, 
+            bool disableNotification = false, 
+            int replyToMessageId = 0, 
+            IReplyMarkup replyMarkup = null, 
+            CancellationToken cancellationToken = default(CancellationToken)
+            )
         {
             return await @this.Bot.SendTextMessageAsync(
                 @this.Chat.Id,
                 text,
-                parseMode: parseMode
+                parseMode,
+                disableWebPagePreview,
+                disableNotification,
+                replyToMessageId,
+                replyMarkup,
+                cancellationToken
                 );
         }
 
