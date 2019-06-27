@@ -39,6 +39,10 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
             @this.Services.AddSingleton<ISessionStorageProvider>(
                 sessionStorage
                 );
+            @this.Services.AddSingleton<RamSessionStorageProvider>(
+                sessionStorage
+                );
+            @this.RegisterForDispose<RamSessionStorageProvider>();
         }
     }
 }

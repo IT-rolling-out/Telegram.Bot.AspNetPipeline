@@ -60,7 +60,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
             var serv = controllerActionContext.UpdateContext.Services;
             var factory = serv.GetRequiredService<IControllersFactory>();
             BotController controller = factory.Create(controllerActionContext);
-            BotController.InvokeInitializer(controller, controllerActionContext);
+            //Invoke initializer.
+            await BotController.InvokeInitialize(controller, controllerActionContext);
             var methodInfo = controllerActionContext.ActionDescriptor.MethodInfo;
 
             //Model binding.
@@ -77,6 +78,9 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services.Implementions
             {
                 await task;
             }
+
+            //Invoke finished.
+            await BotController.InvokeProcessed(controller);
         }
     }
 }

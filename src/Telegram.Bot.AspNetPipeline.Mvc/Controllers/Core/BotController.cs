@@ -88,7 +88,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         /// <summary>
         /// Called after controller created to set context.
         /// </summary>
-        private void Initialize(ControllerActionContext controllerActionContext)
+        private async Task Initialize(ControllerActionContext controllerActionContext)
         {
             if (_isInit)
             {
@@ -96,22 +96,39 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
             }
             ControllerContext = controllerActionContext;
             _isInit = true;
-            AfterInitialized();
+            await Initialized();
         }
 
         /// <summary>
         /// Invoked after context initialized.
         /// </summary>
-        protected virtual void AfterInitialized()
+        protected virtual async Task Initialized()
+        {
+        }
+
+        /// <summary>
+        /// Invoked after every update processing method invoked.
+        /// Will not be invoked on exceptions.
+        /// Use it to finish all work in controller. 
+        /// </summary>
+        protected virtual async Task Processed()
         {
         }
 
         /// <summary>
         /// Used to invoke initializer after controller constructed but before controller routing method invoked.
         /// </summary>
-        public static void InvokeInitializer(BotController controller, ControllerActionContext controllerActionContext)
+        internal static async Task InvokeInitialize(BotController controller, ControllerActionContext controllerActionContext)
         {
-            controller.Initialize(controllerActionContext);
+            await controller.Initialize(controllerActionContext);
+        }
+
+        /// <summary>
+        /// Used to invoke <see cref="Processed"/>.
+        /// </summary>
+        internal static async Task InvokeProcessed(BotController controller)
+        {
+            await controller.Processed();
         }
         #endregion
     }

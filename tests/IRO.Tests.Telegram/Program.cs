@@ -15,6 +15,7 @@ namespace IRO.Tests.Telegram
 
             var botTest = new BotTests_Mvc();
             botTest.Run(botManager, true);
+            
 
             while (true)
             {

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
@@ -45,6 +47,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
         bool _servicesConfigured;
 
         ServiceCollectionWrapper _serviceCollectionWrapper;
+
+        IEnumerable<Type> _forDispose;
         #endregion
 
         /// <summary>
@@ -130,7 +134,8 @@ namespace Telegram.Bot.AspNetPipeline.Core
             //Register mandatory services.
             AddMandatoryServices(_serviceCollectionWrapper);
             servicesConfigureAction.Invoke(_serviceCollectionWrapper);
-
+            _forDispose = _serviceCollectionWrapper.ForDispose
+                .ToArray();
             _servicesConfigured = true;
         }
 
@@ -319,7 +324,22 @@ namespace Telegram.Bot.AspNetPipeline.Core
             if (IsDisposed)
                 return;
             await Stop();
+            //Dispose singletones that registered to be disposed.
+            foreach (var type in _forDispose)
+            {
+                IDisposable serviceToDispose = null;
+                try
+                {
+                    serviceToDispose=Services.GetService(type) as IDisposable;
+                }
+                catch
+                {
+                }
+                serviceToDispose?.Dispose();
+            }
+            (Services as IDisposable)?.Dispose();
             Services = null;
+
             BotContext = null;
             _updateProcessingDelegate = null;
             IsDisposed = true;
@@ -334,7 +354,6 @@ namespace Telegram.Bot.AspNetPipeline.Core
         /// <summary>
         /// Here only musthave middleware services.
         /// </summary>
-        /// <param name="serviceCollection"></param>
         void AddMandatoryServices(ServiceCollectionWrapper serviceCollectionWrapper)
         {
             serviceCollectionWrapper.AddPendingExceededChecker(

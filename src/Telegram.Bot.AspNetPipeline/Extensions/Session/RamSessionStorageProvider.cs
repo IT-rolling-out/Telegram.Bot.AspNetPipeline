@@ -4,8 +4,10 @@ using System.Timers;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.Session
 {
-    public class RamSessionStorageProvider : ISessionStorageProvider
+    public class RamSessionStorageProvider : ISessionStorageProvider, IDisposable
     {
+        Timer _timer;
+
         readonly TimeSpan _sessionTimeout;
 
         readonly ConcurrentDictionary<long, (ISessionStorage Session, DateTime LastAccess)> _sessionsDict =
@@ -26,29 +28,18 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
             _sessionTimeout = sessionTimeout ?? TimeSpan.FromMinutes(30);
             var interval = checkInterval ?? TimeSpan.FromMinutes(5);
 
-            interval = TimeSpan.FromSeconds(3);
-
             //Start timer.
-            var timer = new Timer(interval.TotalMilliseconds);
-            //Use WeakReference to stop timer when all references to this was removed.
-            var weakThis = new WeakReference<RamSessionStorageProvider>(this);
+            _timer = new Timer(interval.TotalMilliseconds);
             var lastCheck = DateTime.MinValue;
-            timer.Elapsed += (s, e) =>
+            _timer.Elapsed += (s, e) =>
             {
-                if (weakThis.TryGetTarget(out var target))
-                {
-                    //Skip if previous wasn't finished.
-                    if (DateTime.Now - interval < lastCheck)
-                        return;
-                    target.RemoveTimeouted();
-                    lastCheck = DateTime.Now;
-                }
-                else
-                {
-                    timer.Dispose();
-                }
+                //Skip if previous wasn't finished.
+                if (DateTime.Now - interval < lastCheck)
+                    return;
+                RemoveTimeouted();
+                lastCheck = DateTime.Now;
             };
-            timer.Start();
+            _timer.Start();
         }
 
         public ISessionStorage ResolveSessionStorage(long chatId)
@@ -86,5 +77,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
             }
         }
         #endregion
+
+        public void Dispose()
+        {
+            _timer?.Dispose();
+            _timer = null;
+        }
     }
 }
