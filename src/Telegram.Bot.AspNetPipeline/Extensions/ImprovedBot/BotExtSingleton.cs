@@ -90,7 +90,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                     foreach (var globalValidator in GlobalValidators)
                     {
                         //Break on first not valid.
-                        if (updateValidatorRes!=UpdateValidatorResult.Valid)
+                        if (updateValidatorRes != UpdateValidatorResult.Valid)
                             break;
                         updateValidatorRes = await globalValidator.Invoke(newCtx, origCtx);
                     }
@@ -118,7 +118,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                     updateValidatorRes
                     );
 
-                if (updateValidatorRes==UpdateValidatorResult.ContinueWaiting)
+                if (updateValidatorRes == UpdateValidatorResult.ContinueWaiting)
                 {
                     await next();
                     return;
