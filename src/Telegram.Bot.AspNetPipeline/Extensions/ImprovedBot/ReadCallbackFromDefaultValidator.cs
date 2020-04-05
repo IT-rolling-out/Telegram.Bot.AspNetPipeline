@@ -4,15 +4,12 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.Types;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
     public static class ReadCallbackFromDefaultValidator
     {
-        /// <summary>
-        /// Return true if new message valid from waiter.
-        /// You can use current method in your <see cref="UpdateValidatorDelegate"/>s.
-        /// </summary>
         public static bool Check(UpdateContext newCtx, UpdateContext origCtx, ReadCallbackFromType fromType)
         {
             var upd = newCtx.Update;

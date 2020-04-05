@@ -53,7 +53,11 @@ namespace IRO.Samples.Standalone.TelegramControllers
         public async Task TestReadWithoutContext()
         {
             await UpdateContext.SendTextMessageAsync("Please send message.");
-            var msg = await Bot.ReadMessageAsync(UpdateContext.Chat);
+            var msg = await Bot.ReadMessageAsync(UpdateContext.Chat, NoContextReadCallbackFromType.AnyUser);
+            await UpdateContext.SendTextMessageAsync($"You sent '{msg.Text}'.");
+
+            await UpdateContext.SendTextMessageAsync("Please send message with reply.");
+            msg = await Bot.ReadMessageAsync(UpdateContext.Chat, NoContextReadCallbackFromType.AnyUserReply);
             await UpdateContext.SendTextMessageAsync($"You sent '{msg.Text}'.");
         }
     }

@@ -8,7 +8,7 @@
         /// <summary>
         /// Only updates where Message.From is current user.
         /// </summary>
-        CurrentUser=0,
+        CurrentUser = 0,
 
         /// <summary>
         /// Only updates where Message.From is current user and message is reply to current bot.
