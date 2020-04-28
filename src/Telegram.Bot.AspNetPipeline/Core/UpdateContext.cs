@@ -66,6 +66,17 @@ namespace Telegram.Bot.AspNetPipeline.Core
         #region Proxy properties.
         public ITelegramBotClient Bot => BotContext.Bot;
 
+
+        /// <summary>
+        /// Return chat id for any update type. If chat can't be extracted from current update - return user id.
+        /// </summary>
+        public ChatId ChatId => Update.ExtractChatId();
+
+        /// <summary>
+        /// Return from id for any update type.
+        /// </summary>
+        public ChatId FromId => Update.ExtractFromId();
+
         public Message Message => Update.Message;
 
         /// <summary>

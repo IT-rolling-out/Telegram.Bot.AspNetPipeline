@@ -25,6 +25,16 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
 
         public Message Message => UpdateContext.Message;
 
+        /// <summary>
+        /// Return chat id for any update type. If chat can't be extracted from current update - return user id.
+        /// </summary>
+        public ChatId ChatId => Update.ExtractChatId();
+
+        /// <summary>
+        /// Return from id for any update type.
+        /// </summary>
+        public ChatId FromId => Update.ExtractFromId();
+
         public Chat Chat => UpdateContext.Chat;
 
         public BotClientContext BotContext => UpdateContext.BotContext;

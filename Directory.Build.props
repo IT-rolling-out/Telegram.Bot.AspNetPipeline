@@ -37,6 +37,6 @@
     <AsmVersion_Storage>2.2.5$(RemoteVersionPostfix)</AsmVersion_Storage>
 	<!--/// Versions for remote nuget libs management.-->
 	
-	<AsmVersion_Telegram>1.1.1$(VersionPostfix)</AsmVersion_Telegram>
+	<AsmVersion_Telegram>1.1.2$(VersionPostfix)</AsmVersion_Telegram>
   </PropertyGroup>
 </Project>

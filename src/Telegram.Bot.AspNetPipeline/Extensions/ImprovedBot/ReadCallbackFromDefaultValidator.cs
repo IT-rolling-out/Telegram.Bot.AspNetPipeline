@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.Logging;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
@@ -18,11 +19,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 origCtx.Logger().LogTrace("Default CheckFromType for {0}.", fromType);
                 if (fromType == ReadCallbackFromType.CurrentUser)
                 {
-                    return upd.Message.From.Id == origCtx.Message.From.Id;
+                    return newCtx.FromId.Identifier == origCtx.FromId.Identifier;
                 }
                 else if (fromType == ReadCallbackFromType.CurrentUserReply)
                 {
-                    if (upd.Message.From.Id != origCtx.Message.From.Id)
+                    if (newCtx.FromId.Identifier == origCtx.FromId.Identifier)
                         return false;
                     if (upd.Message.ReplyToMessage?.From.Id != origCtx.Bot.BotId)
                         return false;

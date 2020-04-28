@@ -32,6 +32,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             UpdateValidatorDelegate updateValidator
             );
 
+        Task<Update> ReadUpdateAsync(UpdateContext updateContext, UpdateValidatorDelegate updateValidator);
+
         Task OnUpdateInvoke(UpdateContext newContext, Func<Task> next);
     }
 }

@@ -7,6 +7,8 @@ using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Extensions.ReadWithoutContext;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace IRO.Samples.Standalone.TelegramControllers
 {
@@ -29,12 +31,12 @@ namespace IRO.Samples.Standalone.TelegramControllers
             //Access current telegram Update as property of controller.
 
             //Extension too. Send message to current chat.
-            await UpdateContext.SendTextMessageAsync("Hi.");
+            await SendTextMessageAsync("Hi.");
 
             if (IsModelStateValid)
             {
 
-                await UpdateContext.SendTextMessageAsync(
+                await SendTextMessageAsync(
                     $"Hi. You passed '{str}' with command. Note, default model binder split all command parameters by space," +
                     $"like in CLI, so you can't pass string with command using default model binder."
                 );
@@ -44,21 +46,73 @@ namespace IRO.Samples.Standalone.TelegramControllers
             //Improved bot extension. Allow to await new messages from current chat, just like in console applications.
             var message = await BotExt.ReadMessageAsync(ReadCallbackFromType.CurrentUserReply);
 
-            await UpdateContext.SendTextMessageAsync($"You send: {message.Text}");
+            await SendTextMessageAsync($"You send: {message.Text}");
 
             //Use UpdateContext to get more info about current "request".
         }
 
-        [BotRoute("/test_read_without_context")]
+        [BotRoute("/test_read_no_ctx")]
         public async Task TestReadWithoutContext()
         {
-            await UpdateContext.SendTextMessageAsync("Please send message.");
+            await SendTextMessageAsync("Please send message.");
             var msg = await Bot.ReadMessageAsync(UpdateContext.Chat, NoContextReadCallbackFromType.AnyUser);
-            await UpdateContext.SendTextMessageAsync($"You sent '{msg.Text}'.");
+            await SendTextMessageAsync($"You sent '{msg.Text}'.");
 
-            await UpdateContext.SendTextMessageAsync("Please send message with reply.");
+            await SendTextMessageAsync("Please send message with reply.");
             msg = await Bot.ReadMessageAsync(UpdateContext.Chat, NoContextReadCallbackFromType.AnyUserReply);
-            await UpdateContext.SendTextMessageAsync($"You sent '{msg.Text}'.");
+            await SendTextMessageAsync($"You sent '{msg.Text}'.");
+        }
+
+        [BotRoute("/test_query_read")]
+        public async Task TestCallbackQuery()
+        {
+            var replyMarkup = new InlineKeyboardMarkup(
+                new InlineKeyboardButton[][]
+                {
+                    new InlineKeyboardButton[] { "one", "two" },
+                    new InlineKeyboardButton[] { "three", "four" },
+                }
+            );
+            await Bot.SendTextMessageAsync(
+                ChatId,
+                "Read inline query test.",
+                replyMarkup: replyMarkup
+            );
+
+            var readUpd = await BotExt.ReadUpdateAsync(async (newCtx, currentCtx) =>
+            {
+                if (newCtx.Update.Type == UpdateType.CallbackQuery)
+                    return UpdateValidatorResult.Valid;
+                return UpdateValidatorResult.ContinueWaiting;
+            });
+            await SendTextMessageAsync($"You chosen '{readUpd.CallbackQuery.Data}'.");
+
+        }
+
+        [BotRoute("/test_query_read_no_ctx")]
+        public async Task TestCallbackQueryWithoutContext()
+        {
+            var replyMarkup = new InlineKeyboardMarkup(
+                new InlineKeyboardButton[][]
+                {
+                    new InlineKeyboardButton[] { "one", "two" },
+                    new InlineKeyboardButton[] { "three", "four" },
+                }
+            );
+            await Bot.SendTextMessageAsync(
+                ChatId,
+                "Read inline query test, no UpdateContext.",
+                replyMarkup: replyMarkup
+            );
+
+            var readUpd = await Bot.ReadUpdateAsync(Chat.Id, (chatId, upd) =>
+            {
+                if (upd.Type == UpdateType.CallbackQuery)
+                    return true;
+                return false;
+            });
+            await SendTextMessageAsync($"You chosen '{readUpd.CallbackQuery.Data}'.");
+
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ReadWithoutContext
 {
@@ -16,7 +17,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ReadWithoutContext
             this ITelegramBotClient bot,
             ChatId chatId,
             NoContextReadCallbackFromType validateType = NoContextReadCallbackFromType.AnyUser
-            )
+        )
         {
             var tcs = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
             EventHandler<Args.MessageEventArgs> ev = null;
@@ -33,16 +34,44 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ReadWithoutContext
             return await tcs.Task;
         }
 
-        static bool ValidateMessage(ITelegramBotClient bot, ChatId chatId, Message newMessage, NoContextReadCallbackFromType validateType)
+        /// <summary>
+        /// This extension only use only <see cref="ITelegramBotClient"/>, no middleware, so it can't prevent handling by other middlewares in your pipeline.
+        /// </summary>
+        public static async Task<Update> ReadUpdateAsync(
+            this ITelegramBotClient bot,
+            ChatId chatId,
+            UpdateValidatorDelegate validatorDelegate = null
+        )
+        {
+            var tcs = new TaskCompletionSource<Update>(TaskCreationOptions.RunContinuationsAsynchronously);
+            EventHandler<Args.UpdateEventArgs> ev = null;
+            ev = (s, e) =>
+            {
+                var upd = e.Update;
+                if (upd.ExtractChatId().Identifier != chatId.Identifier)
+                    return;
+
+                var isValid = validatorDelegate?.Invoke(chatId, e.Update) ?? true;
+                if (isValid)
+                {
+                    bot.OnUpdate -= ev;
+                    tcs.TrySetResult(e.Update);
+                }
+            };
+            bot.OnUpdate += ev;
+            return await tcs.Task;
+        }
+
+        static bool ValidateMessage(ITelegramBotClient bot, ChatId chatId, Message newMsg, NoContextReadCallbackFromType validateType)
         {
             try
             {
-                if (newMessage.Chat.Id != chatId.Identifier)
+                if (newMsg.Chat.Id != chatId.Identifier)
                     return false;
 
                 if (validateType == NoContextReadCallbackFromType.AnyUserReply)
                 {
-                    if (newMessage.ReplyToMessage?.From.Id != bot.BotId)
+                    if (newMsg.ReplyToMessage?.From.Id != bot.BotId)
                         return false;
                 }
                 return true;
@@ -52,5 +81,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ReadWithoutContext
                 return false;
             }
         }
+
     }
 }

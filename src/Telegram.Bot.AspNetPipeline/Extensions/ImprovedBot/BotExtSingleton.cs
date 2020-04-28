@@ -43,7 +43,14 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
         /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public async Task<Message> ReadMessageAsync(UpdateContext updateContext, UpdateValidatorDelegate updateValidator)
+        public async Task<Message> ReadMessageAsync(UpdateContext updateContext,
+            UpdateValidatorDelegate updateValidator)
+        {
+            var res = await ReadUpdateAsync(updateContext, updateValidator);
+            return res.Message;
+        }
+
+        public async Task<Update> ReadUpdateAsync(UpdateContext updateContext, UpdateValidatorDelegate updateValidator)
         {
             var taskCompletionSource = new TaskCompletionSource<Update>(
                 TaskContinuationOptions.RunContinuationsAsynchronously
@@ -58,7 +65,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             });
 
             var resUpdate = await taskCompletionSource.Task;
-            return resUpdate.Message;
+            return resUpdate;
         }
 
         public async Task OnUpdateInvoke(UpdateContext newCtx, Func<Task> next)
@@ -67,7 +74,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 "Checking read-callback for '{0}'.",
                 newCtx
                 );
-            var searchDataNullable = _searchBag.TryFind(newCtx.Chat.Id, newCtx.Bot.BotId);
+            var searchDataNullable = _searchBag.TryFind(newCtx.ChatId.Identifier, newCtx.Bot.BotId);
             if (searchDataNullable != null)
             {
                 _logger.LogTrace(
@@ -125,7 +132,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 }
                 if (updateValidatorRes == UpdateValidatorResult.AbortWaiter)
                 {
-                    _searchBag.TryRemove(origCtx.Chat.Id, origCtx.Bot.BotId);
+                    _searchBag.TryRemove(origCtx.ChatId.Identifier, origCtx.Bot.BotId);
                     origCtx.HiddenContext().UpdateProcessingAbortedSource.Cancel();
                     await next();
                     return;
@@ -134,7 +141,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 //Force exit only if result valid.
 
                 SetResult(searchData.TaskCompletionSource, newCtx.Update);
-                _searchBag.TryRemove(newCtx.Chat.Id, newCtx.Bot.BotId);
+                _searchBag.TryRemove(newCtx.ChatId.Identifier, newCtx.Bot.BotId);
                 newCtx.ForceExit();
             }
             else
@@ -145,7 +152,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 
         void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, UpdateValidatorDelegate updateValidator)
         {
-            var chatId = updateContext.Update.Message.Chat.Id;
+            var chatId = updateContext.ChatId.Identifier;
             var botId = updateContext.Bot.BotId;
             var prevData = _searchBag.TryRemove(chatId, botId);
             if (prevData != null)
