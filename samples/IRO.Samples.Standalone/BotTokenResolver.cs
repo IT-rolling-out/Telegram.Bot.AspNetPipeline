@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Newtonsoft.Json.Linq;
 using File = System.IO.File;
 
 namespace IRO.Samples.Standalone
@@ -8,33 +9,37 @@ namespace IRO.Samples.Standalone
     {
         public static string GetToken()
         {
-            //Just crunch to read token from test_token.txt (gitignored) file in solution root directory.
+            return LoadJson()["token"].ToObject<string>();
+        }
+
+        public static string GetSecondToken()
+        {
+            return LoadJson()["secondToken"].ToObject<string>();
+        }
+
+        static JToken LoadJson()
+        {
             try
             {
+                string jsonStr = null;
                 try
                 {
                     var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\",
-                        "test_token.txt"));
-                    var token = File.ReadAllText(path).Trim();
-                    if (string.IsNullOrWhiteSpace(token))
-                        throw new Exception();
-                    return token;
+                        "test_token.json"));
+                    jsonStr = File.ReadAllText(path);
                 }
-                catch { }
-
+                catch
                 {
-                    //Read token from gitignored file.
                     var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\..\\",
-                        "test_token.txt"));
-                    var token = File.ReadAllText(path).Trim();
-                    if (string.IsNullOrWhiteSpace(token))
-                        throw new Exception();
-                    return token;
+                        "test_token.json"));
+                    jsonStr = File.ReadAllText(path);
                 }
+                var jToken = JToken.Parse(jsonStr);
+                return jToken;
             }
             catch (Exception ex)
             {
-                throw new Exception("Wrong token. Please, check 'test_token.txt' exists in solution folder.", ex);
+                throw new Exception("Wrong token. Please, check 'test_token.json' exists in solution folder.", ex);
             }
         }
     }

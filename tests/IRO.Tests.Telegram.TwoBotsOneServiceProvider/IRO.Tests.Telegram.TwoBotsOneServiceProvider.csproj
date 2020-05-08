@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Telegram.Bot" Version="15.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
+  </ItemGroup>
+
+</Project>

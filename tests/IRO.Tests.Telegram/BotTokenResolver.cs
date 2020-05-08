@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using Telegram.Bot.AspNetPipeline.Builder;
 using File = System.IO.File;
 
@@ -10,19 +11,37 @@ namespace IRO.Tests.Telegram
     {
         public static string GetToken()
         {
+            return LoadJson()["token"].ToObject<string>();
+        }
+
+        public static string GetSecondToken()
+        {
+            return LoadJson()["secondToken"].ToObject<string>();
+        }
+
+        static JToken LoadJson()
+        {
             try
             {
-                //Read token from gitignored file.
-                var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\",
-                    "test_token.txt"));
-                var token = File.ReadAllText(path).Trim();
-                if (string.IsNullOrWhiteSpace(token))
-                    throw new Exception();
-                return token;
+                string jsonStr = null;
+                try
+                {
+                    var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\",
+                        "test_token.json"));
+                    jsonStr = File.ReadAllText(path);
+                }
+                catch
+                {
+                    var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\..\\",
+                        "test_token.json"));
+                    jsonStr = File.ReadAllText(path);
+                }
+                var jToken = JToken.Parse(jsonStr);
+                return jToken;
             }
             catch (Exception ex)
             {
-                throw new Exception("Wrong token. Please, check 'test_token.txt' exists in solution folder.", ex);
+                throw new Exception("Wrong token. Please, check 'test_token.json' exists in solution folder.", ex);
             }
         }
     }

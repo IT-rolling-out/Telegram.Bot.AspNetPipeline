@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Newtonsoft.Json.Linq;
 using Telegram.Bot;
 using Telegram.Bot.AspNetPipeline.Builder;
 using Telegram.Bot.AspNetPipeline.Core;
@@ -26,19 +27,32 @@ namespace IRO.UnitTests.Telegram
 
         public static string GetToken()
         {
+            return LoadJson()["token"].ToObject<string>();
+        }
+
+        static JToken LoadJson()
+        {
             try
             {
-                //Read token from gitignored file.
-                var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\",
-                    "test_token.txt"));
-                var token = File.ReadAllText(path).Trim();
-                if (string.IsNullOrWhiteSpace(token))
-                    throw new Exception();
-                return token;
+                string jsonStr = null;
+                try
+                {
+                    var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\",
+                        "test_token.json"));
+                    jsonStr = File.ReadAllText(path);
+                }
+                catch
+                {
+                    var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\..\\..\\",
+                        "test_token.json"));
+                    jsonStr = File.ReadAllText(path);
+                }
+                var jToken = JToken.Parse(jsonStr);
+                return jToken;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                throw new Exception("Wrong token. Please, check 'test_token.txt' exists in solution folder.", ex);
+                throw new Exception("Wrong token. Please, check 'test_token.json' exists in solution folder.", ex);
             }
         }
 

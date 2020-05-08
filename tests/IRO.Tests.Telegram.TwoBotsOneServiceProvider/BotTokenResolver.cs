@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using File = System.IO.File;
 
-namespace IRO.Samples.AspWebhooks
+namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
 {
     public static class BotTokenResolver
     {
