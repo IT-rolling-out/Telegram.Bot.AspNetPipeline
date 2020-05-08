@@ -27,29 +27,20 @@ namespace Telegram.Bot.AspNetPipeline.Core.Services
             Task resTask = null;
             try
             {
-                //!If we await default Task.Run(func) - exception will not be shown in VS.
-                //But even with current crunch it showed only here, not in method where it was thrown.
-                //Please, contact me if you know how to fix it.
-                Exception catchedException = null;
-                resTask = Task.Run(async ()=>
+                try
                 {
-                    try
+                    resTask = func.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    if (!(ex is TaskCanceledException))
                     {
-                        await func.Invoke();
+                        throw;
                     }
-                    catch(Exception ex)
-                    {    
-                        catchedException = ex;
-                    }
-                });
+                }
                 _pendingTasks.Add(resTask);
-                await resTask.ContinueWith((t) =>
-                {
-                    if (catchedException != null && !(catchedException is TaskCanceledException))
-                    {
-                        throw catchedException;
-                    }
-                });
+                if(resTask!=null)
+                    await resTask;
             }
             finally
             {

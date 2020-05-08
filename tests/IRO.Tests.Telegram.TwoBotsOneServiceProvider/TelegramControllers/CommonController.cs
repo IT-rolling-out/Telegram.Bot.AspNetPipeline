@@ -7,6 +7,8 @@ using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers
 {
@@ -51,6 +53,16 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers
             await SendTextMessageAsync($"You send: {message.Text}");
         }
 
-
+        [BotRoute("/pending_test")]
+        public async Task TestCallbackQuery()
+        {
+            await SendTextMessageAsync(
+                "Before delay."
+            );
+            await Task.Delay(2000);
+            await SendTextMessageAsync(
+                "After delay."
+            );
+        }
     }
 }

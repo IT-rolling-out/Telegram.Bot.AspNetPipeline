@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Args;
+﻿using System.Threading.Tasks;
+using Telegram.Bot.Args;
 
 namespace Telegram.Bot.AspNetPipeline.Core.Services
 {
