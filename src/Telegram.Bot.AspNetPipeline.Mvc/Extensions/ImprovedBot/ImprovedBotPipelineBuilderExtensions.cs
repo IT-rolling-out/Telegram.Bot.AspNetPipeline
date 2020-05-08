@@ -14,16 +14,16 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions
         /// </summary>
         public static void AddBotExtMvcGlobalValidator(this IPipelineBuilder @this, int botExtOrder)
         {
-            IOuterMiddlewaresInformer outerMiddlewaresInformer=null;
+            IOuterMiddlewaresInformer outerMiddlewaresInformer = null;
             @this.AddBotExtGlobalValidator(async (newCtx, origCtx) =>
             {
                 if (outerMiddlewaresInformer == null)
                 {
-                    var provider=origCtx.Services.GetRequiredService<IOuterMiddlewaresInformerProvider>();
-                    outerMiddlewaresInformer=provider.OuterMiddlewaresInformer;
+                    var provider = origCtx.Services.GetRequiredService<IOuterMiddlewaresInformerProvider>();
+                    outerMiddlewaresInformer = provider.OuterMiddlewaresInformer;
                 }
-                var mvcWillHandle=await outerMiddlewaresInformer.CheckMvcHasPriorityHandler(newCtx, botExtOrder);
-                return mvcWillHandle ? UpdateValidatorResult.AbortWaiter : UpdateValidatorResult.Valid; 
+                var mvcWillHandle = await outerMiddlewaresInformer.CheckMvcHasPriorityHandler(newCtx, botExtOrder);
+                return mvcWillHandle ? UpdateValidatorResult.AbortWaiter : UpdateValidatorResult.Valid;
 
             });
         }

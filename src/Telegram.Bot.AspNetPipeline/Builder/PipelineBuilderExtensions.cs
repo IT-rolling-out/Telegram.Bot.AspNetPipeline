@@ -8,14 +8,14 @@ namespace Telegram.Bot.AspNetPipeline.Builder
         /// <summary>
         /// Resolves middleware form ServiceProvider and use it.
         /// </summary>
-        public static void UseMiddlware<TMiddleware>(this IPipelineBuilder @this)
+        public static void UseMiddleware<TMiddleware>(this IPipelineBuilder @this)
             where TMiddleware : IMiddleware
         {
             var md = @this.ServiceProvider.GetRequiredService<TMiddleware>();
-            @this.UseMiddlware(md);
+            @this.UseMiddleware(md);
         }
 
-        public static void UseMiddlware(this IPipelineBuilder @this, IMiddleware middleware)
+        public static void UseMiddleware(this IPipelineBuilder @this, IMiddleware middleware)
         {
             if (middleware == null)
                 throw new ArgumentNullException(nameof(middleware));

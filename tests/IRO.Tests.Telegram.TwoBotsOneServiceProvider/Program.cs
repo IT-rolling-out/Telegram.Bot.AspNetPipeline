@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
@@ -13,11 +14,38 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
     {
         static void Main(string[] args)
         {
+            try
+            {
+                var services = new ServiceCollection();
+                var bm1 = ConfFirstBot(services);
+                var bm2 = ConfSecondBot(services);
+                var sp = services.BuildServiceProvider();
+
+                bm1.Setup(sp);
+                bm2.Setup(sp);
+
+                bm1.Start();
+                bm2.Start();
+
+                Console.WriteLine("Bots initialized.");
+                while (true)
+                {
+                    Console.ReadLine();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        static BotManager ConfFirstBot(IServiceCollection services)
+        {
             var bot = new TelegramBotClient(
                 BotTokenResolver.GetToken(),
                 new QueuedHttpClient(TimeSpan.FromSeconds(1))
-                );
-            var botManager = new BotManager(bot);
+            );
+            var botManager = new BotManager(bot, services);
             botManager.ConfigureServices((servicesWrap) =>
             {
                 servicesWrap.AddMvc(new MvcOptions()
@@ -28,7 +56,6 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
 
                 //Logging service example with NLog you can see in IRO.Tests.Telegram.
             });
-
             botManager.ConfigureBuilder(builder =>
             {
                 builder.UseDevEceptionMessage();
@@ -39,33 +66,33 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
                     {
                         typeof(FirstBotController)
                     };
-
-                    //Write /debug to see info about routing.
                     mvcBuilder.UseDebugInfo();
-
-                    mvcBuilder.MapRouteAction(
-                        async (actionCtx) =>
-                        {
-                            await actionCtx.UpdateContext.SendTextMessageAsync("Bot commands works.");
-                        },
-                        template: "/help"
-                        );
                 });
             });
+            return botManager;
+        }
 
-            //Default implemention use standart ITelegramBotClient polling.
-            //You can add webhooks implemention using Telegram.Bot.AspNetPipeline.WebhookSupport or
-            //write your own IUpdatesReceiver.
-            botManager.Setup();
-            botManager.Start();
-
-            Console.WriteLine("Bot initialized.");
-            while (true)
+        static BotManager ConfSecondBot(IServiceCollection services)
+        {
+            var bot = new TelegramBotClient(
+                BotTokenResolver.GetSecondToken(),
+                new QueuedHttpClient(TimeSpan.FromSeconds(1))
+            );
+            var botManager = new BotManager(bot, services);
+            botManager.ConfigureBuilder(builder =>
             {
-                Console.ReadLine();
-            }
-
-            botManager.Dispose();
+                builder.UseDevEceptionMessage();
+                builder.UseOldUpdatesIgnoring();
+                builder.UseMvc(mvcBuilder =>
+                {
+                    mvcBuilder.Controllers = new List<Type>()
+                    {
+                        typeof(SecondBotController)
+                    };
+                    mvcBuilder.UseDebugInfo();
+                });
+            });
+            return botManager;
         }
     }
 }

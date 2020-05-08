@@ -160,7 +160,7 @@ namespace Telegram.Bot.AspNetPipeline.Core
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(BotManager));
-            
+
             lock (_runLocker)
             {
                 if (IsRunning)
@@ -319,25 +319,40 @@ namespace Telegram.Bot.AspNetPipeline.Core
         #region Dispose region.
         public bool IsDisposed { get; private set; }
 
-        public async void Dispose()
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposeServices">Default is true.</param>
+        public async void Dispose(bool disposeServices)
         {
             if (IsDisposed)
                 return;
             await Stop();
-            //Dispose singletones that registered to be disposed.
-            foreach (var type in _forDispose)
+
+            if (disposeServices)
             {
-                IDisposable serviceToDispose = null;
-                try
+                //Dispose singletones that registered to be disposed.
+                foreach (var type in _forDispose)
                 {
-                    serviceToDispose=Services.GetService(type) as IDisposable;
+                    IDisposable serviceToDispose = null;
+                    try
+                    {
+                        serviceToDispose = Services.GetService(type) as IDisposable;
+                    }
+                    catch
+                    {
+                    }
+
+                    serviceToDispose?.Dispose();
                 }
-                catch
-                {
-                }
-                serviceToDispose?.Dispose();
+                (Services as IDisposable)?.Dispose();
             }
-            (Services as IDisposable)?.Dispose();
+
             Services = null;
 
             BotContext = null;

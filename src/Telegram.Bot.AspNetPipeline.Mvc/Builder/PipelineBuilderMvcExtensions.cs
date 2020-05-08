@@ -36,7 +36,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             configureUseMvcBuilder?.Invoke(useMvcBuilder);
 
             var md = new MvcMiddleware(addMvcBuilder.MvcOptions, useMvcBuilder);
-            @this.UseMiddlware(md);
+            @this.UseMiddleware(md);
         }
 
         public static void AddMvc(

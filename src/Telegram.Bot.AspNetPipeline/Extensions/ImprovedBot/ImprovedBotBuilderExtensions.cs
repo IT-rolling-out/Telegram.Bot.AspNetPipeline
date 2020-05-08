@@ -13,7 +13,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
         /// </summary>
         internal static void UseBotExt(this IPipelineBuilder @this)
         {
-            @this.UseMiddlware<ImprovedBotMiddleware>();
+            @this.UseMiddleware<ImprovedBotMiddleware>();
         }
 
         /// <summary>
