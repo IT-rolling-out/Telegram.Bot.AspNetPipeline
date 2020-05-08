@@ -29,6 +29,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// </summary>
         IList<IModelBinder> ModelBinders { get; set; }
 
+        IList<Type> Controllers { get; set; }
+
         /// <summary>
         /// Just like you do with controller methods, but for delegates.
         /// </summary>

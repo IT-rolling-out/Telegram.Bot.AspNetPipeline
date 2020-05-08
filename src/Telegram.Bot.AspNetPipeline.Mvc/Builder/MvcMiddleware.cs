@@ -38,22 +38,21 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
         /// All other services will be resolved from ServiceProvider.
         /// </summary>
         public MvcMiddleware(
-            IAddMvcBuilder addMvcBuilder, 
+            MvcOptions mvcOptions,
             IUseMvcBuilder useMvcBuilder
             )
         {
-            addMvcBuilder.Controllers = addMvcBuilder.Controllers ?? new List<Type>();
             useMvcBuilder.Routers = useMvcBuilder.Routers ?? new List<IRouter>();
             useMvcBuilder.ModelBinders = useMvcBuilder.ModelBinders ?? new List<IModelBinder>();
 
-            _mvcOptions = (MvcOptions)addMvcBuilder.MvcOptions.Clone();
+            _mvcOptions = (MvcOptions)mvcOptions.Clone();
 
             var serv = useMvcBuilder.ServiceProvider;
             _mainRouter = new MainRouter(useMvcBuilder.Routers);
             _contextPreparer = serv.GetRequiredService<IContextPreparer>();
 
             //Controllers.
-            var controllers = addMvcBuilder.Controllers;
+            var controllers = useMvcBuilder.Controllers ?? new List<Type>();
             var startupRoutes = useMvcBuilder.GetRoutes();
             _globalSearchBag = InitGlobalSearchBagProvider(serv, startupRoutes, controllers);
             var mainModelBinder = new MainModelBinder(useMvcBuilder.ModelBinders);

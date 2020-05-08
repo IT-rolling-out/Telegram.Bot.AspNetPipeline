@@ -22,6 +22,8 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 
         public IList<IModelBinder> ModelBinders { get; set; }
 
+        public IList<Type> Controllers { get; set; }
+
         public UseMvcBuilder(IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;

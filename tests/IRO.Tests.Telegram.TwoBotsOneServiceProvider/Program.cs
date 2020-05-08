@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers;
 using Telegram.Bot;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
@@ -33,6 +35,11 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
                 builder.UseOldUpdatesIgnoring();
                 builder.UseMvc(mvcBuilder =>
                 {
+                    mvcBuilder.Controllers = new List<Type>()
+                    {
+                        typeof(FirstBotController)
+                    };
+
                     //Write /debug to see info about routing.
                     mvcBuilder.UseDebugInfo();
 

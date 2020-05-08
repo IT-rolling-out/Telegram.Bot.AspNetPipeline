@@ -22,9 +22,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var addMvcBuilder = @this.ServiceProvider.GetRequiredService<IAddMvcBuilder>();
             var options=addMvcBuilder.MvcOptions;
             var useMvcBuilder = new UseMvcBuilder(@this.ServiceProvider);
+            useMvcBuilder.Controllers = addMvcBuilder.Controllers;
 
             //Add BotExt validator. 
-            if(options.ConfigureBotExtWithMvc)
+            if (options.ConfigureBotExtWithMvc)
                 @this.AddBotExtMvcGlobalValidator(options.BotExtOrder);
 
             //Controllers settiongs.
@@ -34,7 +35,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             //!Warning! Service bus will always return null values before we init MvcMiddleware.
             configureUseMvcBuilder?.Invoke(useMvcBuilder);
 
-            var md = new MvcMiddleware(addMvcBuilder, useMvcBuilder);
+            var md = new MvcMiddleware(addMvcBuilder.MvcOptions, useMvcBuilder);
             @this.UseMiddlware(md);
         }
 
