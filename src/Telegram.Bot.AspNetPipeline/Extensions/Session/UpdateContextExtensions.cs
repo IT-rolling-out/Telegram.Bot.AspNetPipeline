@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.Session;
 
@@ -15,9 +12,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
         /// </summary>
         public static ISessionStorage Session(this UpdateContext @this)
         {
-            var sessionProvider=@this.Services.GetRequiredService<ISessionStorageProvider>();
-            var chatId=@this.ChatId.Identifier;
-            return sessionProvider.ResolveSessionStorage(chatId);
-        } 
+            var sessionProvider = @this.Services.GetRequiredService<ISessionStorageProvider>();
+            var chatId = @this.ChatId.Identifier;
+            return sessionProvider.ResolveSessionStorage(@this.Bot.BotId, chatId);
+        }
     }
 }

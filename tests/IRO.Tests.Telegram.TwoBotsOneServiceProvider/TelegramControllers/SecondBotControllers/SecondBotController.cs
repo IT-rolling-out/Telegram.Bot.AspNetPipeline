@@ -2,7 +2,7 @@
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 
-namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers
+namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers.SecondBotControllers
 {
     public class SecondBotController : BotController
     {

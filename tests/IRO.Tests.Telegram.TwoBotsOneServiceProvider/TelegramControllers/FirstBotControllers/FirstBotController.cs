@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using IRO.Tests.Telegram.TwoBotsOneServiceProvider.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
 
-namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers
+namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider.TelegramControllers.FirstBotControllers
 {
     public class FirstBotController : BotController
     {

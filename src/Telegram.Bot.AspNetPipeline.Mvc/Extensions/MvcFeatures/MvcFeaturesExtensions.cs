@@ -12,7 +12,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Extensions
             const string FeaturesPropName = "_FeaturesProp";
             if (!@this.Properties.ContainsKey(FeaturesPropName))
             {
-                var mvcFeaturesProvider=@this.UpdateContext.Services.GetRequiredService<IMvcFeaturesProvider>();
+                var mvcFeaturesProvider = @this.UpdateContext.Services.GetRequiredService<IMvcFeaturesProvider>();
                 var mvcFeatures = mvcFeaturesProvider.MvcFeatures;
                 @this.Properties[FeaturesPropName] = new ContextMvcFeatures(mvcFeatures, @this);
             }

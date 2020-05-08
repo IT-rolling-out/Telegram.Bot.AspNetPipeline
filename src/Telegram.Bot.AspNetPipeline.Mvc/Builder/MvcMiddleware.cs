@@ -11,6 +11,7 @@ using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.ModelBinding.Binders;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Services;
 using Telegram.Bot.AspNetPipeline.Mvc.Core;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.Main;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing;
@@ -54,7 +55,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             //Controllers.
             var controllers = useMvcBuilder.Controllers ?? new List<Type>();
             var startupRoutes = useMvcBuilder.GetRoutes();
-            _globalSearchBag = InitGlobalSearchBagProvider(serv, startupRoutes, controllers);
+            _globalSearchBag = CreateGlobalSearchBag(serv, startupRoutes, controllers);
             var mainModelBinder = new MainModelBinder(useMvcBuilder.ModelBinders);
 
             //Init services bus.
@@ -69,8 +70,18 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
                 );            
         }
 
+        /// <summary>
+        /// Invoked before all UseMvc middlewares.
+        /// </summary>
+        public void SetGlobalSearchBag(UpdateContext ctx)
+        {
+            ctx.SetGlobalSearchBag(_globalSearchBag);
+        }
+
         public async Task Invoke(UpdateContext ctx, Func<Task> next)
         {
+            SetGlobalSearchBag(ctx);
+
             var routingCtx = new RoutingContext(ctx);
             await _mainRouter.RouteAsync(routingCtx);
 
@@ -122,7 +133,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
 
         }
 
-        IGlobalSearchBag InitGlobalSearchBagProvider(
+        IGlobalSearchBag CreateGlobalSearchBag(
             IServiceProvider serv,
             IEnumerable<ActionDescriptor> startupRoutes,
             IList<Type> controllers
@@ -142,11 +153,10 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var allRoutes = controllersRoutes.ToList();
             allRoutes.AddRange(startupRoutes);
             var globalSearchBagProvider = serv.GetRequiredService<GlobalSearchBagProvider>();
-            globalSearchBagProvider.Init(allRoutes, _mvcOptions.CheckEqualsRouteInfo);
             //Search bag initialized. 
             //All routes you can get only with IGlobalSearchBag.
 
-            return globalSearchBagProvider.Resolve();
+            return globalSearchBagProvider.Resolve(allRoutes, _mvcOptions.CheckEqualsRouteInfo);
         }
     }
 }

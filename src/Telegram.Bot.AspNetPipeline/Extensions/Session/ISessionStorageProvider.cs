@@ -8,6 +8,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
 {
     public interface ISessionStorageProvider
     {
-        ISessionStorage ResolveSessionStorage(long chatId);
+        ISessionStorage ResolveSessionStorage(long botId, long chatId);
     }
 }

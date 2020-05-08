@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.RouteSearcing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 
 namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
 {
@@ -39,9 +40,7 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Routing.Routers
                 return;
             }
 
-            var globalSearchBagProvider =
-                routeContext.UpdateContext.Services.GetRequiredService<IGlobalSearchBagProvider>();
-            var globalSearchBag = globalSearchBagProvider.Resolve();
+            var globalSearchBag = routeContext.UpdateContext.GlobalSearchBag();
             foreach (var fullMatchTemplate in templateMatchingStrings)
             {
                 foreach (var orderScope in globalSearchBag.AllSorted())

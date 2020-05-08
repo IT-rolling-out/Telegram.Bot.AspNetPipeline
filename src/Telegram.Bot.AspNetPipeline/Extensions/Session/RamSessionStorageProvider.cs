@@ -10,8 +10,8 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
 
         readonly TimeSpan _sessionTimeout;
 
-        readonly ConcurrentDictionary<long, (ISessionStorage Session, DateTime LastAccess)> _sessionsDict =
-            new ConcurrentDictionary<long, (ISessionStorage, DateTime)>();
+        readonly ConcurrentDictionary<string, (ISessionStorage Session, DateTime LastAccess)> _sessionsDict =
+            new ConcurrentDictionary<string, (ISessionStorage, DateTime)>();
 
         /// <summary>
         /// Sessions, that wasn't resolved for a given time will be removed.
@@ -42,10 +42,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
             _timer.Start();
         }
 
-        public ISessionStorage ResolveSessionStorage(long chatId)
+        public ISessionStorage ResolveSessionStorage(long botId, long chatId)
         {
+            var key = $"{botId}_{chatId}";
             ISessionStorage session;
-            if (_sessionsDict.TryGetValue(chatId, out var val))
+            if (_sessionsDict.TryGetValue(key, out var val))
             {
                 session = val.Session;
             }
@@ -53,7 +54,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Session
             {
                 session = new RamSessionStorage(chatId);
             }
-            _sessionsDict[chatId] = (session, DateTime.Now);
+            _sessionsDict[key] = (session, DateTime.Now);
             return session;
 
         }

@@ -23,11 +23,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             var options=addMvcBuilder.MvcOptions;
             var useMvcBuilder = new UseMvcBuilder(@this.ServiceProvider);
             useMvcBuilder.Controllers = addMvcBuilder.Controllers;
-
-            //Add BotExt validator. 
-            if (options.ConfigureBotExtWithMvc)
-                @this.AddBotExtMvcGlobalValidator(options.BotExtOrder);
-
             //Controllers settiongs.
             ControllersMiddlewareExtensions.InitUseMvcBuilder(useMvcBuilder);
 
@@ -36,6 +31,16 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             configureUseMvcBuilder?.Invoke(useMvcBuilder);
 
             var md = new MvcMiddleware(addMvcBuilder.MvcOptions, useMvcBuilder);
+
+            //Add BotExt validator. 
+            if (options.ConfigureBotExtWithMvc)
+            {
+                @this.AddBotExtMvcGlobalValidator(
+                    options.BotExtOrder,
+                    md.SetGlobalSearchBag
+                    );
+            }
+
             @this.UseMiddleware(md);
         }
 
@@ -95,7 +100,6 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Builder
             {
                 serv.AddTransient(controllerType);
             }
-
         }
 
         static IAddMvcBuilder InitAddMvcBuilder(ServiceCollectionWrapper serviceCollectionWrapper, MvcOptions mvcOptions)
