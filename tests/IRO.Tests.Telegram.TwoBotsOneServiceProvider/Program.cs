@@ -17,12 +17,9 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
             try
             {
                 var services = new ServiceCollection();
-                var bm1 = ConfFirstBot(services);
-                var bm2 = ConfSecondBot(services);
+                var bm1 = ConfFirstBot();
+                var bm2 = ConfSecondBot();
                 var sp = services.BuildServiceProvider();
-
-                bm1.Setup(sp);
-                bm2.Setup(sp);
 
                 bm1.Start();
                 bm2.Start();
@@ -36,25 +33,20 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                throw;
             }
         }
 
-        static BotManager ConfFirstBot(IServiceCollection services)
+        static BotManager ConfFirstBot()
         {
             var bot = new TelegramBotClient(
                 BotTokenResolver.GetToken(),
                 new QueuedHttpClient(TimeSpan.FromSeconds(1))
             );
-            var botManager = new BotManager(bot, services);
+            var botManager = new BotManager(bot);
             botManager.ConfigureServices((servicesWrap) =>
             {
-                servicesWrap.AddMvc(new MvcOptions()
-                {
-                    //Useful for debugging.
-                    CheckEqualsRouteInfo = true
-                });
-
-                //Logging service example with NLog you can see in IRO.Tests.Telegram.
+                servicesWrap.AddMvc();
             });
             botManager.ConfigureBuilder(builder =>
             {
@@ -72,13 +64,17 @@ namespace IRO.Tests.Telegram.TwoBotsOneServiceProvider
             return botManager;
         }
 
-        static BotManager ConfSecondBot(IServiceCollection services)
+        static BotManager ConfSecondBot()
         {
             var bot = new TelegramBotClient(
                 BotTokenResolver.GetSecondToken(),
                 new QueuedHttpClient(TimeSpan.FromSeconds(1))
             );
-            var botManager = new BotManager(bot, services);
+            var botManager = new BotManager(bot);
+            botManager.ConfigureServices((servicesWrap) =>
+            {
+                servicesWrap.AddMvc();
+            });
             botManager.ConfigureBuilder(builder =>
             {
                 builder.UseDevEceptionMessage();
