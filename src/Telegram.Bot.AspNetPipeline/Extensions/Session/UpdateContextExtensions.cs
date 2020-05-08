@@ -16,7 +16,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
         public static ISessionStorage Session(this UpdateContext @this)
         {
             var sessionProvider=@this.Services.GetRequiredService<ISessionStorageProvider>();
-            var chatId=@this.Chat.Id;
+            var chatId=@this.ChatId.Identifier;
             return sessionProvider.ResolveSessionStorage(chatId);
         } 
     }

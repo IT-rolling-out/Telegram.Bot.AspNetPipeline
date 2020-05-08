@@ -31,7 +31,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
             )
         {
             return await @this.Bot.SendTextMessageAsync(
-                @this.Chat.Id,
+                @this.ChatId,
                 text,
                 parseMode,
                 disableWebPagePreview,

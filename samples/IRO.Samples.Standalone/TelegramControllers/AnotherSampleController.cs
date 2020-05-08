@@ -55,11 +55,11 @@ namespace IRO.Samples.Standalone.TelegramControllers
         public async Task TestReadWithoutContext()
         {
             await SendTextMessageAsync("Please send message.");
-            var msg = await Bot.ReadMessageAsync(UpdateContext.Chat, NoContextReadCallbackFromType.AnyUser);
+            var msg = await Bot.ReadMessageAsync(ChatId, NoContextReadCallbackFromType.AnyUser);
             await SendTextMessageAsync($"You sent '{msg.Text}'.");
 
             await SendTextMessageAsync("Please send message with reply.");
-            msg = await Bot.ReadMessageAsync(UpdateContext.Chat, NoContextReadCallbackFromType.AnyUserReply);
+            msg = await Bot.ReadMessageAsync(ChatId, NoContextReadCallbackFromType.AnyUserReply);
             await SendTextMessageAsync($"You sent '{msg.Text}'.");
         }
 
@@ -112,7 +112,29 @@ namespace IRO.Samples.Standalone.TelegramControllers
                 return false;
             });
             await SendTextMessageAsync($"You chosen '{readUpd.CallbackQuery.Data}'.");
+        }
 
+        [BotRoute("/test_restore_markup")]
+        public async Task TestRestoreMarkup()
+        {
+            await SendTextMessageAsync($"Send me something like:\n\n" +
+                                       $"`Code str` \n```Code``` \n*Bold* \n_Italic_ \n[google link](https://google.com)");
+
+            var readMsg = await BotExt.ReadMessageAsync();
+            var markdownText = readMsg.RestoreMarkdown();
+            await SendTextMessageAsync(markdownText, parseMode: ParseMode.MarkdownV2);
+        }
+
+        /// <summary>
+        /// Will process all requests, but only if other command not executing now,
+        /// because have priority lower than default (0).
+        /// So will not cancel NewBot.
+        /// NOTE: Bigger Order mean lower priority, ASP.NET naming.
+        /// </summary>
+        [BotRoute(Order = 1, Name = "Default")]
+        public async Task Default()
+        {
+            await Bot.SendTextMessageAsync(ChatId, "Hi, i am default handler.");
         }
     }
 }

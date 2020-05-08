@@ -14,10 +14,10 @@ namespace IRO.Samples.AspWebhooks.TelegramControllers
         [BotRoute("/newbot", UpdateType.Message)]
         public async Task NewBot()
         {
-            await Bot.SendTextMessageAsync(Chat.Id, "Enter bot name: ");
+            await Bot.SendTextMessageAsync(ChatId, "Enter bot name: ");
             Message msg = await BotExt.ReadMessageAsync();
             var name = msg.Text;
-            await Bot.SendTextMessageAsync(Chat.Id, "Enter bot nikname: ");
+            await Bot.SendTextMessageAsync(ChatId, "Enter bot nikname: ");
             msg = await BotExt.ReadMessageAsync();
             var nick = msg.Text;
 
@@ -26,7 +26,7 @@ namespace IRO.Samples.AspWebhooks.TelegramControllers
             UpdateProcessingAborted.ThrowIfCancellationRequested();
             //Creating bot finished...
 
-            await Bot.SendTextMessageAsync(Chat.Id, "Bot created.");
+            await Bot.SendTextMessageAsync(ChatId, "Bot created.");
 
             //In mvc middleware called by default if found command or read-callback.
             //Next middleware can ignore it.
@@ -39,7 +39,7 @@ namespace IRO.Samples.AspWebhooks.TelegramControllers
         [BotRoute("/help", UpdateType.Message, Name = "Help")]
         public async Task Help()
         {
-            await Bot.SendTextMessageAsync(Chat.Id, "Commands list:\n" +
+            await Bot.SendTextMessageAsync(ChatId, "Commands list:\n" +
                                                     "/newbot - NewBot,\n" +
                                                     "/help - Help");
         }
@@ -53,7 +53,7 @@ namespace IRO.Samples.AspWebhooks.TelegramControllers
         [BotRoute(Order = 1, Name = "Default")]
         public async Task Default()
         {
-            await Bot.SendTextMessageAsync(Chat.Id, "Hi, i am BotFather.");
+            await Bot.SendTextMessageAsync(ChatId, "Hi, i am BotFather.");
         }
     }
 }
