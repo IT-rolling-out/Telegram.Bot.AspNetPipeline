@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Telegram.Bot.CloudFileStorage
+namespace Telegram.Bot.CloudFileStorage.BotsProviders
 {
     public class OneTelegramBotProvider : ITelegramBotsProvider
     {

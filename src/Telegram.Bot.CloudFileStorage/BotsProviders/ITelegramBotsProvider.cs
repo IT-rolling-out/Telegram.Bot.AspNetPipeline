@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Telegram.Bot.CloudFileStorage.Data;
 
-namespace Telegram.Bot.CloudFileStorage
+namespace Telegram.Bot.CloudFileStorage.BotsProviders
 {
     /// <summary>
     /// Current interface designed to manage services which use multiple bots.

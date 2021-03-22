@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IRO.Common.Text;
 using Newtonsoft.Json;
+using Telegram.Bot.CloudFileStorage.BotsProviders;
 using Telegram.Bot.CloudFileStorage.Consts;
 using Telegram.Bot.CloudFileStorage.Data;
 using Telegram.Bot.CloudFileStorage.Data.PostContentTypes;

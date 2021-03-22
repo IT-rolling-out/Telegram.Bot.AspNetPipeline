@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.CloudFileStorage.Data;
 
-namespace Telegram.Bot.CloudFileStorage
+namespace Telegram.Bot.CloudFileStorage.BotsProviders
 {
     public class ListTelegramBotsProvider : ITelegramBotsProvider
     {
