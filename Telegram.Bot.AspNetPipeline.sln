@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.AspNetPipeline
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Samples.Standalone", "samples\IRO.Samples.Standalone\IRO.Samples.Standalone.csproj", "{00AF7862-96FC-4EDF-A205-87448A17D458}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRO.Tests.Telegram.TwoBotsOneServiceProvider", "tests\IRO.Tests.Telegram.TwoBotsOneServiceProvider\IRO.Tests.Telegram.TwoBotsOneServiceProvider.csproj", "{698559C9-7ECA-434B-BBDA-EC85D4A8A80F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Tests.Telegram.TwoBotsOneServiceProvider", "tests\IRO.Tests.Telegram.TwoBotsOneServiceProvider\IRO.Tests.Telegram.TwoBotsOneServiceProvider.csproj", "{698559C9-7ECA-434B-BBDA-EC85D4A8A80F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram.Bot.CloudFileStorage", "src\Telegram.Bot.CloudFileStorage\Telegram.Bot.CloudFileStorage.csproj", "{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +97,14 @@ Global
 		{698559C9-7ECA-434B-BBDA-EC85D4A8A80F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{698559C9-7ECA-434B-BBDA-EC85D4A8A80F}.Release|x64.ActiveCfg = Release|Any CPU
 		{698559C9-7ECA-434B-BBDA-EC85D4A8A80F}.Release|x64.Build.0 = Release|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Debug|x64.Build.0 = Debug|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|x64.ActiveCfg = Release|Any CPU
+		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

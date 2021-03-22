@@ -177,7 +177,7 @@ namespace Telegram.Bot.AspNetPipeline.WebhookSupport
             if (!IsDisposed && _isInit && path.Contains(_pathWithBotname))
             {
                 //When webhook of current bot.
-                var requestBodyStr = ctx.GetRequestBodyText();
+                var requestBodyStr = await ctx.GetRequestBodyText();
                 var update=JsonConvert.DeserializeObject<Update>(requestBodyStr, JsonSettings);
                 var args = new UpdateReceivedEventArgs(update);
                 UpdateReceived?.Invoke(this, args);
