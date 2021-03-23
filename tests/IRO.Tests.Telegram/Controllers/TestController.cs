@@ -27,8 +27,9 @@ namespace IRO.Tests.Telegram.Controllers
         [BotRoute(Order = 1)]
         public async Task WithoutCmd(int num, bool boolean, string str)
         {
+            return;
             await UpdateContext.SendTextMessageAsync($"num: {num}\nboolean: {boolean}\nstr: '{str}'" +
-                                                      $"\n\nall valid: {IsModelStateValid}");
+                                                     $"\n\nall valid: {IsModelStateValid}");
         }
 
         [BotRoute("/ex")]

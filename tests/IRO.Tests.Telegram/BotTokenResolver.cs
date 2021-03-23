@@ -16,7 +16,12 @@ namespace IRO.Tests.Telegram
 
         public static string GetSecondToken()
         {
-            return LoadJson()["secondToken"].ToObject<string>();
+            return LoadJson()["secondToken"].ToObject<string>(); 
+        }
+
+        public static long GetSaveResChatId()
+        {
+            return LoadJson()["saveResChatId"].ToObject<long>(); 
         }
 
         static JToken LoadJson()

@@ -12,6 +12,11 @@ namespace Telegram.Bot.CloudFileStorage.BotsProviders
             _telegramBotClient = telegramBotClient ?? throw new ArgumentNullException(nameof(telegramBotClient));
         }
 
+        public async Task<ITelegramBotClient> GetMainBotClient()
+        {
+            return _telegramBotClient;
+        }
+
         public async Task<ITelegramBotClient> GetBotClient(long id)
         {
             if (_telegramBotClient.BotId != id)

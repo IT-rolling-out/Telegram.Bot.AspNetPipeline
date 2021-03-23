@@ -7,13 +7,6 @@ namespace Telegram.Bot.CloudFileStorage.Data.PostContentTypes
     /// </summary>
     public class TelegramStickerResourceDto : ResourceDto
     {
-
-        public override PostResSourceType SourceType
-        {
-            get => PostResSourceType.TelegramPost;
-            set { }
-        }
-
         public override PostResExtType ExtType
         {
             get => PostResExtType.Sticker;

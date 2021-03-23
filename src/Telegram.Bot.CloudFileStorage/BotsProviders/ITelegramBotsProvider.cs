@@ -7,6 +7,8 @@ namespace Telegram.Bot.CloudFileStorage.BotsProviders
     /// </summary>
     public interface ITelegramBotsProvider
     {
+        Task<ITelegramBotClient> GetMainBotClient();
+
         Task<ITelegramBotClient> GetBotClient(long id);
 
         Task<ITelegramBotClient> GetRandomBotClient();

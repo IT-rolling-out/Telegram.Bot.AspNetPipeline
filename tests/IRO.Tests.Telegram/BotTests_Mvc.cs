@@ -1,8 +1,12 @@
 ﻿using IRO.Tests.Telegram.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
+using Telegram.Bot.CloudFileStorage;
+using Telegram.Bot.CloudFileStorage.BotsProviders;
+using Telegram.Bot.CloudFileStorage.Data;
 
 namespace IRO.Tests.Telegram
 {
@@ -12,13 +16,38 @@ namespace IRO.Tests.Telegram
         {
             botManager.ConfigureServices((servicesWrap) =>
             {
+                var serv = servicesWrap.Services;
                 LoggerStarter.InitLogger(servicesWrap);
                 servicesWrap.AddMvc(new MvcOptions()
                 {
                     CheckEqualsRouteInfo = true
                 });
 
-                servicesWrap.Services.AddScoped<ISomeScopedService, SomeScopedService>();
+                serv.AddSingleton<ITelegramBotClient>((sp) =>
+                {
+                    return botManager.BotContext.Bot;
+                });
+                serv.AddScoped<ISomeScopedService, SomeScopedService>();
+
+                //Resource manager test
+                serv.AddSingleton<ITelegramBotsProvider>((sp) =>
+                {
+                    return new OneTelegramBotProvider(botManager.BotContext.Bot);
+                });
+                serv.AddSingleton(new TgResourceManagerOptions()
+                {
+                    SaveResourcesChatId = BotTokenResolver.GetSaveResChatId()
+                });
+                serv.AddSingleton<TgResourceManager>();
+
+                //Telegram storage test
+                var opt = new TelegramStorageOptions()
+                {
+                    SaveResourcesChatId = BotTokenResolver.GetSaveResChatId(),
+                    SaveOnSet = true
+                };
+                serv.AddSingleton(opt);
+                serv.AddSingleton<TelegramStorage>();
             });
 
             botManager.ConfigureBuilder((builder) =>
