@@ -23,6 +23,6 @@
   <PropertyGroup>
     <!-- Use current same version for all or define special for category-->
     <VersionPostfix></VersionPostfix>		
-	<AsmVersion_Telegram>1.2.1$(VersionPostfix)</AsmVersion_Telegram>
+	<AsmVersion_Telegram>1.2.2$(VersionPostfix)</AsmVersion_Telegram>
   </PropertyGroup>
 </Project>

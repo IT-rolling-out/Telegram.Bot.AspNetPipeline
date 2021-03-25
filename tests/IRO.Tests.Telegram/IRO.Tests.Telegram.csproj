@@ -14,7 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline.Mvc\Telegram.Bot.AspNetPipeline.Mvc.csproj" />
     <ProjectReference Include="..\..\src\Telegram.Bot.AspNetPipeline\Telegram.Bot.AspNetPipeline.csproj" />
-    <ProjectReference Include="..\..\src\Telegram.Bot.CloudFileStorage\Telegram.Bot.CloudStorage.csproj" />
     <ProjectReference Include="..\..\src\Telegram.Bot.CloudStorage\Telegram.Bot.CloudStorage.csproj" />
   </ItemGroup>
 
