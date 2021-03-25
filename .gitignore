@@ -41,3 +41,5 @@ output/
 publish_to_nugetorg.cmd
 scripts/localData/*
 test_token.json
+**/appsettings.json
+**/appSettings.json

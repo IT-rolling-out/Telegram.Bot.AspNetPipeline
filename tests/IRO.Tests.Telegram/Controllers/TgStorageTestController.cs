@@ -2,7 +2,7 @@
 using IRO.Storage;
 using Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core;
 using Telegram.Bot.AspNetPipeline.Mvc.Routing.Metadata;
-using Telegram.Bot.CloudFileStorage;
+using Telegram.Bot.CloudStorage;
 
 namespace IRO.Tests.Telegram.Controllers
 {

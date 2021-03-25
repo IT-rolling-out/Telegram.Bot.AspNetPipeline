@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using IRO.Common.Services;
 using IRO.Storage.DefaultStorages;
 using NeoSmart.AsyncLock;
 using Newtonsoft.Json;
-using Telegram.Bot.CloudFileStorage.Data;
+using Telegram.Bot.CloudStorage.Data;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InputFiles;
 using File = System.IO.File;
 
-namespace Telegram.Bot.CloudFileStorage
+namespace Telegram.Bot.CloudStorage
 {
     public class TelegramStorage : BaseStorage
     {
@@ -150,9 +149,6 @@ namespace Telegram.Bot.CloudFileStorage
                     }
                 });
             }
-
-
-
         }
 
         protected async Task SyncedLoad()
@@ -197,8 +193,7 @@ namespace Telegram.Bot.CloudFileStorage
             _storageDict?.Clear();
             await SyncedSave();
         }
-
-
+        
         protected void LoadStorageStateFromFile()
         {
             _storageDict = ReadStorage();

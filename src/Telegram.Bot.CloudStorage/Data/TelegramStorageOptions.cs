@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Telegram.Bot.CloudFileStorage.Data
+namespace Telegram.Bot.CloudStorage.Data
 {
     public class TelegramStorageOptions
     {

@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Samples.Standalone", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRO.Tests.Telegram.TwoBotsOneServiceProvider", "tests\IRO.Tests.Telegram.TwoBotsOneServiceProvider\IRO.Tests.Telegram.TwoBotsOneServiceProvider.csproj", "{698559C9-7ECA-434B-BBDA-EC85D4A8A80F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram.Bot.CloudFileStorage", "src\Telegram.Bot.CloudFileStorage\Telegram.Bot.CloudFileStorage.csproj", "{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.CloudStorage", "src\Telegram.Bot.CloudStorage\Telegram.Bot.CloudStorage.csproj", "{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRO.Samples.FileStorageWebApi", "samples\IRO.Samples.FileStorageWebApi\IRO.Samples.FileStorageWebApi.csproj", "{4C57D466-7DA6-47BC-9374-4F4356DD403E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,6 +107,14 @@ Global
 		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|x64.ActiveCfg = Release|Any CPU
 		{DDC82BD8-9A91-46CC-AE6B-06AD6E8684B7}.Release|x64.Build.0 = Release|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Debug|x64.Build.0 = Debug|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Release|x64.ActiveCfg = Release|Any CPU
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,6 +125,7 @@ Global
 		{B1901EEB-02FA-4360-8EA1-AF1E40CD9E20} = {762DC31F-16D5-43B9-AFFD-9150F39E38F0}
 		{00AF7862-96FC-4EDF-A205-87448A17D458} = {762DC31F-16D5-43B9-AFFD-9150F39E38F0}
 		{698559C9-7ECA-434B-BBDA-EC85D4A8A80F} = {A9CAF669-789B-4705-ADDD-2D700148C187}
+		{4C57D466-7DA6-47BC-9374-4F4356DD403E} = {762DC31F-16D5-43B9-AFFD-9150F39E38F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C232FA4E-FED2-40B5-B4A3-1458678B1AED}
