@@ -13,6 +13,8 @@ namespace IRO.Samples.FileStorageWebApi
 
         public const string SwaggerApiVersion = "v1";
 
+        public const int MaxFileSize = 52428800;
+
         public static string EXTERNAL_URL => Configuration["EXTERNAL_URL"];
 
         public static bool IS_DEBUG => Convert.ToBoolean(Configuration["IS_DEBUG"]);

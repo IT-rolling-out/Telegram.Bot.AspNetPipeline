@@ -1,3 +1,11 @@
+# Telegram.Bot.CloudStorage
+
+This lib allow to store files in telegram chat and access them by key. For it use ```TelegramFilesCloud``` class. Caching included.
+
+Metadata can be saved in one telegram file too, use class ```TelegramStorage```. It can store objects and return them by key.
+
+With all caching options enabled you can use files with local file systen speed, but they will be synced to telegram. See ```samples/IRO.Samples.FileStorageWebApi```.
+
 # Telegram.Bot.AspNetPipeline
 [![NuGet](https://img.shields.io/nuget/v/Telegram.Bot.AspNetPipeline.svg)](https://www.nuget.org/packages/Telegram.Bot.AspNetPipeline)
 

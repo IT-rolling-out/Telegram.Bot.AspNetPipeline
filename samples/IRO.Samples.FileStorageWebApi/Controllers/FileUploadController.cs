@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using IRO.Samples.FileStorageWebApi.Data;
+using IRO.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,36 +18,46 @@ namespace IRO.Samples.FileStorageWebApi.Controllers
     [Route(AppSettings.ApiPath + "/files")]
     public class FileUploadController : ControllerBase
     {
-        TelegramFilesCloud<FileMetadata> _tgCloud;
+        const string UploadsLogCacheKey = "UploadsLogCacheKey";
 
-        public FileUploadController(TelegramFilesCloud<FileMetadata> tgCloud)
+        readonly IKeyValueStorage _storage;
+        readonly TelegramFilesCloud<FileMetadata> _filesCloud;
+
+        public FileUploadController(IKeyValueStorage storage, TelegramFilesCloud<FileMetadata> filesCloud)
         {
-            _tgCloud = tgCloud;
+            _storage = storage;
+            _filesCloud = filesCloud;
         }
 
-        [HttpPost("upload/{fileName}")]
-        public async Task<JsonResult> UploadFile(IFormFile uploadedFile, [FromRoute] string fileName)
+        [HttpGet("uploadLogs")]
+        public async Task<IEnumerable<UploadLogRecord>> GetUploadLogs()
+        {
+            return await GetLogRecordsList();
+        }
+
+        [HttpPost("upload")]
+        public async Task<UploadLogRecord> UploadFile(IFormFile uploadedFile)
         {
             if (uploadedFile != null)
             {
                 var metadata = FileMetadata.FromFormFile(uploadedFile);
                 using (var fileStream = uploadedFile.OpenReadStream())
                 {
-                    await _tgCloud.SaveFile(fileName, fileStream, metadata);
+                    await _filesCloud.SaveFile(uploadedFile.FileName, fileStream, metadata);
                 }
+                return await AddLogRecord(uploadedFile.FileName);
             }
             else
             {
                 throw new Exception("File not uploaded.");
             }
-            return new JsonResult("File uploaded.");
         }
 
         [HttpGet("download/{fileName}")]
         public async Task<FileStreamResult> DownloadFile([FromRoute] string fileName)
         {
-            var metadata = await _tgCloud.GetFileMetadata(fileName);
-            var fileStream = await _tgCloud.LoadFile(fileName);
+            var metadata = await _filesCloud.GetFileMetadata(fileName);
+            var fileStream = await _filesCloud.LoadFile(fileName);
             return File(
                 fileStream,
                 metadata.ContentType,
@@ -53,6 +65,27 @@ namespace IRO.Samples.FileStorageWebApi.Controllers
                 metadata.LastModified,
                 null
                 );
+        }
+
+        async Task<UploadLogRecord> AddLogRecord(string fileName)
+        {
+            var urlFileName = HttpUtility.UrlEncode(fileName);
+            var record = new UploadLogRecord()
+            {
+                UploadedAt = DateTime.UtcNow,
+                FileName = fileName,
+                DownloadUrl = $"{ AppSettings.EXTERNAL_URL}/{AppSettings.ApiPath}/files/download/{urlFileName}"
+            };
+            var list =await GetLogRecordsList();
+            list.Add(record);
+            await _storage.Set(UploadsLogCacheKey, list);
+            return record;
+        }
+
+        async Task<List<UploadLogRecord>> GetLogRecordsList()
+        {
+            return await _storage.GetOrDefault<List<UploadLogRecord>>(UploadsLogCacheKey) ?? new List<UploadLogRecord>();
+            
         }
     }
 }

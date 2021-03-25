@@ -15,5 +15,11 @@
     <ProjectReference Include="..\..\src\Telegram.Bot.CloudStorage\Telegram.Bot.CloudStorage.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="FrontApp\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 
 </Project>

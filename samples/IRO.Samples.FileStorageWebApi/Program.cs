@@ -18,6 +18,29 @@ namespace IRO.Samples.FileStorageWebApi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    try
+                    {
+                        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                        if (string.IsNullOrWhiteSpace(envName))
+                        {
+                            config.AddJsonFile("appsettings.json");
+                        }
+                        else
+                        {
+                            config.AddJsonFile($"appsettings.{envName}.json");
+                        }
+                    }
+                    catch
+                    {
+#if DEBUG
+                        throw;
+#endif
+                    }
+                    //Override by external.
+                    config.AddEnvironmentVariables();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

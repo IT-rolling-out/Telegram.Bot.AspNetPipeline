@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 
 namespace IRO.Samples.FileStorageWebApi.Data
 {
@@ -14,7 +15,7 @@ namespace IRO.Samples.FileStorageWebApi.Data
 
         public string FileName { get; set; }
 
-        public IHeaderDictionary Headers { get; set; }
+        public IDictionary<string, StringValues> Headers { get; set; }
 
         public long Length { get; set; }
 

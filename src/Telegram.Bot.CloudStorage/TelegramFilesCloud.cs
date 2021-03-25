@@ -29,6 +29,7 @@ namespace Telegram.Bot.CloudStorage
         readonly AsyncLock _lock = new AsyncLock();
         readonly bool _deleteOlderFiles;
         readonly long _saveResChatId;
+        readonly bool _cacheAndNotWait;
 
         public TelegramFilesCloud(
             ITelegramBotClient botClient,
@@ -41,6 +42,7 @@ namespace Telegram.Bot.CloudStorage
             _metadataStorage = metadataStorage ?? new FileStorage();
             opt ??= new TelegramFilesCloudOptions();
             _useCache = opt.UseCache;
+            _cacheAndNotWait= opt.UseCache && opt.CacheAndNotWait ;
             _saveResChatId = opt.SaveResourcesChatId;
             _deleteOlderFiles = opt.DeleteOlderFiles;
             _cache = cache ?? new FileSystemCache(100);
@@ -68,7 +70,16 @@ namespace Telegram.Bot.CloudStorage
             }
         }
 
-
+        /// <summary>
+        /// Save file to telegram with caching.
+        /// <para></para>
+        /// Warning. If <see cref="TelegramFilesCloudOptions.CacheAndNotWait"/> enabled - it will save stream to cache and not wait for
+        /// telegram upload, so you can loose your data.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="stream"></param>
+        /// <param name="yourMetadata"></param>
+        /// <returns></returns>
         public async Task SaveFile(string key, Stream stream, TMetadata yourMetadata = null)
         {
             key = EscapeKey(key);
@@ -77,28 +88,34 @@ namespace Telegram.Bot.CloudStorage
                 if (_deleteOlderFiles)
                     await DeleteFile(key);
 
-                var fileName = TextExtensions.Generate(10);
-                var savedMsg = await _botClient.SendDocumentAsync(
-                        _saveResChatId,
-                        new InputOnlineFile(stream, fileName),
-                        caption: fileName
-                    );
+                await UpdateMetadata(key, (m) =>
+                {
+                    m.UserCastomMetadata = yourMetadata;
+                });
 
-                var metadata = new TgFileMetadata<TMetadata>()
+                if (_cacheAndNotWait)
                 {
-                    FileId = savedMsg.Document.FileId,
-                    MessageId = savedMsg.MessageId,
-                    UserCastomMetadata = yourMetadata
-                };
-                await _metadataStorage.Set(key, metadata);
-                if (_useCache)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
                     await _cache.SetStream(key, stream);
+                    //Not same stream will be returned.
+                    //This code use file storage to cache file and then upload file to telegram.
+                    stream = await _cache.GetStream(key);
+                    var t = Task.Run(async () =>
+                    {
+                        await SaveFileDirectly(key, stream, yourMetadata); 
+                    });
                 }
+                else
+                {
+                    if (_useCache)
+                    {
+                        await _cache.Remove(key);
+                    }
+                    await SaveFileDirectly(key, stream, yourMetadata);
+                }
+                
             }
         }
-
+        
         public async Task<TMetadata> GetFileMetadata(string key)
         {
             key = EscapeKey(key);
@@ -109,7 +126,6 @@ namespace Telegram.Bot.CloudStorage
                 {
                     throw new Exception("File not found.");
                 }
-
                 return metadata.UserCastomMetadata;
             }
         }
@@ -121,13 +137,10 @@ namespace Telegram.Bot.CloudStorage
             {
                 if (_useCache)
                 {
-                    try
+                    var cachedStream= await _cache.GetStream(key);
+                    if (cachedStream != null)
                     {
-                        return await _cache.GetStream(key);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine("Not found file in cache.", ex);
+                        return cachedStream;
                     }
                 }
 
@@ -156,6 +169,29 @@ namespace Telegram.Bot.CloudStorage
             }
         }
 
+        /// <summary>
+        /// Save file directly to telegram. Without caching.
+        /// </summary>
+        async Task SaveFileDirectly(string key, Stream stream, TMetadata yourMetadata = null)
+        {
+            var fileName = TextExtensions.Generate(10);
+            var savedMsg = await _botClient.SendDocumentAsync(
+                _saveResChatId,
+                new InputOnlineFile(stream, fileName),
+                caption: fileName
+            );
+            await UpdateMetadata(key, (m) =>
+            {
+                m.FileId = savedMsg.Document.FileId;
+                m.MessageId = savedMsg.MessageId;
+            });
+            if (_useCache)
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                await _cache.SetStream(key, stream);
+            }
+        }
+
         string EscapeKey(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -164,6 +200,14 @@ namespace Telegram.Bot.CloudStorage
             }
             //Used to prevent scopes usage in metadata storage.
             return key.Replace(".", "_DOT_");
+        }
+
+        async Task UpdateMetadata(string key, Action<TgFileMetadata<TMetadata>> updater)
+        {
+            var metadata = await _metadataStorage.GetOrDefault<TgFileMetadata<TMetadata>>(key) ??
+                           new TgFileMetadata<TMetadata>();
+            updater(metadata);
+            await _metadataStorage.Set(key, metadata);
         }
     }
 }
