@@ -42,7 +42,7 @@ namespace Telegram.Bot.CloudStorage
             _metadataStorage = metadataStorage ?? new FileStorage();
             opt ??= new TelegramFilesCloudOptions();
             _useCache = opt.UseCache;
-            _cacheAndNotWait= opt.UseCache && opt.CacheAndNotWait ;
+            _cacheAndNotWait = opt.UseCache && opt.CacheAndNotWait;
             _saveResChatId = opt.SaveResourcesChatId;
             _deleteOlderFiles = opt.DeleteOlderFiles;
             _cache = cache ?? new FileSystemCache(100);
@@ -101,7 +101,7 @@ namespace Telegram.Bot.CloudStorage
                     stream = await _cache.GetStream(key);
                     var t = Task.Run(async () =>
                     {
-                        await SaveFileDirectly(key, stream, yourMetadata); 
+                        await SaveFileDirectly(key, stream, yourMetadata);
                     });
                 }
                 else
@@ -112,10 +112,10 @@ namespace Telegram.Bot.CloudStorage
                     }
                     await SaveFileDirectly(key, stream, yourMetadata);
                 }
-                
+
             }
         }
-        
+
         public async Task<TMetadata> GetFileMetadata(string key)
         {
             key = EscapeKey(key);
@@ -137,7 +137,7 @@ namespace Telegram.Bot.CloudStorage
             {
                 if (_useCache)
                 {
-                    var cachedStream= await _cache.GetStream(key);
+                    var cachedStream = await _cache.GetStream(key);
                     if (cachedStream != null)
                     {
                         return cachedStream;
@@ -199,7 +199,7 @@ namespace Telegram.Bot.CloudStorage
                 throw new Exception("Key is invalid.");
             }
             //Used to prevent scopes usage in metadata storage.
-            return key.Replace(".", "_DOT_");
+            return "FILE__" + key.Replace(".", "_DOT_");
         }
 
         async Task UpdateMetadata(string key, Action<TgFileMetadata<TMetadata>> updater)

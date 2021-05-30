@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
-using Telegram.Bot.AspNetPipeline.Extensions.Logging;
+using Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit;
 using Telegram.Bot.AspNetPipeline.Extensions.Session;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Extensions.MvcFeatures;
@@ -47,6 +47,13 @@ namespace Telegram.Bot.AspNetPipeline.Mvc.Controllers.Core
         public BotExt BotExt => UpdateContext.BotExt;
 
         public CancellationToken UpdateProcessingAborted => UpdateContext.UpdateProcessingAborted;
+
+        public ISimpleKeyboard SimpleKeyboard => UpdateContext.SimpleKeyboard();
+
+        /// <summary>
+        /// Work only in current request. 
+        /// </summary>
+        public IManagedKeyboard ManagedKeyboard => UpdateContext.ManagedKeyboard();
 
         /// <summary>
         /// Just proxy to ControllerContext.Features().

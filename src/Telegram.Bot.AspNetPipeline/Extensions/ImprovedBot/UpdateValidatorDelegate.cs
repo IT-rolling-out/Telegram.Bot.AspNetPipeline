@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
 {
