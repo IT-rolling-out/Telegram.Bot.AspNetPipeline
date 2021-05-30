@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.Types;
@@ -103,21 +105,19 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
 
         async Task DeleteLastKeyboardMessage()
         {
-            var bot = _updateContext.Bot;
-            var msgId = await _updateContext.Session().GetOrDefault<int?>("LastKeyboardButtonMsgId");
-            if (msgId.HasValue)
+            try
             {
-                try
+                var bot = _updateContext.Bot;
+                var msgId = await _updateContext.Session().GetOrDefault<int?>("LastKeyboardButtonMsgId");
+                if (msgId.HasValue)
                 {
                     await bot.DeleteMessageAsync(_updateContext.ChatId, msgId.Value);
+                    await _updateContext.Session().Set("LastKeyboardButtonMsgId", null);
                 }
-                catch
-                {
-#if DEBUG
-                    throw;
-#endif
-                }
-                await _updateContext.Session().Set("LastKeyboardButtonMsgId", null);
+            }
+            catch (Exception ex)
+            {
+                Debug.Write(ex);
             }
         }
 
