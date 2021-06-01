@@ -25,9 +25,9 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
 
         #region Options.
 
-        public string KeyboardTitleString { get; set; } = "⌨️.";
+        public string KeyboardTitleString { get; set; } = "⌨️ㅤ";
 
-        public string CancelButtonString { get; set; } = "🗙";
+        public string CancelButtonString { get; set; } = "🗙ㅤ";
 
         public string CancelCommandString { get; set; } = "/cancel";
 

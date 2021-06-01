@@ -12,7 +12,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
     {
         readonly UpdateContext _updateContext;
 
-        public string KeyboardTitleString { get; set; } = "⌨️.";
+        public string KeyboardTitleString { get; set; } = "⌨️ㅤ";
 
         public SimpleKeyboard(UpdateContext updateContext)
         {
