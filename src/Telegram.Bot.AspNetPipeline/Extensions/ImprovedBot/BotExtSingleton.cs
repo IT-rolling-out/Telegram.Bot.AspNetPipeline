@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
@@ -29,13 +30,17 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// </summary>
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
         /// <param name="fromType">Used to set which members messages must be processed.</param>
-        public async Task<Message> ReadMessageAsync(UpdateContext updateContext, ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
+        public async Task<Message> ReadMessageAsync(
+            UpdateContext updateContext, 
+            ReadCallbackFromType fromType,
+            CancellationToken cancellationToken
+            )
         {
             UpdateValidatorDelegate updateValidator = async (newCtx, origCtx) =>
              {
                  return CheckFromType(newCtx, origCtx, fromType);
              };
-            return await ReadMessageAsync(updateContext, updateValidator);
+            return await ReadMessageAsync(updateContext, updateValidator, cancellationToken);
         }
 
         /// <summary>
@@ -43,25 +48,32 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <param name="updateContext">Current command context. Needed to find TaskCompletionSource of current command.</param>
         /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public async Task<Message> ReadMessageAsync(UpdateContext updateContext,
-            UpdateValidatorDelegate updateValidator)
+        public async Task<Message> ReadMessageAsync(
+            UpdateContext updateContext,
+            UpdateValidatorDelegate updateValidator,
+            CancellationToken cancellationToken
+            )
         {
-            var res = await ReadUpdateAsync(updateContext, updateValidator);
+            var res = await ReadUpdateAsync(updateContext, updateValidator, cancellationToken);
             return res.Message;
         }
 
-        public async Task<Update> ReadUpdateAsync(UpdateContext updateContext, UpdateValidatorDelegate updateValidator)
+        public async Task<Update> ReadUpdateAsync(
+            UpdateContext updateContext,
+            UpdateValidatorDelegate updateValidator,
+            CancellationToken cancellationToken
+            )
         {
             var taskCompletionSource = new TaskCompletionSource<Update>(
                 TaskContinuationOptions.RunContinuationsAsynchronously
                 );
-            Add(updateContext, taskCompletionSource, updateValidator);
+
+            var searchData = Add(updateContext, taskCompletionSource, updateValidator);
 
             //OnCanceled.
-            updateContext.UpdateProcessingAborted.Register(() =>
+            cancellationToken.Register(() =>
             {
-                _logger.LogInformation("'{0}' will be cancelled.", updateContext);
-                SetCancelled(taskCompletionSource);
+                SetCancelled(searchData);
             });
 
             var resUpdate = await taskCompletionSource.Task;
@@ -104,26 +116,13 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(
-                        "Exception while validating Update '{0}'.\nOrigUpdateContext: '{1}'.\nNewContext: '{2}'.",
-                        ex,
-                        origCtx,
-                        newCtx
-                        );
                     SetException(
-                        searchData.TaskCompletionSource,
+                        searchData,
                         new TelegramAspException("Exception in update validator delegate.", ex)
                         );
 
                     return;
                 }
-
-                _logger.LogTrace(
-                    "'{0}'  validation result for read-callback of '{1}' is {2}.",
-                    origCtx,
-                    newCtx,
-                    updateValidatorRes
-                    );
 
                 if (updateValidatorRes == UpdateValidatorResult.ContinueWaiting)
                 {
@@ -132,17 +131,16 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 }
                 if (updateValidatorRes == UpdateValidatorResult.AbortWaiter)
                 {
-                    _searchBag.TryRemove(origCtx.ChatId.Identifier, origCtx.Bot.BotId);
-                    origCtx.HiddenContext().UpdateProcessingAbortedSource.Cancel();
+
+                    SetCancelled(searchData);
                     await next();
                     return;
                 }
 
                 //Force exit only if result valid.
+                SetResult(searchData, newCtx);
 
-                SetResult(searchData.TaskCompletionSource, newCtx.Update);
-                _searchBag.TryRemove(newCtx.ChatId.Identifier, newCtx.Bot.BotId);
-                newCtx.ForceExit();
+
             }
             else
             {
@@ -150,7 +148,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             }
         }
 
-        void Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, UpdateValidatorDelegate updateValidator)
+        UpdateContextSearchData Add(UpdateContext updateContext, TaskCompletionSource<Update> taskCompletionSource, UpdateValidatorDelegate updateValidator)
         {
             var chatId = updateContext.ChatId.Identifier;
             var botId = updateContext.Bot.BotId;
@@ -161,7 +159,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                     "UpdateContext '{0}' cancelled while adding new context with same chatId and botId.",
                     prevData.Value.CurrentUpdateContext
                     );
-                SetCancelled(prevData.Value.TaskCompletionSource);
+                SetCancelled(prevData.Value);
             }
             var sd = new UpdateContextSearchData
             {
@@ -176,6 +174,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
                 "UpdateContext '{0}' added to SearchBag of read-callbacks.",
                 updateContext
                 );
+            return sd;
         }
 
         UpdateValidatorResult CheckFromType(UpdateContext newCtx, UpdateContext origCtx, ReadCallbackFromType fromType)
@@ -184,8 +183,12 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             return res ? UpdateValidatorResult.Valid : UpdateValidatorResult.ContinueWaiting;
         }
 
-        void SetCancelled(TaskCompletionSource<Update> taskCompletionSource)
+        void SetCancelled(UpdateContextSearchData searchData)
         {
+            var taskCompletionSource = searchData.TaskCompletionSource;
+            var origCtx = searchData.CurrentUpdateContext;
+            _searchBag.TryRemove(origCtx.ChatId.Identifier, origCtx.Bot.BotId);
+
             //Task will be continued with current thread context of readed UpdateContext object.
             //So we don`t need to start it with IExecutionManager.
             var t = taskCompletionSource.Task;
@@ -194,18 +197,27 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
             taskCompletionSource.SetCanceled();
         }
 
-        void SetResult(TaskCompletionSource<Update> taskCompletionSource, Update upd)
+        void SetResult(UpdateContextSearchData searchData, UpdateContext newCtx)
         {
+            var taskCompletionSource = searchData.TaskCompletionSource;
+            var origCtx = searchData.CurrentUpdateContext;
+            _searchBag.TryRemove(origCtx.ChatId.Identifier, origCtx.Bot.BotId);
+            newCtx.ForceExit();
+
             //Task will be continued with current thread context of readed UpdateContext object.
             //So we don`t need to start it with IExecutionManager.
             var t = taskCompletionSource.Task;
             if (t.IsCanceled || t.IsCompleted || t.IsFaulted)
                 return;
-            taskCompletionSource.SetResult(upd);
+            taskCompletionSource.SetResult(newCtx.Update);
         }
 
-        void SetException(TaskCompletionSource<Update> taskCompletionSource, Exception ex)
+        void SetException(UpdateContextSearchData searchData, Exception ex)
         {
+            var taskCompletionSource = searchData.TaskCompletionSource;
+            var origCtx = searchData.CurrentUpdateContext;
+            _searchBag.TryRemove(origCtx.ChatId.Identifier, origCtx.Bot.BotId);
+
             //Task will be continued with current thread context of readed UpdateContext object.
             //So we don`t need to start it with IExecutionManager.
             var t = taskCompletionSource.Task;

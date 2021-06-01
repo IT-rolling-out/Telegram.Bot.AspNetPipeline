@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot;
@@ -52,14 +53,14 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
 
         Task<Message> RefreshButtons();
         Task DeleteButtons();
-        Task StartListeningUpdates(UpdateValidatorDelegate updateValidatorDelegate=null);
+        Task StartListeningUpdates(UpdateValidatorDelegate updateValidatorDelegate = null);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="updateValidatorDelegate"> If null - use <see cref="ManagedKeyboard.DefaultUpdatesValidator"/>.</param>
         /// <returns></returns>
-        Task ListenUpdateOnce(UpdateValidatorDelegate updateValidatorDelegate=null);
+        Task ListenUpdateOnce(CancellationToken cancellationToken, UpdateValidatorDelegate updateValidatorDelegate = null);
 
         void StopListeningUpdates();
     }

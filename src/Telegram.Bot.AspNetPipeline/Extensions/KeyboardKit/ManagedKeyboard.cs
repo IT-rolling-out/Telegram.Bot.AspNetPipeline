@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using IRO.Common.Text;
 using Telegram.Bot.AspNetPipeline.Core;
@@ -17,7 +18,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
         Message _messageWithKeyboard;
         ITelegramBotClient _bot;
         readonly UpdateContext _updateContext;
-        bool _isListening;
+        CancellationTokenSource _listeningTokenSource;
         bool _twoInRow;
         IEnumerable<ButtonInfo> _buttonInfoCollection_OneDimension;
         IEnumerable<IEnumerable<ButtonInfo>> _buttonInfoCollection = new ButtonInfo[0][];
@@ -166,15 +167,23 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
         {
             ThrowIfKeyboardWasntShown();
             updateValidatorDelegate = updateValidatorDelegate ?? DefaultUpdatesValidator;
-            if (_isListening)
+            if (_listeningTokenSource != null)
             {
                 throw new Exception("Listening was started before.");
             }
-            _isListening = true;
-
-            while (_isListening)
+            _listeningTokenSource = new CancellationTokenSource();
+            while (!_listeningTokenSource.Token.IsCancellationRequested)
             {
-                await ListenUpdateOnce(updateValidatorDelegate);
+                try
+                {
+                    await ListenUpdateOnce(_listeningTokenSource.Token, updateValidatorDelegate);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    if (!_listeningTokenSource.Token.IsCancellationRequested)
+                        throw;
+                    break;
+                }
             }
         }
 
@@ -183,16 +192,16 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.KeyboardKit
         /// </summary>
         /// <param name="updateValidatorDelegate"> If null - use <see cref="DefaultUpdatesValidator"/>.</param>
         /// <returns></returns>
-        public async Task ListenUpdateOnce(UpdateValidatorDelegate updateValidatorDelegate = null)
+        public async Task ListenUpdateOnce(CancellationToken cancellationToken, UpdateValidatorDelegate updateValidatorDelegate = null)
         {
             updateValidatorDelegate = updateValidatorDelegate ?? DefaultUpdatesValidator;
-            var upd = await _updateContext.BotExt.ReadUpdateAsync(updateValidatorDelegate);
+            var upd = await _updateContext.BotExt.ReadUpdateAsync(updateValidatorDelegate, cancellationToken);
             await ProcessUpdate(_bot, upd);
         }
 
         public void StopListeningUpdates()
         {
-            _isListening = false;
+            _listeningTokenSource?.Cancel();
         }
 
         IEnumerable<IEnumerable<ButtonInfo>> GetButtons()

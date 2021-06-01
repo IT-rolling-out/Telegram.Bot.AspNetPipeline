@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Core;
@@ -24,34 +25,44 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.ImprovedBot
         /// <summary>
         /// </summary>
         /// <param name="fromType">Used to set which members messages must be processed.</param>
-        public Task<Message> ReadMessageAsync(ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser)
+        public Task<Message> ReadMessageAsync(
+            ReadCallbackFromType fromType = ReadCallbackFromType.CurrentUser,
+            CancellationToken cancellationToken = default(CancellationToken)
+            )
         {
-            return _botExtSingleton.ReadMessageAsync(_updateContext, fromType);
+            return _botExtSingleton.ReadMessageAsync(_updateContext, fromType, cancellationToken);
         }
 
         /// <summary>
         /// </summary>
         /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public Task<Message> ReadMessageAsync(UpdateValidatorDelegate updateValidator)
+        public Task<Message> ReadMessageAsync(
+            UpdateValidatorDelegate updateValidator,
+            CancellationToken cancellationToken = default(CancellationToken)
+            )
         {
-            return _botExtSingleton.ReadMessageAsync(_updateContext, updateValidator);
+            return _botExtSingleton.ReadMessageAsync(_updateContext, updateValidator, cancellationToken);
         }
 
         /// <summary>
         /// </summary>
         /// <param name="updateValidator">User delegate to check if Update from current context is fits.
         /// If true - current Update passed to callback result, else - will be processed by other controller actions with lower priority.</param>
-        public Task<Update> ReadUpdateAsync(UpdateValidatorDelegate updateValidator)
+        public Task<Update> ReadUpdateAsync(
+            UpdateValidatorDelegate updateValidator,
+            CancellationToken cancellationToken = default(CancellationToken)
+            )
         {
-            return _botExtSingleton.ReadUpdateAsync(_updateContext, updateValidator);
+            return _botExtSingleton.ReadUpdateAsync(_updateContext, updateValidator, cancellationToken);
         }
 
-        public Task<Update> ReadUpdateAsync()
+        public Task<Update> ReadUpdateAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             return _botExtSingleton.ReadUpdateAsync(
-                _updateContext, 
-                async (newUpdateContext, originalUpdateContext) => UpdateValidatorResult.Valid
+                _updateContext,
+                async (newUpdateContext, originalUpdateContext) => UpdateValidatorResult.Valid,
+                cancellationToken
                 );
         }
 

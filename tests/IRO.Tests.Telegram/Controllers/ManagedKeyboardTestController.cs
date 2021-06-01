@@ -44,6 +44,10 @@ namespace IRO.Tests.Telegram.Controllers
                         {
                             ManagedKeyboard.StopListeningUpdates();
                         }
+                    }),
+                    new ButtonInfo("Stop",async (s, a) =>
+                    {
+                        ManagedKeyboard.StopListeningUpdates();
                     })
                 }
             };
