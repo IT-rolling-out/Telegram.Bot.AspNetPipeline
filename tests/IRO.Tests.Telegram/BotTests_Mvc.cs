@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.AspNetPipeline.Extensions;
 using Telegram.Bot.AspNetPipeline.Mvc.Builder;
+using Telegram.Bot.AspNetPipeline.Mvc.Extensions;
 using Telegram.Bot.CloudStorage;
 using Telegram.Bot.CloudStorage.Data;
 
@@ -37,14 +38,21 @@ namespace IRO.Tests.Telegram
                     SaveOnSet = true
                 };
                 serv.AddSingleton(opt);
-                serv.AddSingleton<IKeyValueStorage, TelegramStorage>();
+                serv.AddSingleton<TelegramStorage>();
+                serv.AddSingleton<IKeyValueStorage>((sp) =>
+                {
+                    return sp.GetRequiredService<TelegramStorage>();
+                });
                 serv.AddSingleton<TelegramFilesCloud>();
             });
 
             botManager.ConfigureBuilder((builder) =>
             {
                 if (isDebug)
+                {
                     builder.UseDevEceptionMessage();
+                }
+
                 builder.UseExceptionHandler(async (ctx, ex) =>
                 {
                     //Throw exception if false. False mean 'not handled'.
@@ -53,6 +61,7 @@ namespace IRO.Tests.Telegram
 
                 builder.UseMvc(mvcBuilder =>
                 {
+                    mvcBuilder.UseDebugInfo();
                     mvcBuilder.MapRouteAction(async (actionCtx) =>
                     {
                         await actionCtx.UpdateContext.SendTextMessageAsync("Mvc works.");

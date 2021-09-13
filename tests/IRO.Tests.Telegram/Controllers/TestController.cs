@@ -37,5 +37,17 @@ namespace IRO.Tests.Telegram.Controllers
         {
             throw new Exception("Some exception message.");
         }
+
+        [BotRoute("/parts_send")]
+        public async Task PartsSendTest()
+        {
+            var str = "Этот текст отправлен через SendTextMessageInPartsAsync, проверяем метод.\n";
+            for (int i = 0; i < 6000; i++)
+            {
+                str += "ы";
+            }
+
+            await Bot.SendTextMessageInPartsAsync(ChatId, str);
+        }
     }
 }

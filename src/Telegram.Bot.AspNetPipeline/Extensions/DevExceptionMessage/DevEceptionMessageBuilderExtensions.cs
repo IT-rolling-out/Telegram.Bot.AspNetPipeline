@@ -21,7 +21,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
                     var exceptionText = ex.ToString();
 
                     //Send messages.
-                    var utfText = exceptionText.ToUTF8();
+                    var utfText = exceptionText;
                     //Max for telegram is 4096 UTF8  characters.
                     if (utfText.Length > 4080)
                         utfText = utfText.Remove(4080) + "...";

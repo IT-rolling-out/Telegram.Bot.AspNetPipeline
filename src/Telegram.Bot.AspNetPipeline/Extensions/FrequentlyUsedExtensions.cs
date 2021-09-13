@@ -56,13 +56,12 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
             ParseMode parseMode = ParseMode.Default
             )
         {
-            var utfText = text.ToUTF8();
             while (true)
             {
-                if (utfText.Length > MaxTelegramMessageLength)
+                if (text.Length > MaxTelegramMessageLength)
                 {
-                    string currentMessage = utfText.Remove(MaxTelegramMessageLength);
-                    utfText = utfText.Substring(MaxTelegramMessageLength);
+                    string currentMessage = text.Remove(MaxTelegramMessageLength);
+                    text = text.Substring(MaxTelegramMessageLength);
                     await @this.SendTextMessageAsync(
                         chatId,
                         currentMessage,
@@ -73,18 +72,11 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
                 {
                     return await @this.SendTextMessageAsync(
                         chatId,
-                        utfText,
+                        text,
                         parseMode: parseMode
                         );
                 }
             }
-        }
-
-        public static string ToUTF8(this string @this)
-        {
-            byte[] bytes = Encoding.Default.GetBytes(@this);
-            var utfStr = Encoding.UTF8.GetString(bytes);
-            return utfStr;
         }
     }
 }
