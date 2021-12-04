@@ -1,5 +1,4 @@
 ﻿using System;
-using IRO.Common.Serialization;
 
 namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
 {
@@ -7,7 +6,6 @@ namespace Telegram.Bot.AspNetPipeline.Extensions.Logging
               "Now current function is deprecated, all data that you need showed with ToString().")]
     public struct LoggingAdvancedOptions
     {
-        public ILazySerializerFactory LazySerializerFactory { get; set; }
     }
 
 }

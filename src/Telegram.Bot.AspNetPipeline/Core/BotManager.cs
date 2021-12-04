@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
-using IRO.Common.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.AspNetPipeline.Builder;
@@ -403,7 +402,6 @@ namespace Telegram.Bot.AspNetPipeline.Core
             PendingExceededChecker = Services.GetRequiredService<IPendingExceededChecker>();
             ExecutionManager = Services.GetRequiredService<IExecutionManager>();
             var loggingAdvancedOptions = Services.GetRequiredService<Func<LoggingAdvancedOptions>>().Invoke();
-            loggingAdvancedOptions.LazySerializerFactory = loggingAdvancedOptions.LazySerializerFactory ?? new LazySerializerFactory();
             LoggingAdvancedOptions = loggingAdvancedOptions;
         }
         #endregion
