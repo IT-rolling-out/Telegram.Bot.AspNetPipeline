@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IRO.Mvc.CoolSwagger" Version="5.0.2" />
-    <PackageReference Include="IRO.Mvc.Core" Version="5.0.2" />
-    <PackageReference Include="IRO.Mvc.MvcExceptionHandler" Version="5.0.2" />
+    <PackageReference Include="IRO.Mvc.CoolSwagger" Version="5.0.10" />
+    <PackageReference Include="IRO.Mvc.Core" Version="5.0.10" />
+    <PackageReference Include="IRO.Mvc.MvcExceptionHandler" Version="5.0.10" />
   </ItemGroup>
 
   <ItemGroup>
