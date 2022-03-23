@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.AspNetPipeline.Core;
 using Telegram.Bot.Types;
@@ -21,24 +19,26 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
         /// </summary>
         public static async Task<Message> SendTextMessageAsync(
             this UpdateContext @this,
-            string text, 
-            ParseMode parseMode = ParseMode.Default, 
-            bool disableWebPagePreview = false, 
-            bool disableNotification = false, 
-            int replyToMessageId = 0, 
-            IReplyMarkup replyMarkup = null, 
+            string text,
+            ParseMode? parseMode = null,
+            IEnumerable<MessageEntity> entities = null,
+            bool disableWebPagePreview = false,
+            bool disableNotification = false,
+            int replyToMessageId = 0,
+            IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default(CancellationToken)
             )
         {
             return await @this.Bot.SendTextMessageAsync(
-                @this.ChatId,
-                text,
-                parseMode,
-                disableWebPagePreview,
-                disableNotification,
-                replyToMessageId,
-                replyMarkup,
-                cancellationToken
+                chatId: @this.ChatId,
+                text: text,
+                parseMode: parseMode,
+                entities: entities
+                disableWebPagePreview: disableWebPagePreview,
+                disableNotification: disableNotification,
+                replyToMessageId: replyToMessageId,
+                replyMarkup: replyMarkup,
+                cancellationToken: cancellationToken
                 );
         }
 
@@ -53,7 +53,7 @@ namespace Telegram.Bot.AspNetPipeline.Extensions
             this ITelegramBotClient @this,
             ChatId chatId,
             string text,
-            ParseMode parseMode = ParseMode.Default
+            ParseMode? parseMode
             )
         {
             while (true)

@@ -1,13 +1,9 @@
-﻿using System.Threading.Tasks;
-using Telegram.Bot.Args;
-
-namespace Telegram.Bot.AspNetPipeline.Core.Services
+﻿namespace Telegram.Bot.AspNetPipeline.Core.Services
 {
     public class PollingUpdatesReceiver : IUpdatesReceiver
     {
-        BotManager _botManager;
-
-        ITelegramBotClient _bot;
+        private BotManager _botManager;
+        private ITelegramBotClient _bot;
 
         public bool IsReceiving => _bot.IsReceiving;
 
@@ -39,7 +35,7 @@ namespace Telegram.Bot.AspNetPipeline.Core.Services
             _botManager = null;
         }
 
-        void Handler(object sender, UpdateEventArgs args)
+        private void Handler(object sender, UpdateEventArgs args)
         {
             var passedArgs = new UpdateReceivedEventArgs(args.Update);
             UpdateReceived?.Invoke(sender, passedArgs);
